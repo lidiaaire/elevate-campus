@@ -1,0 +1,52 @@
+/* ============================================================
+   CourseProgressCard — Design System v1.0
+   ============================================================ */
+
+.title {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0.875rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.progressHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.375rem;
+}
+
+.progressLabel {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.progressPct {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--brand-600);
+}
+
+.bar {
+  height: 6px;
+  background-color: var(--bg-subtle);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  margin-bottom: 0.875rem;
+}
+
+.barFill {
+  height: 100%;
+  background: linear-gradient(to right, var(--brand-400), var(--brand-600));
+  border-radius: var(--radius-full);
+  transition: width var(--dur-slow) var(--ease-out);
+}
+
+.lessons {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}

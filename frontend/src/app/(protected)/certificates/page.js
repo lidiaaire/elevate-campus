@@ -1,33 +1,35 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { certificateService } from '@/lib/services/certificate.service';
+import { useAsyncData } from '@/hooks/useAsyncData';
 import CertificateCard from '@/components/certificates/CertificateCard';
+import LoadingState from '@/components/ui/LoadingState';
+import ErrorState from '@/components/ui/ErrorState';
+import EmptyState from '@/components/ui/EmptyState';
 import styles from '@/styles/Certificates.module.css';
 
 export default function CertificatesPage() {
   const { token } = useAuth();
-  const [certificates, setCertificates] = useState([]);
-  const [loading,      setLoading]      = useState(true);
-  const [error,        setError]        = useState(null);
 
-  useEffect(() => {
-    certificateService.getMyCertificates(token)
-      .then((res) => setCertificates(res.certificates))
-      .catch((err) => setError(err.message ?? 'Error desconocido'))
-      .finally(() => setLoading(false));
-  }, [token]);
+  const { data, loading, error } = useAsyncData(
+    () => certificateService.getMyCertificates(token)
+  );
 
-  if (loading) return <p>Cargando certificados...</p>;
-  if (error)   return <p>Error cargando certificados</p>;
+  const certificates = data?.certificates ?? [];
+
+  if (loading) return <LoadingState message="Cargando certificados..." />;
+  if (error)   return <ErrorState message={error} />;
 
   return (
     <div className={styles.page}>
       <h1>Mis certificados</h1>
 
       {certificates.length === 0 && (
-        <p>Todavía no tienes certificados. ¡Completa un curso para obtener el tuyo!</p>
+        <EmptyState
+          title="Todavía no tienes certificados."
+          description="¡Completa un curso para obtener el tuyo!"
+        />
       )}
 
       <ul className={styles.list}>

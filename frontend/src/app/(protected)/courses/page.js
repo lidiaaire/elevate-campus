@@ -1,72 +1,98 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
+import { useAsyncData } from '@/hooks/useAsyncData';
 import { coursesService } from '@/lib/services/courses.service';
-import styles from '@/styles/Courses.module.css';
+import PageHeader from '@/components/ui/PageHeader';
+import LoadingState from '@/components/ui/LoadingState';
+import ErrorState from '@/components/ui/ErrorState';
+import EmptyState from '@/components/ui/EmptyState';
+import Card, { CardHeader, CardBody, CardFooter } from '@/components/ui/Card';
+import { getCourseVisual } from '@/lib/config/courseVisuals';
+import styles from './Courses.module.css';
 
-const BADGE_CLASS = {
-  draft:     styles.badgeDraft,
-  published: styles.badgePublished,
-  archived:  styles.badgeArchived,
+const LEVEL_LABEL = {
+  beginner:     'Principiante',
+  intermediate: 'Intermedio',
+  advanced:     'Avanzado',
+};
+
+const STATUS_CLASS = {
+  draft:     styles.statusDraft,
+  published: styles.statusPublished,
+  archived:  styles.statusArchived,
+};
+
+const STATUS_LABEL = {
+  draft:     'Borrador',
+  published: 'Publicado',
+  archived:  'Archivado',
 };
 
 export default function CoursesPage() {
   const { token } = useAuth();
 
-  const [courses, setCourses] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError]     = useState(null);
+  const { data, loading, error } = useAsyncData(
+    () => coursesService.getCourses(token).then((res) => res.docs ?? res),
+  );
 
-  useEffect(() => {
-    coursesService.getCourses(token)
-      .then((data) => setCourses(data.docs ?? data))
-      .catch((err) => setError(err.message))
-      .finally(() => setLoading(false));
-  }, [token]);
+  const courses = data ?? [];
+
+  if (loading) return <LoadingState message="Cargando cursos…" />;
+  if (error)   return <ErrorState message={error} />;
 
   return (
     <div className={styles.page}>
-      <h1 className={styles.title}>Cursos</h1>
+      <PageHeader
+        title="Cursos"
+        description={`${courses.length} curso${courses.length !== 1 ? 's' : ''} disponible${courses.length !== 1 ? 's' : ''}`}
+      />
 
-      {loading && <p className={styles.status}>Cargando cursos…</p>}
-      {error   && <p className={styles.status}>Error: {error}</p>}
+      {courses.length === 0 ? (
+        <EmptyState title="No hay cursos disponibles." />
+      ) : (
+        <div className={styles.grid}>
+          {courses.map((course) => {
+            const id     = course._id ?? course.id;
+            const visual = getCourseVisual(course.title);
+            return (
+              <Link key={id} href={`/courses/${id}`} className={styles.cardLink}>
+                <Card variant="default" clickable noPadding className={styles.card}>
+                  <CardHeader
+                    actions={
+                      <span className={`${styles.status} ${STATUS_CLASS[course.status] ?? ''}`}>
+                        {STATUS_LABEL[course.status] ?? course.status}
+                      </span>
+                    }
+                  >
+                    <h3 className={styles.cardTitle}>{course.title}</h3>
+                    {course.level && (
+                      <span className={styles.level}>
+                        {LEVEL_LABEL[course.level] ?? course.level}
+                      </span>
+                    )}
+                  </CardHeader>
 
-      {!loading && !error && (
-        <table className={styles.table}>
-          <thead>
-            <tr>
-              <th>Título</th>
-              <th>Nivel</th>
-              <th>Estado</th>
-            </tr>
-          </thead>
-          <tbody>
-            {courses.map((course) => (
-              <tr key={course._id ?? course.id}>
-                <td>
-                  <Link href={`/courses/${course._id ?? course.id}`} className={styles.link}>
-                    {course.title}
-                  </Link>
-                </td>
-                <td>{course.level}</td>
-                <td>
-                  <span className={`${styles.badge} ${BADGE_CLASS[course.status] ?? ''}`}>
-                    {course.status}
-                  </span>
-                </td>
-              </tr>
-            ))}
-            {courses.length === 0 && (
-              <tr>
-                <td colSpan={3} style={{ textAlign: 'center', color: '#9ca3af' }}>
-                  No hay cursos disponibles.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+                  {course.description && (
+                    <CardBody>
+                      <p className={styles.description}>{course.description}</p>
+                    </CardBody>
+                  )}
+
+                  <CardFooter align="between" divided>
+                    <span className={styles.meta}>
+                      {course.units?.length
+                        ? `${course.units.length} unidad${course.units.length !== 1 ? 'es' : ''}`
+                        : 'Ver curso'}
+                    </span>
+                    <span className={styles.arrow}>→</span>
+                  </CardFooter>
+                </Card>
+              </Link>
+            );
+          })}
+        </div>
       )}
     </div>
   );

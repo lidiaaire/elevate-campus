@@ -1,5 +1,7 @@
 'use client';
 
+import Button from '@/components/ui/Button';
+
 export default function CohortComparisonTable({ students, cohortProgressAvg, onSelectStudent }) {
   if (!students || students.length === 0) {
     return <p>No hay alumnos en el cohort.</p>;
@@ -28,9 +30,9 @@ export default function CohortComparisonTable({ students, cohortProgressAvg, onS
               <td>{diffLabel}</td>
               <td>{student.daysSinceLastActivity ?? '—'}</td>
               <td>
-                <button onClick={() => onSelectStudent(student._id)}>
+                <Button variant="ghost" size="sm" onClick={() => onSelectStudent(student._id)}>
                   Ver tendencia
-                </button>
+                </Button>
               </td>
             </tr>
           );

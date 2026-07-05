@@ -1,33 +1,32 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { notificationService } from '@/lib/services/notification.service';
+import { useAsyncData } from '@/hooks/useAsyncData';
 import NotificationCard from '@/components/notifications/NotificationCard';
+import LoadingState from '@/components/ui/LoadingState';
+import ErrorState from '@/components/ui/ErrorState';
+import EmptyState from '@/components/ui/EmptyState';
 import styles from '@/styles/Notifications.module.css';
 
 export default function NotificationsPage() {
   const { token } = useAuth();
-  const [notifications, setNotifications] = useState([]);
-  const [loading,       setLoading]       = useState(true);
-  const [error,         setError]         = useState(null);
 
-  useEffect(() => {
-    notificationService.getMyNotifications(token)
-      .then((res) => setNotifications(res.notifications))
-      .catch((err) => setError(err.message ?? 'Error desconocido'))
-      .finally(() => setLoading(false));
-  }, [token]);
+  const { data, loading, error } = useAsyncData(
+    () => notificationService.getMyNotifications(token)
+  );
 
-  if (loading) return <p>Cargando notificaciones...</p>;
-  if (error)   return <p>Error cargando notificaciones</p>;
+  const notifications = data?.notifications ?? [];
+
+  if (loading) return <LoadingState message="Cargando notificaciones..." />;
+  if (error)   return <ErrorState message={error} />;
 
   return (
     <div className={styles.page}>
       <h1>Mis notificaciones</h1>
 
       {notifications.length === 0 && (
-        <p>No tienes notificaciones.</p>
+        <EmptyState title="No tienes notificaciones." />
       )}
 
       <ul className={styles.list}>

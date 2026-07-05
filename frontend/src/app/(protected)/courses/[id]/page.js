@@ -1,18 +1,36 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
 import Link from 'next/link';
+import { useParams } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
+import { useAsyncData } from '@/hooks/useAsyncData';
 import { coursesService } from '@/lib/services/courses.service';
 import { unitsService } from '@/lib/services/units.service';
-import { lessonsService } from '@/lib/services/lessons.service';
-import styles from '@/styles/CourseDetail.module.css';
+import PageHeader from '@/components/ui/PageHeader';
+import Card from '@/components/ui/Card';
+import Button from '@/components/ui/Button';
+import LoadingState from '@/components/ui/LoadingState';
+import ErrorState from '@/components/ui/ErrorState';
+import EmptyState from '@/components/ui/EmptyState';
+import { getCourseVisual } from '@/lib/config/courseVisuals';
+import styles from './CourseDetail.module.css';
 
-const BADGE_CLASS = {
-  draft:     styles.badgeDraft,
-  published: styles.badgePublished,
-  archived:  styles.badgeArchived,
+const LEVEL_LABEL = {
+  beginner:     'Principiante',
+  intermediate: 'Intermedio',
+  advanced:     'Avanzado',
+};
+
+const STATUS_LABEL = {
+  draft:     'Borrador',
+  published: 'Publicado',
+  archived:  'Archivado',
+};
+
+const STATUS_CLASS = {
+  draft:     styles.statusDraft,
+  published: styles.statusPublished,
+  archived:  styles.statusArchived,
 };
 
 function formatDate(iso) {
@@ -26,74 +44,52 @@ export default function CourseDetailPage() {
   const { id } = useParams();
   const { token } = useAuth();
 
-  const [course, setCourse]             = useState(null);
-  const [loading, setLoading]           = useState(true);
-  const [error, setError]               = useState(null);
+  const { data, loading, error } = useAsyncData(() =>
+    Promise.all([
+      coursesService.getCourseById(id, token),
+      unitsService.getUnitsByCourse(id, token),
+    ]).then(([courseRes, unitsRes]) => ({
+      course: courseRes.course ?? courseRes,
+      units:  unitsRes.docs   ?? unitsRes,
+    })),
+  );
 
-  const [units, setUnits]               = useState([]);
-  const [unitsLoading, setUnitsLoading] = useState(true);
-  const [unitsError, setUnitsError]     = useState(null);
+  const course = data?.course ?? null;
+  const units  = data?.units  ?? [];
 
-  // { [unitId]: { docs: [], loading: true, error: null } }
-  const [lessonsMap, setLessonsMap]     = useState({});
+  if (loading) return <LoadingState message="Cargando curso…" />;
+  if (error)   return <ErrorState message={error} />;
+  if (!course) return <EmptyState title="Curso no encontrado." />;
 
-  useEffect(() => {
-    coursesService.getCourseById(id, token)
-      .then((data) => setCourse(data.course ?? data))
-      .catch((err) => setError(err.message))
-      .finally(() => setLoading(false));
-
-    unitsService.getUnitsByCourse(id, token)
-      .then((data) => setUnits(data.docs ?? data))
-      .catch((err) => setUnitsError(err.message))
-      .finally(() => setUnitsLoading(false));
-  }, [id, token]);
-
-  useEffect(() => {
-    if (!units.length) return;
-
-    const initial = {};
-    units.forEach((u) => {
-      initial[u._id] = { docs: [], loading: true, error: null };
-    });
-    setLessonsMap(initial);
-
-    units.forEach((unit) => {
-      lessonsService.getLessonsByUnit(id, unit._id, token)
-        .then((data) => setLessonsMap((prev) => ({
-          ...prev,
-          [unit._id]: { docs: data.docs ?? [], loading: false, error: null },
-        })))
-        .catch((err) => setLessonsMap((prev) => ({
-          ...prev,
-          [unit._id]: { docs: [], loading: false, error: err.message },
-        })));
-    });
-  }, [units, id, token]);
-
-  if (loading) return <p className={styles.status}>Cargando curso…</p>;
-  if (error)   return <p className={styles.status}>Error: {error}</p>;
-  if (!course) return null;
+  const visual = getCourseVisual(course.title);
 
   return (
     <div className={styles.page}>
-      <div className={styles.card}>
-        <h1 className={styles.title}>{course.title}</h1>
+      {/* ── Cabecera ── */}
+      <PageHeader
+        title={course.title}
+        description={course.description}
+        actions={
+          <Button as={Link} href="/courses" variant="ghost" size="sm">
+            ← Volver
+          </Button>
+        }
+      />
 
-        {course.description && (
-          <p className={styles.description}>{course.description}</p>
-        )}
-
-        <div className={styles.meta}>
+      {/* ── Metadatos ── */}
+      <Card variant="filled" size="sm">
+        <div className={styles.metaRow}>
           <div className={styles.metaItem}>
             <span className={styles.metaLabel}>Nivel</span>
-            <span className={styles.metaValue}>{course.level}</span>
+            <span className={styles.metaValue}>
+              {LEVEL_LABEL[course.level] ?? course.level ?? '—'}
+            </span>
           </div>
 
           <div className={styles.metaItem}>
             <span className={styles.metaLabel}>Estado</span>
-            <span className={`${styles.badge} ${BADGE_CLASS[course.status] ?? ''}`}>
-              {course.status}
+            <span className={`${styles.status} ${STATUS_CLASS[course.status] ?? ''}`}>
+              {STATUS_LABEL[course.status] ?? course.status ?? '—'}
             </span>
           </div>
 
@@ -102,56 +98,46 @@ export default function CourseDetailPage() {
             <span className={styles.metaValue}>{formatDate(course.createdAt)}</span>
           </div>
         </div>
-      </div>
+      </Card>
 
-      <section>
-        <h2 className={styles.sectionTitle}>Unidades</h2>
+      {/* ── Unidades ── */}
+      <section className={styles.section}>
+        <h2 className={styles.sectionTitle}>
+          Unidades
+          {units.length > 0 && (
+            <span className={styles.unitCount}>{units.length}</span>
+          )}
+        </h2>
 
-        {unitsLoading && <p className={styles.status}>Cargando unidades…</p>}
-        {unitsError   && <p className={styles.status}>Error: {unitsError}</p>}
+        {units.length === 0 ? (
+          <EmptyState title="Sin unidades todavía." />
+        ) : (
+          <div className={styles.unitList}>
+            {units.map((unit) => (
+              <Card
+                key={unit._id}
+                as={Link}
+                href={`/courses/${id}/units/${unit._id}`}
+                variant="default"
+                clickable
+                noPadding
+                className={styles.unitCard}
+              >
+                <div className={styles.unitContent}>
+                  <span className={styles.unitOrder}>{unit.order}</span>
 
-        {!unitsLoading && !unitsError && (
-          <ul className={styles.unitList}>
-            {units.map((unit) => {
-              const ls = lessonsMap[unit._id] ?? { docs: [], loading: true, error: null };
-              return (
-                <li key={unit._id} className={styles.unitItem}>
-                  <div className={styles.unitHeader}>
-                    <span className={styles.unitOrder}>{unit.order}</span>
+                  <div className={styles.unitInfo}>
                     <span className={styles.unitTitle}>{unit.title}</span>
+                    {unit.description && (
+                      <span className={styles.unitDescription}>{unit.description}</span>
+                    )}
                   </div>
 
-                  {ls.loading && (
-                    <p className={styles.lessonStatus}>Cargando lecciones…</p>
-                  )}
-                  {ls.error && (
-                    <p className={styles.lessonStatus}>Error: {ls.error}</p>
-                  )}
-                  {!ls.loading && !ls.error && (
-                    <ul className={styles.lessonList}>
-                      {ls.docs.map((lesson) => (
-                        <li key={lesson._id} className={styles.lessonItem}>
-                          <Link
-                            href={`/courses/${id}/units/${unit._id}/lessons/${lesson._id}`}
-                            className={styles.lessonLink}
-                          >
-                            <span className={styles.lessonOrder}>{lesson.order}</span>
-                            <span className={styles.lessonTitle}>{lesson.title}</span>
-                          </Link>
-                        </li>
-                      ))}
-                      {ls.docs.length === 0 && (
-                        <li className={styles.unitEmpty}>Sin lecciones.</li>
-                      )}
-                    </ul>
-                  )}
-                </li>
-              );
-            })}
-            {units.length === 0 && (
-              <li className={styles.unitEmpty}>Sin unidades todavía.</li>
-            )}
-          </ul>
+                  <span className={styles.unitArrow} aria-hidden="true">→</span>
+                </div>
+              </Card>
+            ))}
+          </div>
         )}
       </section>
     </div>

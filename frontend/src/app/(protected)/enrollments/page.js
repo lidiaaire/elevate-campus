@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { enrollmentsService } from '@/lib/services/enrollments.service';
 import { buildCourseMap, buildUserMap } from '@/lib/resolvers';
+import Button from '@/components/ui/Button';
 import styles from '@/styles/Enrollments.module.css';
 
 const BADGE_CLASS = {
@@ -95,22 +96,24 @@ export default function EnrollmentsPage() {
                   <td>
                     <div className={styles.actions}>
                       {e.status === 'suspended' && (
-                        <button
-                          className={styles.btnActivate}
+                        <Button
+                          variant="secondary"
+                          size="sm"
                           disabled={busy}
                           onClick={() => handleAction(e._id, enrollmentsService.activateEnrollment.bind(enrollmentsService))}
                         >
                           {busy ? '…' : 'Activate'}
-                        </button>
+                        </Button>
                       )}
                       {e.status === 'active' && (
-                        <button
-                          className={styles.btnSuspend}
+                        <Button
+                          variant="secondary"
+                          size="sm"
                           disabled={busy}
                           onClick={() => handleAction(e._id, enrollmentsService.suspendEnrollment.bind(enrollmentsService))}
                         >
                           {busy ? '…' : 'Suspend'}
-                        </button>
+                        </Button>
                       )}
                     </div>
                   </td>

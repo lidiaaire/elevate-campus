@@ -5,14 +5,15 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 
 export function useProtectedRoute() {
-  const { user, token } = useAuth();
+  const { user, token, loaded } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    if (!user || !token) {
+    if (loaded && (!user || !token)) {
       router.replace('/login');
     }
-  }, [user, token, router]);
+  }, [loaded, user, token, router]);
 
+  if (!loaded) return { isAuthenticated: null };
   return { isAuthenticated: Boolean(user && token) };
 }

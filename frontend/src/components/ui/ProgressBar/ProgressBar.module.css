@@ -1,0 +1,17 @@
+/* ============================================================
+   ProgressBar — Design System v2.0
+   ============================================================ */
+
+.track {
+  height: 6px;
+  background-color: var(--bg-subtle);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.fill {
+  height: 100%;
+  background: linear-gradient(to right, var(--brand-400), var(--brand-600));
+  border-radius: var(--radius-full);
+  transition: width var(--dur-slow) var(--ease-out);
+}

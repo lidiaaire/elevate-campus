@@ -1,33 +1,35 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { achievementService } from '@/lib/services/achievement.service';
+import { useAsyncData } from '@/hooks/useAsyncData';
 import AchievementCard from '@/components/achievements/AchievementCard';
+import LoadingState from '@/components/ui/LoadingState';
+import ErrorState from '@/components/ui/ErrorState';
+import EmptyState from '@/components/ui/EmptyState';
 import styles from '@/styles/Achievements.module.css';
 
 export default function AchievementsPage() {
   const { token } = useAuth();
-  const [achievements, setAchievements] = useState([]);
-  const [loading,      setLoading]      = useState(true);
-  const [error,        setError]        = useState(null);
 
-  useEffect(() => {
-    achievementService.getMyAchievements(token)
-      .then((res) => setAchievements(res.achievements))
-      .catch((err) => setError(err.message ?? 'Error desconocido'))
-      .finally(() => setLoading(false));
-  }, [token]);
+  const { data, loading, error } = useAsyncData(
+    () => achievementService.getMyAchievements(token)
+  );
 
-  if (loading) return <p>Cargando logros...</p>;
-  if (error)   return <p>Error cargando logros</p>;
+  const achievements = data?.achievements ?? [];
+
+  if (loading) return <LoadingState message="Cargando logros..." />;
+  if (error)   return <ErrorState message={error} />;
 
   return (
     <div className={styles.page}>
       <h1>Mis logros</h1>
 
       {achievements.length === 0 && (
-        <p>Todavía no has desbloqueado ningún logro. ¡Sigue aprendiendo!</p>
+        <EmptyState
+          title="Todavía no has desbloqueado ningún logro."
+          description="¡Sigue aprendiendo!"
+        />
       )}
 
       <ul className={styles.list}>

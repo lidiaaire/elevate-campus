@@ -1,0 +1,24 @@
+/* ============================================================
+   ProtectedLayout (Shell) — Design System v1.0
+   ============================================================ */
+
+.shell {
+  display: flex;
+  min-height: 100vh;
+  background-color: var(--bg-page);
+}
+
+/* Columna derecha: navbar + contenido */
+.main {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;       /* evita overflow en hijos con texto largo */
+  overflow: hidden;
+}
+
+.content {
+  flex: 1;
+  padding: 2rem;
+  overflow-y: auto;
+}

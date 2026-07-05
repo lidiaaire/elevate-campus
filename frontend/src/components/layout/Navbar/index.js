@@ -2,7 +2,8 @@
 
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
-import styles from '@/styles/Navbar.module.css';
+import Button from '@/components/ui/Button';
+import styles from './Navbar.module.css';
 
 export default function Navbar() {
   const { user, logout } = useAuth();
@@ -23,9 +24,9 @@ export default function Navbar() {
         </div>
       )}
 
-      <button className={styles.logoutButton} onClick={handleLogout}>
-        Logout
-      </button>
+      <Button variant="secondary" size="sm" onClick={handleLogout}>
+        Cerrar sesión
+      </Button>
     </header>
   );
 }

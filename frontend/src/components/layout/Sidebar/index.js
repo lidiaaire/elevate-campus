@@ -3,24 +3,30 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
-import styles from '@/styles/Sidebar.module.css';
+import styles from './Sidebar.module.css';
+
+const ROLE_LABELS = {
+  student: 'Alumno',
+  teacher: 'Docente',
+  admin:   'Administrador',
+};
 
 const NAV_LINKS = [
-  { href: '/dashboard',    label: 'Dashboard' },
-  { href: '/courses',      label: 'Courses' },
-  { href: '/enrollments',  label: 'Enrollments' },
-  { href: '/progress',     label: 'Progress' },
+  { href: '/dashboard',    label: 'Inicio' },
+  { href: '/courses',      label: 'Cursos' },
+  { href: '/enrollments',  label: 'Matrículas' },
+  { href: '/progress',     label: 'Progreso' },
 ];
 
 const ADMIN_LINKS = [
-  { href: '/users', label: 'Users' },
+  { href: '/users', label: 'Usuarios' },
 ];
 
 const STUDENT_LINKS = [
-  { href: '/skill-radar',     label: 'Skill Radar' },
-  { href: '/achievements',    label: 'Achievements' },
-  { href: '/certificates',    label: 'Certificates' },
-  { href: '/notifications',   label: 'Notifications' },
+  { href: '/skill-radar',     label: 'Radar de habilidades' },
+  { href: '/achievements',    label: 'Logros' },
+  { href: '/certificates',    label: 'Certificados' },
+  { href: '/notifications',   label: 'Notificaciones' },
 ];
 
 export default function Sidebar() {
@@ -40,7 +46,7 @@ export default function Sidebar() {
       {user && (
         <div className={styles.userBlock}>
           <span className={styles.userName}>{user.firstName} {user.lastName}</span>
-          <span className={styles.role}>{user.role}</span>
+          <span className={styles.role}>{ROLE_LABELS[user.role] ?? user.role}</span>
         </div>
       )}
 

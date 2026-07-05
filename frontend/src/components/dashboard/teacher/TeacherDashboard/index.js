@@ -3,6 +3,12 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { dashboardService } from '@/lib/services/dashboard.service';
+import PageHeader from '@/components/ui/PageHeader';
+import StatCard from '@/components/ui/StatCard';
+import Card, { CardHeader, CardBody } from '@/components/ui/Card';
+import LoadingState from '@/components/ui/LoadingState';
+import ErrorState from '@/components/ui/ErrorState';
+import styles from './TeacherDashboard.module.css';
 
 export default function TeacherDashboard() {
   const { token } = useAuth();
@@ -17,43 +23,124 @@ export default function TeacherDashboard() {
       .finally(() => setLoading(false));
   }, [token]);
 
-  if (loading) return <p>Cargando dashboard...</p>;
-  if (error)   return <p>Error cargando dashboard</p>;
+  if (loading) return <LoadingState message="Cargando dashboard..." />;
+  if (error)   return <ErrorState message="Error cargando dashboard" />;
 
   const { profile, cohortSummary, cohortGrowth, students } = data;
 
   return (
-    <div>
-      <h1>{profile.firstName} {profile.lastName}</h1>
+    <div className={styles.page}>
+      <PageHeader
+        title={`${profile.firstName} ${profile.lastName}`}
+        description="Panel del profesor"
+      />
 
-      <section>
-        <h2>Cohorte</h2>
-        <p>Total de alumnos: {cohortSummary.totalStudents}</p>
-        <p>Alumnos activos (7 días): {cohortSummary.activeStudents7d}</p>
-        <p>Progreso medio de la cohorte: {cohortSummary.cohortProgressAvg}%</p>
-        <p>Alumnos en riesgo: {cohortSummary.atRiskCount}</p>
-        <p>Assessment Pass Rate: {cohortSummary.assessmentPassRate !== null ? `${cohortSummary.assessmentPassRate}%` : '—'}</p>
-      </section>
-
-      <section>
-        <h2>Crecimiento</h2>
-        <p>Lecciones completadas (7 días): {cohortGrowth.lessonsCompleted7d}</p>
-        <p>Assessments aprobados (30 días): {cohortGrowth.assessmentsPassed30d}</p>
-      </section>
-
-      <section>
-        <h2>Alumnos</h2>
-        <ul>
-          {students.map((s) => (
-            <li key={s.studentId}>
-              {s.firstName} {s.lastName}
-              {' — '}
-              {s.isAtRisk ? 'En riesgo' : 'Activo'}
-              {' — '}
-              {s.enrollments.length} {s.enrollments.length === 1 ? 'curso' : 'cursos'}
-            </li>
-          ))}
+      <section className={styles.section}>
+        <h2 className={styles.sectionTitle}>Resumen de la cohorte</h2>
+        <ul className={styles.statsGrid}>
+          <StatCard
+            as="li"
+            title="Total de alumnos"
+            value={cohortSummary.totalStudents}
+          />
+          <StatCard
+            as="li"
+            variant="success"
+            title="Activos (7 días)"
+            value={cohortSummary.activeStudents7d}
+            subtitle={`de ${cohortSummary.totalStudents} alumnos`}
+          />
+          <StatCard
+            as="li"
+            variant="brand"
+            title="Progreso medio"
+            value={`${cohortSummary.cohortProgressAvg}%`}
+            subtitle="Progreso de la cohorte"
+          />
+          <StatCard
+            as="li"
+            variant={cohortSummary.atRiskCount > 0 ? 'danger' : 'default'}
+            title="Alumnos en riesgo"
+            value={cohortSummary.atRiskCount}
+            subtitle="Sin actividad reciente"
+          />
+          <StatCard
+            as="li"
+            variant="brand"
+            title="Pass rate assessments"
+            value={
+              cohortSummary.assessmentPassRate !== null
+                ? `${cohortSummary.assessmentPassRate}%`
+                : '—'
+            }
+          />
         </ul>
+      </section>
+
+      <section className={styles.section}>
+        <h2 className={styles.sectionTitle}>Actividad reciente</h2>
+        <ul className={styles.growthGrid}>
+          <StatCard
+            as="li"
+            variant="success"
+            title="Lecciones completadas"
+            value={cohortGrowth.lessonsCompleted7d}
+            subtitle="Últimos 7 días"
+            trend={{
+              direction: 'up',
+              value: `+${cohortGrowth.lessonsCompleted7d}`,
+              label: 'esta semana',
+            }}
+          />
+          <StatCard
+            as="li"
+            variant="success"
+            title="Assessments aprobados"
+            value={cohortGrowth.assessmentsPassed30d}
+            subtitle="Últimos 30 días"
+          />
+        </ul>
+      </section>
+
+      <section className={styles.section}>
+        <Card>
+          <CardHeader divided>
+            <h2 className={styles.cardSectionTitle}>Alumnos</h2>
+          </CardHeader>
+          <CardBody>
+            {students.length === 0 ? (
+              <p className={styles.emptyText}>No hay alumnos en la cohorte.</p>
+            ) : (
+              <ul className={styles.studentList}>
+                {students.map((s) => (
+                  <li key={s.studentId} className={styles.studentRow}>
+                    <div className={styles.studentInfo}>
+                      <span className={styles.studentName}>
+                        {s.firstName} {s.lastName}
+                      </span>
+                      <span className={s.isAtRisk ? styles.badgeDanger : styles.badgeSuccess}>
+                        {s.isAtRisk ? 'En riesgo' : 'Activo'}
+                      </span>
+                    </div>
+                    <div className={styles.studentMeta}>
+                      <span>
+                        {s.enrollments.length}{' '}
+                        {s.enrollments.length === 1 ? 'curso' : 'cursos'}
+                      </span>
+                      {s.daysSinceLastActivity !== null && (
+                        <span className={s.daysSinceLastActivity >= 7 ? styles.metaDaysWarn : styles.metaDays}>
+                          {s.daysSinceLastActivity === 0
+                            ? 'Activo hoy'
+                            : `${s.daysSinceLastActivity}d sin actividad`}
+                        </span>
+                      )}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </CardBody>
+        </Card>
       </section>
     </div>
   );

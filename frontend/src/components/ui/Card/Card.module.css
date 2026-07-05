@@ -1,0 +1,182 @@
+/* ============================================================
+   Card — Design System v1.0
+   ============================================================ */
+
+/* ---- Base ---- */
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--bg-surface);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  transition: box-shadow var(--dur-normal) var(--ease-out),
+              transform var(--dur-normal) var(--ease-out),
+              border-color var(--dur-normal) var(--ease-out);
+}
+
+/* ================================================================
+   VARIANTES
+   ================================================================ */
+
+/* Default: borde sutil + sombra ligera */
+.default {
+  border: 1px solid var(--border-default);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Elevated: sin borde, sombra pronunciada */
+.elevated {
+  border: none;
+  box-shadow: var(--shadow-md);
+}
+
+/* Outlined: solo borde, sin sombra */
+.outlined {
+  border: 1px solid var(--border-default);
+  box-shadow: none;
+}
+
+/* Filled: fondo sutil, sin borde ni sombra */
+.filled {
+  border: none;
+  box-shadow: none;
+  background-color: var(--bg-subtle);
+}
+
+/* ================================================================
+   TAMAÑOS  (padding interno cuando no hay subcomponentes)
+   ================================================================ */
+.sm  { padding: var(--space-3) var(--space-4); }
+.md  { padding: var(--space-4) var(--space-5); }
+.lg  { padding: var(--space-6); }
+
+.noPadding { padding: 0; }
+
+/* ================================================================
+   ESTADO: Clickable
+   ================================================================ */
+.clickable {
+  cursor: pointer;
+  user-select: none;
+}
+
+.clickable.default:hover,
+.clickable.outlined:hover {
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.clickable.elevated:hover {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-2px);
+}
+
+.clickable.filled:hover {
+  background-color: var(--border-default);
+}
+
+.clickable:active:not(.disabled):not([aria-disabled="true"]) {
+  transform: translateY(0);
+  box-shadow: var(--shadow-sm);
+  transition: all var(--dur-fast) var(--ease-default);
+}
+
+.clickable.filled:active:not(.disabled):not([aria-disabled="true"]) {
+  box-shadow: none;
+}
+
+.clickable:focus-visible {
+  outline: 3px solid var(--color-focus-ring);
+  outline-offset: 2px;
+}
+
+/* ================================================================
+   ESTADO: Selected
+   ================================================================ */
+.selected {
+  border-color: var(--brand-400);
+  box-shadow: 0 0 0 1px var(--brand-400), var(--shadow-sm);
+  background-color: var(--brand-50);
+}
+
+.selected.elevated {
+  box-shadow: 0 0 0 2px var(--brand-400), var(--shadow-md);
+}
+
+.selected.filled {
+  background-color: var(--brand-50);
+  box-shadow: 0 0 0 1px var(--brand-400);
+}
+
+/* ================================================================
+   ESTADO: Disabled
+   ================================================================ */
+.disabled {
+  opacity: 0.55;
+  pointer-events: none;
+  cursor: not-allowed;
+}
+
+/* ================================================================
+   SUBCOMPONENTE: CardHeader
+   ================================================================ */
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-5);
+  flex-shrink: 0;
+}
+
+.headerContent {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;   /* permite text-overflow en hijos */
+  flex: 1;
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-shrink: 0;
+}
+
+.headerDivided {
+  border-bottom: 1px solid var(--border-default);
+}
+
+/* ================================================================
+   SUBCOMPONENTE: CardBody
+   ================================================================ */
+.body {
+  flex: 1;
+  padding: var(--space-4) var(--space-5);
+  min-width: 0;
+}
+
+/* ================================================================
+   SUBCOMPONENTE: CardFooter
+   ================================================================ */
+.footer {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-5);
+  flex-shrink: 0;
+}
+
+.footerDivided {
+  border-top: 1px solid var(--border-default);
+}
+
+/* Alineaciones del footer */
+.footerAlignEnd     { justify-content: flex-end; }
+.footerAlignStart   { justify-content: flex-start; }
+.footerAlignBetween { justify-content: space-between; }
+.footerAlignCenter  { justify-content: center; }

@@ -1,0 +1,95 @@
+/* ============================================================
+   Sidebar — Design System v1.0
+   ============================================================ */
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  width: 220px;
+  min-height: 100vh;
+  background-color: var(--brand-950);
+  padding: 1.5rem 0;
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+  z-index: var(--z-sidebar);
+}
+
+/* ---- Logotipo / nombre de la app ---- */
+.brand {
+  padding: 0 1.25rem 1.25rem;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: var(--text-inverse);
+  letter-spacing: -0.02em;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* ---- Bloque de usuario ---- */
+.userBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 0.875rem 1.25rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.userName {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--brand-200);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.role {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--brand-400);
+}
+
+/* ---- Navegación ---- */
+.nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.75rem;
+  flex: 1;
+}
+
+.link {
+  display: block;
+  padding: 0.5625rem 0.75rem;
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--brand-200);
+  text-decoration: none;
+  transition: background-color var(--dur-normal) var(--ease-out),
+              color var(--dur-normal) var(--ease-out);
+}
+
+.link:hover {
+  background-color: rgba(255, 255, 255, 0.07);
+  color: var(--text-inverse);
+}
+
+.link:focus-visible {
+  outline: 2px solid var(--brand-400);
+  outline-offset: 1px;
+}
+
+.linkActive {
+  background-color: var(--brand-600);
+  color: var(--text-inverse);
+  font-weight: 600;
+}
+
+.linkActive:hover {
+  background-color: var(--brand-700);
+}

@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { assessmentsService } from '@/lib/services/assessments.service';
+import Button from '@/components/ui/Button';
 import styles from '@/styles/Assessment.module.css';
 
 const COURSE_ID = '6a342cbb612627be9d0e7700';
@@ -141,13 +142,13 @@ export default function AssessmentsPage() {
           {maxReached ? (
             <p className={styles.maxReachedText}>Maximum attempts reached</p>
           ) : (
-            <button
+            <Button
               type="submit"
-              className={styles.submitBtn}
+              variant="primary"
               disabled={!allAnswered || submitting}
             >
               {submitting ? 'Enviando…' : 'Submit Assessment'}
-            </button>
+            </Button>
           )}
         </form>
       )}

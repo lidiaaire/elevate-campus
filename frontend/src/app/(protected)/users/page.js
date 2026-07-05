@@ -1,48 +1,54 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
+import { useAsyncData } from '@/hooks/useAsyncData';
 import { usersService } from '@/lib/services/users.service';
+import Button from '@/components/ui/Button';
+import PageHeader from '@/components/ui/PageHeader';
+import LoadingState from '@/components/ui/LoadingState';
+import ErrorState from '@/components/ui/ErrorState';
+import EmptyState from '@/components/ui/EmptyState';
 import styles from '@/styles/Users.module.css';
 
 export default function UsersPage() {
   const { token } = useAuth();
 
-  const [users, setUsers]             = useState([]);
-  const [loading, setLoading]         = useState(true);
-  const [error, setError]             = useState(null);
+  const { data, loading, error, reload } = useAsyncData(
+    () => usersService.getUsers(token).then((res) => res.users ?? []),
+  );
+
+  const users = data ?? [];
   const [actionLoading, setActionLoading] = useState(null);
-
-  const fetchUsers = useCallback(() => {
-    setLoading(true);
-    usersService.getUsers(token)
-      .then((data) => setUsers(data.users ?? []))
-      .catch((err) => setError(err.message))
-      .finally(() => setLoading(false));
-  }, [token]);
-
-  useEffect(() => { fetchUsers(); }, [fetchUsers]);
+  const [actionError, setActionError]     = useState(null);
 
   async function handleAction(id, action) {
     setActionLoading(id);
+    setActionError(null);
     try {
       await action(id, token);
-      await fetchUsers();
+      reload();
     } catch (err) {
-      setError(err.message);
+      setActionError(err.message);
     } finally {
       setActionLoading(null);
     }
   }
 
+  if (loading) return <LoadingState message="Cargando usuarios…" />;
+  if (error)   return <ErrorState message={error} />;
+
   return (
     <div className={styles.page}>
-      <h1 className={styles.title}>Usuarios</h1>
+      <PageHeader title="Usuarios" />
 
-      {loading && <p className={styles.status}>Cargando usuarios…</p>}
-      {error   && <p className={styles.status}>Error: {error}</p>}
+      {actionError && <ErrorState message={actionError} />}
 
-      {!loading && !error && (
+      {!actionError && users.length === 0 && (
+        <EmptyState title="No hay usuarios registrados." />
+      )}
+
+      {!actionError && users.length > 0 && (
         <table className={styles.table}>
           <thead>
             <tr>
@@ -69,35 +75,30 @@ export default function UsersPage() {
                   <td>
                     <div className={styles.actions}>
                       {!u.isActive && (
-                        <button
-                          className={styles.btnActivate}
+                        <Button
+                          variant="secondary"
+                          size="sm"
                           disabled={busy}
                           onClick={() => handleAction(u._id, usersService.activateUser.bind(usersService))}
                         >
                           {busy ? '…' : 'Activate'}
-                        </button>
+                        </Button>
                       )}
                       {u.isActive && (
-                        <button
-                          className={styles.btnDeactivate}
+                        <Button
+                          variant="secondary"
+                          size="sm"
                           disabled={busy}
                           onClick={() => handleAction(u._id, usersService.deactivateUser.bind(usersService))}
                         >
                           {busy ? '…' : 'Deactivate'}
-                        </button>
+                        </Button>
                       )}
                     </div>
                   </td>
                 </tr>
               );
             })}
-            {users.length === 0 && (
-              <tr>
-                <td colSpan={5} style={{ textAlign: 'center', color: '#9ca3af' }}>
-                  No hay usuarios registrados.
-                </td>
-              </tr>
-            )}
           </tbody>
         </table>
       )}

@@ -509,6 +509,25 @@ const getStudentDashboard = async (studentId) => {
     _getRecentActivity(studentId),
   ]);
 
+  const continueLearningCandidate = enrollmentDetails
+    .filter((e) => e.nextLesson !== null)
+    .sort((a, b) => {
+      if (!a.lastActivityAt) return 1;
+      if (!b.lastActivityAt) return -1;
+      return new Date(b.lastActivityAt) - new Date(a.lastActivityAt);
+    })[0] ?? null;
+
+  const continueLearning = continueLearningCandidate
+    ? {
+        courseId:        continueLearningCandidate.courseId,
+        courseTitle:     continueLearningCandidate.courseTitle,
+        unitId:          continueLearningCandidate.nextLesson.unitId,
+        lessonId:        continueLearningCandidate.nextLesson.lessonId,
+        lessonTitle:     continueLearningCandidate.nextLesson.lessonTitle,
+        overallProgress: continueLearningCandidate.overallProgress,
+      }
+    : null;
+
   return {
     profile: {
       studentId: user._id,
@@ -532,6 +551,7 @@ const getStudentDashboard = async (studentId) => {
     enrollments:       enrollmentDetails,
     recentActivity,
     pendingAssessments,
+    continueLearning,
   };
 };
 

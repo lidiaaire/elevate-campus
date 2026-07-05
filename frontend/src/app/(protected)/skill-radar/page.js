@@ -1,38 +1,46 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
+import { useAsyncData } from '@/hooks/useAsyncData';
 import { dashboardService } from '@/lib/services/dashboard.service';
 import SkillRadarChart from '@/components/skill-radar/SkillRadarChart';
 import SkillRadarLegend from '@/components/skill-radar/SkillRadarLegend';
+import PageHeader from '@/components/ui/PageHeader';
+import LoadingState from '@/components/ui/LoadingState';
+import ErrorState from '@/components/ui/ErrorState';
+import EmptyState from '@/components/ui/EmptyState';
 import styles from '@/styles/SkillRadar.module.css';
 
 export default function SkillRadarPage() {
   const { token } = useAuth();
-  const [data,    setData]    = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error,   setError]   = useState(null);
 
-  useEffect(() => {
-    dashboardService.getStudentDashboard(token)
-      .then((res) => setData(res))
-      .catch((err) => setError(err.message ?? 'Error desconocido'))
-      .finally(() => setLoading(false));
-  }, [token]);
+  const { data, loading, error } = useAsyncData(
+    () => dashboardService.getStudentDashboard(token),
+  );
 
-  if (loading) return <p>Cargando Skill Radar...</p>;
-  if (error)   return <p>Error cargando Skill Radar</p>;
+  if (loading) return <LoadingState message="Cargando Skill Radar..." />;
+  if (error)   return <ErrorState message={error} />;
 
-  const { profile, skillProgress } = data;
+  const { profile, skillProgress } = data ?? {};
+  const hasData = skillProgress?.length > 0;
 
   return (
     <div className={styles.container}>
-      <h1>English Skill Radar</h1>
-      <p>{profile.firstName} {profile.lastName}</p>
-      <div className={styles.chartWrapper}>
-        <SkillRadarChart skillProgress={skillProgress} />
-      </div>
-      <SkillRadarLegend skillProgress={skillProgress} />
+      <PageHeader
+        title="English Skill Radar"
+        description={profile ? `${profile.firstName} ${profile.lastName}` : undefined}
+      />
+
+      {!hasData ? (
+        <EmptyState title="No hay datos de habilidades disponibles." />
+      ) : (
+        <>
+          <div className={styles.chartWrapper}>
+            <SkillRadarChart skillProgress={skillProgress} />
+          </div>
+          <SkillRadarLegend skillProgress={skillProgress} />
+        </>
+      )}
 
       <section className={styles.infoSection}>
         <h2 className={styles.infoTitle}>¿Cómo se calcula este radar?</h2>
