@@ -11,17 +11,9 @@
 
 /* ---- Hero ---- */
 .heroBody {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 2rem;
-  align-items: center;
-}
-
-.heroLeft {
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  min-width: 0;
 }
 
 .heroGreeting {
@@ -55,53 +47,9 @@
   color: var(--text-secondary);
 }
 
-.heroRight {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 0.5rem;
-  flex-shrink: 0;
-}
-
-.heroCourseLabel {
-  font-size: 0.6875rem;
-  font-weight: 600;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  text-align: right;
-}
-
-.heroLessonLabel {
-  font-size: 0.875rem;
-  color: var(--text-secondary);
-  text-align: right;
-  max-width: 240px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  margin-bottom: 0.25rem;
-}
-
-.heroComplete {
-  font-size: 0.875rem;
-  color: var(--text-secondary);
-  text-align: right;
-  max-width: 240px;
-}
-
-@media (max-width: 640px) {
-  .heroBody {
-    grid-template-columns: 1fr;
-  }
-  .heroRight {
-    align-items: flex-start;
-  }
-  .heroCourseLabel,
-  .heroLessonLabel,
-  .heroComplete {
-    text-align: left;
-  }
+/* ---- Continuar aprendiendo ---- */
+.continueLearningWrapper {
+  max-width: 400px;
 }
 
 /* ---- Grid skills + assessment ---- */
@@ -133,4 +81,11 @@
 
 @media (max-width: 600px) {
   .courseGrid { grid-template-columns: 1fr; }
+}
+
+/* ---- Mi espacio de aprendizaje — CTA ---- */
+.progressCta {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1rem;
 }

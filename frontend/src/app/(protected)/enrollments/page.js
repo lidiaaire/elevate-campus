@@ -83,10 +83,16 @@ export default function EnrollmentsPage() {
           <tbody>
             {enrollments.map((e) => {
               const busy = actionLoading === e._id;
+              const courseId = e.courseId?._id ?? e.courseId;
+              const courseName = e.courseId?.title ?? courseMap[courseId] ?? courseId;
+              const studentId = e.studentId?._id ?? e.studentId;
+              const studentName = e.studentId
+                ? `${e.studentId.firstName ?? ''} ${e.studentId.lastName ?? ''}`.trim() || studentId
+                : userMap[studentId] ?? studentId;
               return (
                 <tr key={e._id}>
-                  <td>{courseMap[e.courseId] ?? <span className={styles.idFallback}>{e.courseId}</span>}</td>
-                  <td>{userMap[e.studentId]  ?? <span className={styles.idFallback}>{e.studentId}</span>}</td>
+                  <td>{courseName ?? <span className={styles.idFallback}>{courseId}</span>}</td>
+                  <td>{studentName ?? <span className={styles.idFallback}>{studentId}</span>}</td>
                   <td>
                     <span className={`${styles.badge} ${BADGE_CLASS[e.status] ?? ''}`}>
                       {e.status}

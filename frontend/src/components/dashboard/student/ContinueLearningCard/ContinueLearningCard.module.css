@@ -1,0 +1,117 @@
+/* ============================================================
+   ContinueLearningCard — Design System v1.0
+   ============================================================ */
+
+/* ---- Imagen / cabecera ---- */
+.imageWrapper {
+  position: relative;
+  height: 140px;
+  background-color: var(--card-accent, var(--brand-500));
+  border-radius: var(--radius-lg, 12px) var(--radius-lg, 12px) 0 0;
+  overflow: hidden;
+}
+
+.image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.imagePlaceholder {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    135deg,
+    var(--card-accent, var(--brand-500)) 0%,
+    color-mix(in srgb, var(--card-accent, var(--brand-500)) 60%, #000) 100%
+  );
+}
+
+.progressBadge {
+  position: absolute;
+  top: 0.625rem;
+  right: 0.75rem;
+  background: rgba(0, 0, 0, 0.45);
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.2rem 0.5rem;
+  border-radius: 999px;
+  letter-spacing: 0.02em;
+}
+
+/* ---- Cuerpo ---- */
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+}
+
+.courseTitle {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-display);
+  line-height: 1.3;
+  margin: 0;
+}
+
+.unitLabel {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--brand-600, var(--brand-500));
+  margin: 0;
+}
+
+.lastLesson {
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.lastLessonPrefix {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* ---- Progreso ---- */
+.progressSection {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  margin-top: 0.25rem;
+}
+
+.progressMeta {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.lessonsCount {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.progressPct {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+/* ---- Estado completado ---- */
+.completedBody {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.completedText {
+  font-size: 0.9375rem;
+  color: var(--text-secondary);
+  margin: 0;
+}

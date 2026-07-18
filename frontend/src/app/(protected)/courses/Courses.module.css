@@ -2,6 +2,115 @@
    CoursesPage — Design System v1.0
    ============================================================ */
 
+/* ---- Buscador + tabs ---- */
+.controls {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.search {
+  width: 100%;
+  max-width: 320px;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  color: var(--text-primary);
+  background: var(--bg-surface);
+  border: 1px solid var(--bg-subtle);
+  border-radius: var(--radius-md, 8px);
+  outline: none;
+  transition: border-color 120ms ease, box-shadow 120ms ease;
+}
+
+.search:focus {
+  border-color: var(--brand-400, #60a5fa);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+}
+
+.search::placeholder {
+  color: var(--text-muted);
+}
+
+.tabs {
+  display: flex;
+  gap: 0.25rem;
+  flex-wrap: wrap;
+}
+
+.tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.375rem 0.75rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md, 8px);
+  cursor: pointer;
+  transition: background-color 120ms ease, color 120ms ease;
+}
+
+.tab:hover {
+  background-color: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.tabActive {
+  background-color: var(--brand-50, #eff6ff);
+  color: var(--brand-700, #1d4ed8);
+  border-color: var(--brand-200, #bfdbfe);
+  font-weight: 600;
+}
+
+.tabCount {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  padding: 0.1rem 0.4rem;
+  border-radius: 999px;
+  background: var(--bg-subtle);
+  color: var(--text-muted);
+}
+
+.tabActive .tabCount {
+  background: var(--brand-100, #dbeafe);
+  color: var(--brand-700, #1d4ed8);
+}
+
+/* ---- Sección heading ---- */
+.sectionTitle {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 0.75rem;
+}
+
+/* ---- Barra de acento en tarjeta ---- */
+.accentBar {
+  height: 4px;
+  border-radius: var(--radius-lg, 12px) var(--radius-lg, 12px) 0 0;
+}
+
+/* ---- Fila de progreso ---- */
+.progressRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 0.375rem;
+}
+
+.progressPct {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--brand-600, #2563eb);
+}
+
+.progressMeta {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
 .page {
   display: flex;
   flex-direction: column;

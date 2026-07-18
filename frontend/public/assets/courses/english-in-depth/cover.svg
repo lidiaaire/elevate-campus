@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450" width="800" height="450">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#d97706;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#fbbf24;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="overlay" x1="0%" y1="60%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#000;stop-opacity:0" />
+      <stop offset="100%" style="stop-color:#000;stop-opacity:0.55" />
+    </linearGradient>
+  </defs>
+  <rect width="800" height="450" fill="url(#bg)" />
+  <circle cx="625" cy="82" r="178" fill="#fff" fill-opacity="0.06" />
+  <circle cx="140" cy="388" r="122" fill="#fff" fill-opacity="0.05" />
+  <circle cx="715" cy="348" r="88" fill="#fff" fill-opacity="0.07" />
+  <rect width="800" height="450" fill="url(#overlay)" />
+  <rect x="40" y="36" width="54" height="28" rx="6" fill="#fff" fill-opacity="0.2" />
+  <text x="67" y="55" font-family="Inter, system-ui, sans-serif" font-size="14" font-weight="700" fill="#fff" text-anchor="middle">B2</text>
+  <text x="40" y="340" font-family="Inter, system-ui, sans-serif" font-size="32" font-weight="700" fill="#fff">English in Depth</text>
+  <text x="40" y="378" font-family="Inter, system-ui, sans-serif" font-size="16" fill="#fef3c7">Lead the conversation. Own the room.</text>
+  <text x="700" y="240" font-size="72" fill="#fff" fill-opacity="0.18" font-family="serif">🎯</text>
+</svg>

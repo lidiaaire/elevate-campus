@@ -3,6 +3,7 @@
 import { useProtectedRoute } from '@/hooks/useProtectedRoute';
 import Sidebar from '@/components/layout/Sidebar';
 import Navbar from '@/components/layout/Navbar';
+import { ToastProvider } from '@/contexts/ToastContext';
 import styles from './ProtectedLayout.module.css';
 
 export default function ProtectedLayout({ children }) {
@@ -11,14 +12,16 @@ export default function ProtectedLayout({ children }) {
   if (isAuthenticated === null || !isAuthenticated) return null;
 
   return (
-    <div className={styles.shell}>
-      <Sidebar />
-      <div className={styles.main}>
-        <Navbar />
-        <main className={styles.content}>
-          {children}
-        </main>
+    <ToastProvider>
+      <div className={styles.shell}>
+        <Sidebar />
+        <div className={styles.main}>
+          <Navbar />
+          <main className={styles.content}>
+            {children}
+          </main>
+        </div>
       </div>
-    </div>
+    </ToastProvider>
   );
 }

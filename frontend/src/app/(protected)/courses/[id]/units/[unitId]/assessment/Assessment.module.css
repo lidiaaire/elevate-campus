@@ -1,0 +1,277 @@
+/* ============================================================
+   AssessmentPage — Design System v1.0
+   ============================================================ */
+
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  max-width: 720px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* ── Navegación superior ── */
+.topNav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.backRow {
+  display: flex;
+}
+
+/* ── Meta ── */
+.metaRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  padding: 1rem 1.25rem;
+  background: var(--bg-surface);
+  border: 1px solid var(--bg-subtle);
+  border-radius: var(--radius-lg, 12px);
+}
+
+.metaItem {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.metaLabel {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+}
+
+.metaValue {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.metaValueDanger  { color: var(--danger-600, #dc2626); }
+.metaValueSuccess { color: var(--success-600, #16a34a); }
+
+/* ── Resultado ── */
+.resultBox {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1.25rem;
+  border-radius: var(--radius-lg, 12px);
+  border: 1px solid transparent;
+}
+
+.resultPass {
+  background: var(--success-50, #f0fdf4);
+  border-color: var(--success-200, #bbf7d0);
+}
+
+.resultFail {
+  background: #fef2f2;
+  border-color: #fecaca;
+}
+
+.resultTitle {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.resultScore {
+  font-size: 0.9375rem;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.noAttemptsMsg {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.resultActions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-top: 0.25rem;
+}
+
+/* ── Formulario ── */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.questionList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  counter-reset: question;
+}
+
+.questionCard {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1.25rem;
+  background: var(--bg-surface);
+  border: 1px solid var(--bg-subtle);
+  border-radius: var(--radius-lg, 12px);
+}
+
+.questionText {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+  counter-increment: question;
+}
+
+.questionText::before {
+  content: counter(question) '. ';
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+.questionPoints {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.optionList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.optionLabel {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.625rem 0.875rem;
+  border: 1px solid var(--bg-subtle);
+  border-radius: var(--radius-md, 8px);
+  font-size: 0.875rem;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: border-color 120ms ease, background-color 120ms ease;
+}
+
+.optionLabel:hover {
+  border-color: var(--brand-300, #93c5fd);
+  background: var(--brand-50, #eff6ff);
+}
+
+.optionSelected {
+  border-color: var(--brand-400, #60a5fa);
+  background: var(--brand-50, #eff6ff);
+}
+
+.optionRadio {
+  flex-shrink: 0;
+  accent-color: var(--brand-500, #3b82f6);
+}
+
+.errorText {
+  font-size: 0.875rem;
+  color: var(--danger-600, #dc2626);
+  margin: 0;
+}
+
+.submitRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-top: 0.25rem;
+  border-top: 1px solid var(--bg-subtle);
+}
+
+.answeredCount {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+}
+
+/* ── Historial ── */
+.historySection {
+  margin-top: 0.5rem;
+}
+
+.historyTitle {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 0.75rem;
+}
+
+.historyTable {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--bg-subtle);
+  border-radius: var(--radius-lg, 12px);
+  overflow: hidden;
+}
+
+.historyRow {
+  display: grid;
+  grid-template-columns: 2rem 1fr 1fr 1fr;
+  align-items: center;
+  padding: 0.625rem 1rem;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--bg-subtle);
+}
+
+.historyRow:last-child { border-bottom: none; }
+
+.historyHead {
+  background: var(--bg-subtle);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+}
+
+.attemptNum   { font-weight: 700; }
+.attemptScore { font-weight: 700; color: var(--brand-600, #2563eb); }
+.attemptDate  { font-size: 0.8125rem; color: var(--text-muted); }
+
+.resultBadge {
+  display: inline-flex;
+  padding: 0.2rem 0.55rem;
+  border-radius: 9999px;
+  font-size: 0.6875rem;
+  font-weight: 700;
+}
+
+.badgePass {
+  background: var(--success-50, #f0fdf4);
+  color: var(--success-700, #15803d);
+}
+
+.badgeFail {
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+@media (max-width: 480px) {
+  .historyRow { grid-template-columns: 2rem 1fr 1fr; }
+  .attemptDate { display: none; }
+  .submitRow { flex-direction: column; align-items: flex-start; }
+}

@@ -23,10 +23,11 @@ const ADMIN_LINKS = [
 ];
 
 const STUDENT_LINKS = [
-  { href: '/skill-radar',     label: 'Radar de habilidades' },
-  { href: '/achievements',    label: 'Logros' },
-  { href: '/certificates',    label: 'Certificados' },
-  { href: '/notifications',   label: 'Notificaciones' },
+  { href: '/assessments',   label: 'Evaluaciones' },
+  { href: '/certificates',  label: 'Certificados' },
+  { href: '/achievements',  label: 'Logros' },
+  { href: '/notifications', label: 'Notificaciones' },
+  { href: '/skill-radar',   label: 'Radar de habilidades' },
 ];
 
 export default function Sidebar() {

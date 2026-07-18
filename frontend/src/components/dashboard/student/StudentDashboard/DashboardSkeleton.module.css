@@ -1,0 +1,279 @@
+/* ============================================================
+   DashboardSkeleton — Design System v1.0
+   Skeleton loading para el módulo Inicio (Blueprint §3.10):
+   "Utiliza Skeleton Loaders manteniendo la estructura de la página."
+   Usa @keyframes shimmer definido en globals.css.
+   ============================================================ */
+
+/* ---- Base shimmer ---- */
+.bone {
+  background: linear-gradient(
+    90deg,
+    var(--bg-subtle)      25%,
+    var(--border-default) 50%,
+    var(--bg-subtle)      75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s linear infinite;
+  border-radius: var(--radius-sm);
+}
+
+/* ---- Layout — idéntico al .dashboard real ---- */
+.dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+}
+
+/* ---- Shell de card reutilizable ---- */
+.card {
+  background: var(--bg-surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+.cardPad {
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+}
+
+/* ---- Hero ---- */
+.heroText {
+  height: 1.25rem;
+  width: 55%;
+}
+
+.heroStat {
+  height: 2.25rem;
+  width: 25%;
+}
+
+.heroBar {
+  height: 0.5rem;
+  width: 100%;
+  border-radius: var(--radius-full);
+}
+
+/* ---- Títulos de sección (fuera de cards) ---- */
+.sectionTitle {
+  height: 1rem;
+  width: 40%;
+  margin-bottom: 0.875rem;
+}
+
+/* ---- Continúa donde lo dejaste — max-width idéntico al .continueLearningWrapper ---- */
+.clWrapper {
+  max-width: 400px;
+}
+
+.clImage {
+  height: 140px;
+  width: 100%;
+  border-radius: 0;
+}
+
+.clBody {
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+}
+
+.clTitle {
+  height: 1rem;
+  width: 70%;
+}
+
+.clSubtitle {
+  height: 0.8125rem;
+  width: 45%;
+}
+
+.clBar {
+  height: 0.5rem;
+  width: 100%;
+  border-radius: var(--radius-full);
+}
+
+.clFooter {
+  padding: 0.875rem 1.25rem;
+  border-top: 1px solid var(--bg-subtle);
+  display: flex;
+  justify-content: flex-end;
+}
+
+.clButton {
+  height: 2rem;
+  width: 5.5rem;
+  border-radius: var(--radius-md);
+}
+
+/* ---- Acciones rápidas — grid idéntico al .grid real ---- */
+.qaGrid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0.75rem;
+}
+
+.qaItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem 0.5rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--bg-subtle);
+  background: var(--bg-surface);
+}
+
+.qaIcon {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: var(--radius-sm);
+}
+
+.qaLabel {
+  height: 0.75rem;
+  width: 70%;
+}
+
+/* ---- Actividad de hoy — grid de métricas ---- */
+.statGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+}
+
+.statItem {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.statValue {
+  height: 2rem;
+  width: 50%;
+}
+
+.statLabel {
+  height: 0.75rem;
+  width: 80%;
+}
+
+/* ---- Objetivos de la semana — lista de goals ---- */
+.goalList {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+}
+
+.goalItem {
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--bg-subtle);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.goalList > li:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.goalList > li:first-child {
+  padding-top: 0;
+}
+
+.goalHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.goalBadge {
+  height: 1.25rem;
+  width: 3.5rem;
+  flex-shrink: 0;
+  border-radius: var(--radius-full);
+}
+
+.goalText {
+  height: 0.875rem;
+  flex: 1;
+}
+
+.goalProgress {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+}
+
+.goalBar {
+  height: 6px;
+  flex: 1;
+  border-radius: var(--radius-full);
+}
+
+.goalFrac {
+  height: 0.75rem;
+  width: 3rem;
+  flex-shrink: 0;
+}
+
+/* ---- Card genérica (Recomendaciones, Próximas actividades) ---- */
+.cardTitle {
+  height: 1rem;
+  width: 45%;
+}
+
+.line {
+  height: 0.75rem;
+}
+
+/* ---- Grid habilidades + métricas — idéntico al .bodyGrid real ---- */
+.bodyGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+/* ---- Cursos matriculados — idéntico al .courseGrid real ---- */
+.courseGrid {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+/* ---- Responsive — breakpoints idénticos al dashboard real ---- */
+@media (max-width: 768px) {
+  .bodyGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .statGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .qaGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .courseGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 380px) {
+  .qaGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

@@ -1,0 +1,94 @@
+/* ============================================================
+   Toast — Design System v1.0
+   ============================================================ */
+
+.container {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+  width: clamp(240px, 90vw, 380px);
+  pointer-events: none;
+}
+
+.toast {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.875rem 1rem;
+  border-radius: var(--radius-lg, 12px);
+  border: 1px solid transparent;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  font-size: 0.875rem;
+  line-height: 1.4;
+  pointer-events: all;
+  animation: toastIn 200ms ease;
+}
+
+.success {
+  background: var(--success-50, #f0fdf4);
+  border-color: var(--success-200, #bbf7d0);
+  color: var(--success-700, #15803d);
+}
+
+.error {
+  background: #fef2f2;
+  border-color: #fecaca;
+  color: #b91c1c;
+}
+
+.info {
+  background: var(--brand-50, #eff6ff);
+  border-color: var(--brand-200, #bfdbfe);
+  color: var(--brand-700, #1d4ed8);
+}
+
+.icon {
+  flex-shrink: 0;
+  font-weight: 700;
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+
+.message {
+  flex: 1;
+  color: inherit;
+}
+
+.close {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  font-size: 1.125rem;
+  line-height: 1;
+  color: inherit;
+  opacity: 0.5;
+  transition: opacity 120ms ease;
+}
+
+.close:hover { opacity: 1; }
+
+.close:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+@keyframes toastIn {
+  from { transform: translateX(110%); opacity: 0; }
+  to   { transform: translateX(0);    opacity: 1; }
+}
+
+@media (max-width: 480px) {
+  .container {
+    bottom: 1rem;
+    right: 1rem;
+    left: 1rem;
+    width: auto;
+  }
+}

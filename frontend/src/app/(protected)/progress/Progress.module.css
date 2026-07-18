@@ -1,0 +1,266 @@
+/* ============================================================
+   ProgressPage — Design System v1.0
+   ============================================================ */
+
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+/* ── Sección ── */
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+}
+
+.sectionTitle {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+/* ── Stats globales ── */
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 0.75rem;
+}
+
+.statCard {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 1.125rem 1.25rem;
+  background: var(--bg-surface);
+  border: 1px solid var(--bg-subtle);
+  border-radius: var(--radius-lg, 12px);
+}
+
+.statValue {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  line-height: 1;
+}
+
+.statLabel {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-top: 0.25rem;
+}
+
+.statSub {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+/* ── Evolución ── */
+.growthGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 0.75rem;
+}
+
+.growthCard {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+  background: var(--bg-surface);
+  border: 1px solid var(--bg-subtle);
+  border-radius: var(--radius-lg, 12px);
+}
+
+.growthCardAccent {
+  background: var(--success-50, #f0fdf4);
+  border-color: var(--success-200, #bbf7d0);
+}
+
+.growthPeriod {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+}
+
+.growthStats {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.growthStat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.growthVal {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  line-height: 1;
+}
+
+.growthLabel {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.growthDivider {
+  width: 1px;
+  height: 2rem;
+  background: var(--bg-subtle);
+  flex-shrink: 0;
+}
+
+/* ── Cursos ── */
+.courseList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.courseRow {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  background: var(--bg-surface);
+  border: 1px solid var(--bg-subtle);
+  border-radius: var(--radius-lg, 12px);
+  overflow: hidden;
+  text-decoration: none;
+  color: inherit;
+  transition: box-shadow 120ms ease, border-color 120ms ease;
+}
+
+.courseRow:hover {
+  border-color: var(--brand-200, #bfdbfe);
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.08);
+}
+
+.courseAccent {
+  width: 5px;
+  align-self: stretch;
+  flex-shrink: 0;
+}
+
+.courseInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex: 1;
+  padding: 1rem 1.125rem;
+  min-width: 0;
+}
+
+.courseTopRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.courseTitle {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.coursePct {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: var(--brand-600, #2563eb);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.pctDone {
+  color: var(--success-600, #16a34a);
+}
+
+.courseMeta {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.doneCheck {
+  font-size: 1rem;
+  color: var(--success-500, #22c55e);
+  font-weight: 700;
+  padding-right: 1rem;
+  flex-shrink: 0;
+}
+
+/* ── Actividad reciente ── */
+.activityList {
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-surface);
+  border: 1px solid var(--bg-subtle);
+  border-radius: var(--radius-lg, 12px);
+  overflow: hidden;
+}
+
+.activityRow {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  padding: 0.75rem 1.125rem;
+  border-bottom: 1px solid var(--bg-subtle);
+}
+
+.activityRow:last-child {
+  border-bottom: none;
+}
+
+.activityDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--brand-400, #60a5fa);
+  flex-shrink: 0;
+}
+
+.activityInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.activityLesson {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.activityCourse {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.activityDate {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* ── Responsive ── */
+@media (max-width: 480px) {
+  .statsGrid  { grid-template-columns: repeat(2, 1fr); }
+  .growthGrid { grid-template-columns: 1fr; }
+}

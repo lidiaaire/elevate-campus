@@ -42,6 +42,8 @@ const CourseRepository             = require('../../repositories/course.reposito
 const LessonRepository             = require('../../repositories/lesson.repository');
 const progressService              = require('../progress/progress.service');
 const progressCalculator           = require('../../utils/progressCalculator');
+const assignmentService            = require('../assignments/assignment.service');
+const bookingService               = require('../bookings/booking.service');
 const {
   ROLES,
   LESSON_TYPES,
@@ -439,10 +441,33 @@ const getStudentDashboard = async (studentId) => {
       }
     }
 
+    // Última lección completada (por orden secuencial dentro del curso)
+    let lastLesson = null;
+    for (const u of cp.units) {
+      for (const l of u.lessons) {
+        if (l.completed) {
+          lastLesson = {
+            lessonId:    l.lesson._id,
+            lessonTitle: l.lesson.title,
+          };
+        }
+      }
+    }
+
+    // Progreso de la unidad que contiene la siguiente lección
+    let unitProgress = null;
+    if (nextLesson) {
+      const targetUnit = cp.units.find(
+        (u) => u.unit._id.toString() === nextLesson.unitId.toString(),
+      );
+      if (targetUnit) unitProgress = targetUnit.progress;
+    }
+
     enrollmentDetails.push({
       enrollmentId:          enrollment._id,
       courseId:              course._id,
       courseTitle:           course.title,
+      courseImage:           course.coverImageUrl ?? null,
       level:                 course.level,
       overallProgress:       cp.overallProgress,
       completedLessons:      cp.completedLessons,
@@ -451,6 +476,8 @@ const getStudentDashboard = async (studentId) => {
       daysSinceLastActivity: daysBetween(cp.lastActivity),
       enrollmentStatus:      enrollment.status,
       nextLesson,
+      lastLesson,
+      unitProgress,
     });
 
     // Assessments pendientes: unidad completa + assessment existe + no aprobado + intentos restantes
@@ -480,12 +507,14 @@ const getStudentDashboard = async (studentId) => {
         if (best?.passed) continue;
         if (attemptsUsed >= assessment.maxAttempts) continue;
         pendingAssessments.push({
-          assessmentId: assessment._id,
-          unitId:       assessment.unitId,
-          unitTitle:    u.unit.title,
-          courseTitle:  course.title,
+          assessmentId:    assessment._id,
+          assessmentTitle: assessment.title,
+          unitId:          assessment.unitId,
+          unitTitle:       u.unit.title,
+          courseTitle:     course.title,
+          courseId:        course._id,
           attemptsUsed,
-          maxAttempts:  assessment.maxAttempts,
+          maxAttempts:     assessment.maxAttempts,
         });
       }
     }
@@ -519,14 +548,89 @@ const getStudentDashboard = async (studentId) => {
 
   const continueLearning = continueLearningCandidate
     ? {
-        courseId:        continueLearningCandidate.courseId,
-        courseTitle:     continueLearningCandidate.courseTitle,
-        unitId:          continueLearningCandidate.nextLesson.unitId,
-        lessonId:        continueLearningCandidate.nextLesson.lessonId,
-        lessonTitle:     continueLearningCandidate.nextLesson.lessonTitle,
-        overallProgress: continueLearningCandidate.overallProgress,
+        courseId:         continueLearningCandidate.courseId,
+        courseTitle:      continueLearningCandidate.courseTitle,
+        courseImage:      continueLearningCandidate.courseImage,
+        unitId:           continueLearningCandidate.nextLesson.unitId,
+        unitTitle:        continueLearningCandidate.nextLesson.unitTitle,
+        lessonId:         continueLearningCandidate.nextLesson.lessonId,
+        lessonTitle:      continueLearningCandidate.nextLesson.lessonTitle,
+        lastLesson:       continueLearningCandidate.lastLesson,
+        overallProgress:  continueLearningCandidate.overallProgress,
+        unitProgress:     continueLearningCandidate.unitProgress,
+        completedLessons: continueLearningCandidate.completedLessons,
+        totalLessons:     continueLearningCandidate.totalLessons,
       }
     : null;
+
+  // --- Próximas actividades ---
+  const now = new Date();
+
+  const [assignmentLists, allBookings] = await Promise.all([
+    Promise.all(
+      activeEnrollments.map((e) => assignmentService.getAssignmentsByCourse(e.courseId._id)),
+    ),
+    bookingService.getMyBookings(studentId),
+  ]);
+
+  const futureAssignments = assignmentLists
+    .flat()
+    .filter((a) => a.isPublished && new Date(a.dueDate) >= now);
+
+  const upcomingSessions = allBookings.filter(
+    (b) => ['PENDING', 'CONFIRMED'].includes(b.status) && new Date(b.bookingDate) >= now,
+  );
+
+  const allActivities = [
+    ...pendingAssessments.map((pa) => ({
+      type:         'assessment',
+      id:           pa.assessmentId.toString(),
+      title:        pa.assessmentTitle,
+      courseTitle:  pa.courseTitle,
+      courseId:     pa.courseId.toString(),
+      unitId:       pa.unitId.toString(),
+      date:         null,
+      status:       'Pendiente',
+      attemptsLeft: pa.maxAttempts - pa.attemptsUsed,
+    })),
+    ...futureAssignments.map((a) => {
+      const enrolled = activeEnrollments.find(
+        (e) => e.courseId._id.toString() === a.course.toString(),
+      );
+      return {
+        type:         'assignment',
+        id:           a._id.toString(),
+        title:        a.title,
+        courseTitle:  enrolled?.courseId.title ?? '',
+        courseId:     a.course.toString(),
+        unitId:       null,
+        date:         a.dueDate,
+        status:       'Pendiente',
+        attemptsLeft: null,
+      };
+    }),
+    ...upcomingSessions.map((b) => ({
+      type:         'session',
+      id:           b._id.toString(),
+      title:        'Sesión en directo',
+      courseTitle:  b.course?.title ?? '',
+      courseId:     b.course?._id?.toString() ?? '',
+      unitId:       null,
+      date:         new Date(`${b.bookingDate.toISOString().split('T')[0]}T${b.startTime}:00.000Z`),
+      status:       b.status === 'CONFIRMED' ? 'Confirmada' : 'Pendiente de confirmación',
+      attemptsLeft: null,
+    })),
+  ];
+
+  // Evaluaciones sin fecha → siempre primero (bloqueantes); resto por fecha ASC
+  allActivities.sort((a, b) => {
+    if (!a.date && !b.date) return 0;
+    if (!a.date) return -1;
+    if (!b.date) return 1;
+    return new Date(a.date) - new Date(b.date);
+  });
+
+  const upcomingActivities = allActivities.slice(0, 5);
 
   return {
     profile: {
@@ -536,13 +640,14 @@ const getStudentDashboard = async (studentId) => {
       avatarUrl: user.avatarUrl,
     },
     summary: {
-      totalEnrollments:     activeEnrollments.length,
+      totalEnrollments:    activeEnrollments.length,
+      totalAllEnrollments: allEnrollments.length,
       overallProgressAvg,
       totalLessonsCompleted,
       totalLessons,
-      assessmentsPassed:    assessmentSummary.passed,
-      assessmentsTotal:     assessmentSummary.total,
-      avgBestScore:         assessmentSummary.avgBestScore,
+      assessmentsPassed:   assessmentSummary.passed,
+      assessmentsTotal:    assessmentSummary.total,
+      avgBestScore:        assessmentSummary.avgBestScore,
       lastActivityAt,
       streakDays,
     },
@@ -552,6 +657,7 @@ const getStudentDashboard = async (studentId) => {
     recentActivity,
     pendingAssessments,
     continueLearning,
+    upcomingActivities,
   };
 };
 
