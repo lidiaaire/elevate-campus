@@ -1,0 +1,22 @@
+{
+  "/(auth)/login/page": "app/(auth)/login/page.js",
+  "/(protected)/achievements/page": "app/(protected)/achievements/page.js",
+  "/(protected)/assessments/page": "app/(protected)/assessments/page.js",
+  "/(protected)/certificates/page": "app/(protected)/certificates/page.js",
+  "/(protected)/courses/[id]/page": "app/(protected)/courses/[id]/page.js",
+  "/(protected)/courses/[id]/units/[unitId]/assessment/page": "app/(protected)/courses/[id]/units/[unitId]/assessment/page.js",
+  "/(protected)/courses/[id]/units/[unitId]/lessons/[lessonId]/page": "app/(protected)/courses/[id]/units/[unitId]/lessons/[lessonId]/page.js",
+  "/(protected)/courses/[id]/units/[unitId]/page": "app/(protected)/courses/[id]/units/[unitId]/page.js",
+  "/(protected)/courses/page": "app/(protected)/courses/page.js",
+  "/(protected)/dashboard/page": "app/(protected)/dashboard/page.js",
+  "/(protected)/enrollments/page": "app/(protected)/enrollments/page.js",
+  "/(protected)/notifications/page": "app/(protected)/notifications/page.js",
+  "/(protected)/progress/page": "app/(protected)/progress/page.js",
+  "/(protected)/skill-radar/page": "app/(protected)/skill-radar/page.js",
+  "/(protected)/teacher-analytics/page": "app/(protected)/teacher-analytics/page.js",
+  "/(protected)/users/page": "app/(protected)/users/page.js",
+  "/_global-error/page": "app/_global-error/page.js",
+  "/_not-found/page": "app/_not-found/page.js",
+  "/favicon.ico/route": "app/favicon.ico/route.js",
+  "/page": "app/page.js"
+}

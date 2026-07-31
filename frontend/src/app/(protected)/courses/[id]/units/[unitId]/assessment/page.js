@@ -44,6 +44,37 @@ function formatDate(iso) {
   });
 }
 
+function Breadcrumb({ courseId, current }) {
+  return (
+    <nav aria-label="breadcrumb" className={styles.breadcrumb}>
+      <Link href="/courses" className={styles.crumbLink}>Mis cursos</Link>
+      <span className={styles.crumbSep} aria-hidden="true">›</span>
+      <Link href={`/courses/${courseId}`} className={styles.crumbLink}>Curso</Link>
+      <span className={styles.crumbSep} aria-hidden="true">›</span>
+      <span className={styles.crumbCurrent} aria-current="page">{current}</span>
+    </nav>
+  );
+}
+
+function QuestionFeedback({ questions, answers }) {
+  return (
+    <ol className={styles.feedbackList}>
+      {questions.map((q, qi) => {
+        const answer = answers.find((a) => a.questionId === q._id);
+        return (
+          <li key={q._id} className={styles.feedbackItem}>
+            <span className={styles.feedbackNum}>{qi + 1}.</span>
+            <span className={styles.feedbackText}>{q.text}</span>
+            <span className={`${styles.resultBadge} ${answer?.isCorrect ? styles.badgePass : styles.badgeFail}`}>
+              {answer?.isCorrect ? 'Correcta' : 'Incorrecta'}
+            </span>
+          </li>
+        );
+      })}
+    </ol>
+  );
+}
+
 function AttemptsHistory({ attempts }) {
   if (!attempts?.length) return null;
   return (
@@ -105,12 +136,8 @@ export default function AssessmentPage() {
     };
     return (
       <div className={styles.page}>
+        <Breadcrumb courseId={courseId} current={copy.title} />
         <EmptyState title={copy.title} description={copy.description} />
-        <div className={styles.backRow}>
-          <Button as={Link} href={`/courses/${courseId}`} variant="ghost" size="sm">
-            ← Volver al curso
-          </Button>
-        </div>
       </div>
     );
   }
@@ -118,12 +145,8 @@ export default function AssessmentPage() {
   if (!assessment) {
     return (
       <div className={styles.page}>
+        <Breadcrumb courseId={courseId} current="Evaluación" />
         <EmptyState title="Esta unidad no tiene evaluación." />
-        <div className={styles.backRow}>
-          <Button as={Link} href={`/courses/${courseId}`} variant="ghost" size="sm">
-            ← Volver al curso
-          </Button>
-        </div>
       </div>
     );
   }
@@ -164,10 +187,9 @@ export default function AssessmentPage() {
 
   return (
     <div className={styles.page}>
-      <div className={styles.topNav}>
-        <Button as={Link} href={`/courses/${courseId}`} variant="ghost" size="sm">
-          ← Volver al curso
-        </Button>
+      <Breadcrumb courseId={courseId} current={assessment.title} />
+
+      <div className={styles.secondaryNav}>
         <Button as={Link} href="/assessments" variant="ghost" size="sm">
           Mis evaluaciones
         </Button>
@@ -209,6 +231,7 @@ export default function AssessmentPage() {
             Puntuación: <strong>{lastAttempt.score}%</strong>
             {' · '}Intento nº <strong>{lastAttempt.attemptNumber}</strong>
           </p>
+          <QuestionFeedback questions={assessment.questions} answers={lastAttempt.answers} />
           {!lastAttempt.passed && attemptsLeft > 1 && (
             <Button onClick={handleRetry} variant="secondary" size="sm">
               Intentar de nuevo ({attemptsLeft - 1} restante{attemptsLeft - 1 !== 1 ? 's' : ''})
@@ -301,7 +324,7 @@ export default function AssessmentPage() {
             </span>
             <Button
               type="submit"
-              variant="primary"
+              variant="accent"
               loading={submitting}
               disabled={!allAnswered || submitting}
             >

@@ -1,0 +1,61 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.studentList {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.studentName {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.emptyText {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.courseList {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.courseRow {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.courseTopRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.courseTitle {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.coursePct {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--brand-600, #2563eb);
+  flex-shrink: 0;
+}
+
+.courseMeta {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}

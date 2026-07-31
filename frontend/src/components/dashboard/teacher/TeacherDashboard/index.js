@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { dashboardService } from '@/lib/services/dashboard.service';
-import PageHeader from '@/components/ui/PageHeader';
+import DashboardLayout, { DashboardSection, DashboardStatGrid } from '@/components/dashboard/DashboardLayout';
 import StatCard from '@/components/ui/StatCard';
 import Card, { CardHeader, CardBody } from '@/components/ui/Card';
 import LoadingState from '@/components/ui/LoadingState';
@@ -29,15 +29,12 @@ export default function TeacherDashboard() {
   const { profile, cohortSummary, cohortGrowth, students } = data;
 
   return (
-    <div className={styles.page}>
-      <PageHeader
-        title={`${profile.firstName} ${profile.lastName}`}
-        description="Panel del profesor"
-      />
-
-      <section className={styles.section}>
-        <h2 className={styles.sectionTitle}>Resumen de la cohorte</h2>
-        <ul className={styles.statsGrid}>
+    <DashboardLayout
+      title={`${profile.firstName} ${profile.lastName}`}
+      description="Panel del profesor"
+    >
+      <DashboardSection title="Resumen de la cohorte">
+        <DashboardStatGrid>
           <StatCard
             as="li"
             title="Total de alumnos"
@@ -74,12 +71,11 @@ export default function TeacherDashboard() {
                 : '—'
             }
           />
-        </ul>
-      </section>
+        </DashboardStatGrid>
+      </DashboardSection>
 
-      <section className={styles.section}>
-        <h2 className={styles.sectionTitle}>Actividad reciente</h2>
-        <ul className={styles.growthGrid}>
+      <DashboardSection title="Actividad reciente">
+        <DashboardStatGrid minWidth="240px">
           <StatCard
             as="li"
             variant="success"
@@ -99,10 +95,10 @@ export default function TeacherDashboard() {
             value={cohortGrowth.assessmentsPassed30d}
             subtitle="Últimos 30 días"
           />
-        </ul>
-      </section>
+        </DashboardStatGrid>
+      </DashboardSection>
 
-      <section className={styles.section}>
+      <DashboardSection>
         <Card>
           <CardHeader divided>
             <h2 className={styles.cardSectionTitle}>Alumnos</h2>
@@ -141,7 +137,7 @@ export default function TeacherDashboard() {
             )}
           </CardBody>
         </Card>
-      </section>
-    </div>
+      </DashboardSection>
+    </DashboardLayout>
   );
 }

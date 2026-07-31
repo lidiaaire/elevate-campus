@@ -18,6 +18,9 @@ const plusJakartaSans = Plus_Jakarta_Sans({
 export const metadata = {
   title: "Elevate Your English Campus",
   description: "Campus de aprendizaje de inglés",
+  icons: {
+    icon: "/brand/elevate-symbol.svg",
+  },
 };
 
 export default function RootLayout({ children }) {

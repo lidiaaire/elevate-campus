@@ -17,6 +17,7 @@
 7. [Qué está permitido y qué no](#7-qué-está-permitido-y-qué-no)
 8. [Guía de consistencia para contribuciones](#8-guía-de-consistencia-para-contribuciones)
 9. [Tokens deprecados y migración](#9-tokens-deprecados-y-migración)
+10. [Identidad de marca Elevate](#10-identidad-de-marca-elevate)
 
 ---
 
@@ -458,33 +459,91 @@ Todo componente interactivo debe implementar:
 
 ## 9. Tokens deprecados y migración
 
-Los siguientes tokens pertenecen al sistema anterior y **están marcados para eliminación**. Están presentes solo para garantizar compatibilidad durante la migración. No deben usarse en código nuevo.
+**Actualizado en Fase 6.** Al auditar los consumidores reales de cada token deprecado (no solo su presencia por `grep`, sino confirmando que el archivo que los referenciaba estuviera realmente importado por algún componente), se descubrió que 12 de los 13 tokens originales no tenían ningún consumidor real: su único "uso" estaba en `frontend/src/styles/Dashboard.module.css`, un CSS Module huérfano sin ningún `import` en todo el proyecto (ver nota de archivos huérfanos en § 10.6). Esos 12 tokens se eliminaron de `globals.css` en esta fase.
 
-| Token deprecado | Reemplazar por | Estado |
-|-----------------|----------------|--------|
-| `--color-accent` | `var(--brand-500)` | Deprecated — migración en curso |
-| `--color-accent-soft` | `var(--brand-50)` | Deprecated — migración en curso |
-| `--color-bg` | `var(--bg-page)` | Deprecated |
-| `--color-surface` | `var(--bg-surface)` | Deprecated |
-| `--color-border` | `var(--border-default)` | Deprecated |
-| `--color-border-soft` | `var(--bg-subtle)` | Deprecated |
-| `--color-text-primary` | `var(--text-primary)` | Deprecated |
-| `--color-text-secondary` | `var(--text-secondary)` | Deprecated |
-| `--color-text-muted` | `var(--text-muted)` | Deprecated |
-| `--shadow-card` | `var(--shadow-sm)` | Deprecated |
-| `--shadow-hover` | `var(--shadow-md)` | Deprecated |
-| `--transition-fast` | `var(--dur-fast) var(--ease-default)` | Deprecated |
-| `--transition-base` | `var(--dur-normal) var(--ease-default)` | Deprecated |
-
-**El valor `#4f46e5` (indigo)** que aparece hardcodeado en archivos legacy (Assessment, LoginForm, Progress, CourseDetail, Enrollments, Users) se migrará a `var(--brand-500)` en la Fase 1. Hasta entonces, `--color-accent` mantiene su valor original para no romper esas vistas.
+| Token deprecado | Estado |
+|-----------------|--------|
+| `--color-text-secondary` | Se mantiene temporalmente. Tenía un único consumidor real (`ErrorState.module.css`), ya migrado en Fase 6 a `var(--text-secondary)` directamente. El token queda sin consumo, pendiente de una fase de retirada explícita. |
+| `--color-accent`, `--color-accent-soft`, `--color-bg`, `--color-surface`, `--color-border`, `--color-border-soft`, `--color-text-primary`, `--color-text-muted`, `--shadow-card`, `--shadow-hover`, `--transition-fast`, `--transition-base` | **Eliminados en Fase 6** — 0 consumidores reales confirmados. |
 
 ### Proceso de eliminación de un token deprecado
 
 1. Buscar en el proyecto todas las referencias al token con `grep -r "token-name" src/`.
-2. Sustituir cada referencia por el token recomendado.
-3. Verificar visualmente que no hay regresiones.
-4. Eliminar el token del bloque de deprecados en `globals.css`.
-5. Documentar la eliminación en el PR.
+2. **Confirmar que cada archivo encontrado está realmente importado** por algún componente o página (no asumir por la sola presencia del texto — ver § 10.6).
+3. Sustituir cada referencia real por el token recomendado.
+4. Verificar visualmente que no hay regresiones.
+5. Eliminar el token del bloque de deprecados en `globals.css`.
+6. Documentar la eliminación en el PR.
+
+---
+
+## 10. Identidad de marca Elevate
+
+### 10.1 Paleta oficial
+
+La identidad visual de Elevate Your English define cuatro colores oficiales, independientes de la paleta funcional (`--brand-*`, azul) usada hoy en producción:
+
+| Color | Valor | Rol |
+|-------|-------|-----|
+| Negro profundo | `#0F1115` | Superficie de marca primaria (oscura) |
+| Gris oscuro | `#2A2D33` | Superficie de marca secundaria (oscura, elevada) |
+| Blanco/gris claro | `#F4F5F7` | Superficie de marca clara |
+| Naranja | `#FF5722` | Acento de marca — símbolo, foco, CTA puntual |
+
+Tokens en `globals.css` (bloque "Elevate Identity v3"):
+
+```css
+--elevate-accent-500:               #FF5722; /* corregido en Fase 1 */
+--elevate-surface-brand-primary:    #0F1115; /* nuevo, en reposo */
+--elevate-surface-brand-secondary:  #2A2D33; /* nuevo, en reposo */
+--elevate-surface-brand-light:      #F4F5F7; /* nuevo, en reposo */
+```
+
+### 10.2 Regla de uso del naranja
+
+> **El naranja es un acento único por vista, nunca un color dominante.**
+
+Se reserva para: el símbolo de marca, el estado activo de navegación, el foco visible y un único CTA destacado por pantalla. No se usa como fondo extenso, no se aplica a botones funcionales genéricos (guardar, cancelar, confirmar), y no debe repetirse más de una vez como protagonista en la misma vista.
+
+### 10.3 Superficies de marca vs. superficies de trabajo
+
+- **Superficies de marca** (`--elevate-surface-brand-*`): portan la identidad visual de forma persistente. Uso previsto: navegación futura (Sidebar) y elementos de identidad (Login, símbolo, favicon). Fondo oscuro.
+- **Superficies de trabajo** (`--bg-*`, `--brand-*`, sistema actual): contenido LMS, lectura prolongada, Navbar, formularios, tablas. Se mantienen claras — no reciben tratamiento de marca oscuro, priorizan contraste y legibilidad sostenida.
+
+Esta separación evita que la identidad de marca compita con la lectura de contenido académico.
+
+### 10.4 Estado por fase
+
+| Fase | Alcance | Estado |
+|------|---------|--------|
+| 1 — Fundamentos | Tokens oficiales, símbolo SVG, favicon | ✅ Completada |
+| 2 — Sidebar de marca | Superficie oscura oficial, símbolo + wordmark, estado activo naranja | ✅ Completada |
+| 3 — CTA de marca | Variante `Button accent`, aplicada a CTAs de alta intención | ✅ Completada |
+| 3.1 — Jerarquía Dashboard | Un único acento naranja principal por vista | ✅ Completada |
+| 4.1 — Login consolidado | Superficies unificadas con Sidebar, sin rediseño | ✅ Completada |
+| 5 — Navegación móvil | `BottomNav` + `MobileMenu` migrados junto con Sidebar | ✅ Completada |
+| 6 — Consolidación técnica | Limpieza de tokens legacy/deprecated sin consumo real | ✅ Completada |
+
+`Navbar` permanece neutro por decisión de producto (superficie de trabajo, no de marca) — no es deuda pendiente.
+
+Asset de símbolo: `frontend/public/brand/elevate-symbol.svg` es una **reconstrucción provisional** (no existía ningún asset vectorial oficial en el proyecto). Debe sustituirse por el archivo definitivo del brandbook en cuanto esté disponible, manteniendo la misma ruta y los mismos colores oficiales. Se usa hoy en `Sidebar` y como favicon (`layout.js`).
+
+### 10.5 Deudas conocidas (no resueltas)
+
+| Deuda | Detalle |
+|-------|---------|
+| Sistema azul activo | `--brand-*` sigue siendo el color funcional real de gran parte de la interfaz (Button `primary`, cards, progreso, etc.); migración pendiente de fase futura |
+| `--color-text-secondary` | Sin consumidores tras Fase 6; candidato a retirada en una futura fase de limpieza |
+| `CourseDetail.module.css` legacy | `frontend/src/styles/CourseDetail.module.css` (activo, usado por `courses/[id]/units/[unitId]/page.js`) no usa tokens del Design System — colores, radios, etc. en crudo, incluido el indigo antiguo `#4f46e5`. Requiere una migración propia, no puntual |
+| Paletas funcionales de contenido | `courseVisuals.js` (colores decorativos por curso) y `CEFR_COLOR` en `certificates/page.js` (colores por nivel A1-C2) usan hex fijos por diseño — no son deuda de marca, son paletas categóricas intencionales |
+
+### 10.6 Archivos CSS huérfanos — advertencia para auditorías futuras
+
+Existen **8 archivos `.module.css` en `frontend/src/styles/`** sin ningún `import` real en el proyecto: `Dashboard`, `Sidebar`, `Navbar`, `Assessment`, `Progress`, `ProtectedLayout`, `LessonDetail`, `Courses`. Son remanentes de una reestructuración anterior a la colocación de estilos junto a sus componentes/páginas (patrón actual: `./Componente.module.css`).
+
+**Advertencia:** un `grep` de un token o color por nombre de archivo puede devolver falsos positivos si coincide con estos huérfanos (ocurrió en la auditoría de Fase 1, que documentó incorrectamente `Dashboard.module.css` como consumidor activo de tokens deprecated). **Antes de dar por válido cualquier hallazgo de auditoría, confirmar que el archivo encontrado está realmente importado** por algún `index.js`/`page.js` (`grep -r "NombreArchivo.module.css" src --include=*.js`).
+
+Su eliminación no se ha decidido — requiere una iteración propia que confirme ausencia de imports dinámicos y de referencias externas antes de borrar.
 
 ---
 

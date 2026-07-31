@@ -88,7 +88,7 @@ export default function ContinueLearningCard({ continueLearning, enrollments }) 
       </CardBody>
 
       <CardFooter divided align="end">
-        <Button as={Link} href={lessonHref} variant="primary" size="md">
+        <Button as={Link} href={lessonHref} variant="accent" size="md">
           Continuar
         </Button>
       </CardFooter>

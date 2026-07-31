@@ -5,6 +5,10 @@ import { useAuth } from '@/hooks/useAuth';
 import { enrollmentsService } from '@/lib/services/enrollments.service';
 import { buildCourseMap, buildUserMap } from '@/lib/resolvers';
 import Button from '@/components/ui/Button';
+import PageHeader from '@/components/ui/PageHeader';
+import LoadingState from '@/components/ui/LoadingState';
+import ErrorState from '@/components/ui/ErrorState';
+import EmptyState from '@/components/ui/EmptyState';
 import styles from '@/styles/Enrollments.module.css';
 
 const BADGE_CLASS = {
@@ -44,7 +48,7 @@ export default function EnrollmentsPage() {
     setLoading(true);
     enrollmentsService.getEnrollments(token)
       .then((data) => setEnrollments(data.docs ?? []))
-      .catch((err) => setError(err.message))
+      .catch((err) => setError(err.message || 'No se pudieron cargar las matrículas.'))
       .finally(() => setLoading(false));
   }, [token]);
 
@@ -56,7 +60,7 @@ export default function EnrollmentsPage() {
       await action(id, token);
       await fetchEnrollments();
     } catch (err) {
-      setError(err.message);
+      setError(err.message || 'No se pudo actualizar la matrícula.');
     } finally {
       setActionLoading(null);
     }
@@ -64,12 +68,16 @@ export default function EnrollmentsPage() {
 
   return (
     <div className={styles.page}>
-      <h1 className={styles.title}>Matrículas</h1>
+      <PageHeader title="Matrículas" />
 
-      {loading && <p className={styles.status}>Cargando matrículas…</p>}
-      {error   && <p className={styles.status}>Error: {error}</p>}
+      {loading && <LoadingState message="Cargando matrículas…" />}
+      {error   && <ErrorState message={error} />}
 
-      {!loading && !error && (
+      {!loading && !error && enrollments.length === 0 && (
+        <EmptyState title="No hay matrículas registradas." />
+      )}
+
+      {!loading && !error && enrollments.length > 0 && (
         <table className={styles.table}>
           <thead>
             <tr>
@@ -126,13 +134,6 @@ export default function EnrollmentsPage() {
                 </tr>
               );
             })}
-            {enrollments.length === 0 && (
-              <tr>
-                <td colSpan={5} style={{ textAlign: 'center', color: '#9ca3af' }}>
-                  No hay matrículas registradas.
-                </td>
-              </tr>
-            )}
           </tbody>
         </table>
       )}

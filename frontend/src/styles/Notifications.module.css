@@ -18,9 +18,9 @@
   align-items: flex-start;
   gap: 1rem;
   padding: 1rem 1.25rem;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  background: #fff;
+  border: 1px solid var(--bg-subtle);
+  border-radius: var(--radius-lg, 12px);
+  background: var(--bg-surface);
 }
 
 .body {
@@ -35,7 +35,7 @@
 
 .message {
   font-size: 0.875rem;
-  color: #6b7280;
+  color: var(--text-secondary);
   margin: 0 0 0.5rem;
 }
 
@@ -44,13 +44,13 @@
   flex-wrap: wrap;
   gap: 0.5rem;
   font-size: 0.75rem;
-  color: #9ca3af;
+  color: var(--text-muted);
 }
 
 .badge {
   padding: 0.125rem 0.5rem;
   border-radius: 9999px;
-  background: #f3f4f6;
-  color: #374151;
+  background: var(--bg-subtle);
+  color: var(--text-secondary);
   font-weight: 500;
 }

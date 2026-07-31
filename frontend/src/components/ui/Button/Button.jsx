@@ -20,6 +20,7 @@ function Spinner() {
  * @param {ElementType} as       - Elemento HTML a renderizar (default: 'button')
  */
 export default function Button({
+  ref,
   variant = 'primary',
   size = 'md',
   loading = false,
@@ -49,6 +50,7 @@ export default function Button({
 
   return (
     <Tag
+      ref={ref}
       type={Tag === 'button' ? type : undefined}
       disabled={Tag === 'button' ? isDisabled : undefined}
       aria-disabled={isDisabled || undefined}

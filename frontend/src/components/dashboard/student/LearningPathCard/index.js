@@ -16,9 +16,13 @@ export default function LearningPathCard({ enrollment }) {
     completedLessons,
     totalLessons,
     nextLesson,
+    enrollmentStatus,
   } = enrollment;
 
   const { accentColor } = getCourseVisual(courseTitle);
+
+  const isCompleted        = enrollmentStatus === 'completed' || overallProgress === 100;
+  const isPendingAssessment = !nextLesson && !isCompleted;
 
   const continueHref = nextLesson
     ? `/courses/${courseId}/units/${nextLesson.unitId}/lessons/${nextLesson.lessonId}`
@@ -35,14 +39,18 @@ export default function LearningPathCard({ enrollment }) {
       <CardBody className={styles.body}>
         <p className={styles.courseTitle}>{courseTitle}</p>
 
-        {nextLesson ? (
+        {nextLesson && (
           <div className={styles.nextStep}>
             <p className={styles.nextLabel}>Siguiente</p>
             <p className={styles.nextUnit}>{nextLesson.unitTitle}</p>
             <p className={styles.nextLesson}>{nextLesson.lessonTitle}</p>
           </div>
-        ) : (
+        )}
+        {isCompleted && (
           <p className={styles.completedNote}>Curso completado ✓</p>
+        )}
+        {isPendingAssessment && (
+          <p className={styles.pendingNote}>Evaluación pendiente para continuar</p>
         )}
 
         <div className={styles.progressSection}>

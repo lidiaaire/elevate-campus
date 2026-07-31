@@ -28,6 +28,6 @@
 
 .message {
   font-size: 0.875rem;
-  color: var(--color-text-secondary);
+  color: var(--text-secondary);
   text-align: center;
 }

@@ -49,58 +49,61 @@ export default function UsersPage() {
       )}
 
       {!actionError && users.length > 0 && (
-        <table className={styles.table}>
-          <thead>
-            <tr>
-              <th>Nombre</th>
-              <th>Email</th>
-              <th>Rol</th>
-              <th>Estado</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            {users.map((u) => {
-              const busy = actionLoading === u._id;
-              return (
-                <tr key={u._id}>
-                  <td>{u.firstName} {u.lastName}</td>
-                  <td>{u.email}</td>
-                  <td><span className={styles.roleBadge}>{u.role}</span></td>
-                  <td>
-                    <span className={u.isActive ? styles.badgeActive : styles.badgeInactive}>
-                      {u.isActive ? 'active' : 'inactive'}
-                    </span>
-                  </td>
-                  <td>
-                    <div className={styles.actions}>
-                      {!u.isActive && (
-                        <Button
-                          variant="secondary"
-                          size="sm"
-                          disabled={busy}
-                          onClick={() => handleAction(u._id, usersService.activateUser.bind(usersService))}
-                        >
-                          {busy ? '…' : 'Activate'}
-                        </Button>
-                      )}
-                      {u.isActive && (
-                        <Button
-                          variant="secondary"
-                          size="sm"
-                          disabled={busy}
-                          onClick={() => handleAction(u._id, usersService.deactivateUser.bind(usersService))}
-                        >
-                          {busy ? '…' : 'Deactivate'}
-                        </Button>
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+        <div className={styles.tableWrap}>
+          <table className={styles.table}>
+            <caption className="sr-only">Listado de usuarios registrados</caption>
+            <thead>
+              <tr>
+                <th scope="col">Nombre</th>
+                <th scope="col">Email</th>
+                <th scope="col">Rol</th>
+                <th scope="col">Estado</th>
+                <th scope="col">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {users.map((u) => {
+                const busy = actionLoading === u._id;
+                return (
+                  <tr key={u._id}>
+                    <td>{u.firstName} {u.lastName}</td>
+                    <td>{u.email}</td>
+                    <td><span className={styles.roleBadge}>{u.role}</span></td>
+                    <td>
+                      <span className={u.isActive ? styles.badgeActive : styles.badgeInactive}>
+                        {u.isActive ? 'active' : 'inactive'}
+                      </span>
+                    </td>
+                    <td>
+                      <div className={styles.actions}>
+                        {!u.isActive && (
+                          <Button
+                            variant="secondary"
+                            size="sm"
+                            disabled={busy}
+                            onClick={() => handleAction(u._id, usersService.activateUser.bind(usersService))}
+                          >
+                            {busy ? '…' : 'Activate'}
+                          </Button>
+                        )}
+                        {u.isActive && (
+                          <Button
+                            variant="secondary"
+                            size="sm"
+                            disabled={busy}
+                            onClick={() => handleAction(u._id, usersService.deactivateUser.bind(usersService))}
+                          >
+                            {busy ? '…' : 'Deactivate'}
+                          </Button>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
   );

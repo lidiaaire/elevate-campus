@@ -9,13 +9,14 @@ export default function CohortComparisonTable({ students, cohortProgressAvg, onS
 
   return (
     <table>
+      <caption className="sr-only">Comparativa de progreso de la cohorte</caption>
       <thead>
         <tr>
-          <th>Alumno</th>
-          <th>Progreso</th>
-          <th>Diferencia vs Cohorte</th>
-          <th>Días sin actividad</th>
-          <th>Acción</th>
+          <th scope="col">Alumno</th>
+          <th scope="col">Progreso</th>
+          <th scope="col">Diferencia vs Cohorte</th>
+          <th scope="col">Días sin actividad</th>
+          <th scope="col">Acción</th>
         </tr>
       </thead>
       <tbody>

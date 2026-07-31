@@ -1,0 +1,35 @@
+/* ============================================================
+   DashboardLayout — Design System v1.0
+   Infraestructura visual compartida por los dashboards de rol.
+   ============================================================ */
+
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+/* ---- Secciones ---- */
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sectionTitle {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* ---- Grid de StatCards ---- */
+
+.statGrid {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(var(--dashboard-stat-grid-min, 172px), 1fr));
+  gap: 12px;
+}

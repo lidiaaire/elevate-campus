@@ -10,10 +10,10 @@ import PageHeader   from '@/components/ui/PageHeader';
 import Card, { CardBody } from '@/components/ui/Card';
 import Button       from '@/components/ui/Button';
 import ProgressBar  from '@/components/ui/ProgressBar';
-import LoadingState from '@/components/ui/LoadingState';
 import ErrorState   from '@/components/ui/ErrorState';
 import EmptyState   from '@/components/ui/EmptyState';
 import { getCourseVisual } from '@/lib/config/courseVisuals';
+import CourseDetailSkeleton from './CourseDetailSkeleton';
 import styles from './CourseDetail.module.css';
 
 const CEFR_LABEL = { A1: 'A1', A2: 'A2', B1: 'B1', B2: 'B2', C1: 'C1', C2: 'C2' };
@@ -25,9 +25,16 @@ function lessonHref(courseId, unitId, lessonId) {
 }
 
 function StatusIcon({ completed, locked }) {
-  if (completed) return <span className={`${styles.statusIcon} ${styles.iconDone}`}>✓</span>;
-  if (locked)    return <span className={`${styles.statusIcon} ${styles.iconLocked}`}>🔒</span>;
-  return             <span className={`${styles.statusIcon} ${styles.iconOpen}`}>→</span>;
+  const label = completed ? 'Completada' : locked ? 'Bloqueada' : 'Disponible';
+  const icon  = completed ? '✓' : locked ? '🔒' : '→';
+  const cls   = completed ? styles.iconDone : locked ? styles.iconLocked : styles.iconOpen;
+
+  return (
+    <span className={`${styles.statusIcon} ${cls}`}>
+      <span aria-hidden="true">{icon}</span>
+      <span className={styles.srOnly}>{label}</span>
+    </span>
+  );
 }
 
 function LessonRow({ lesson, locked, completed, courseId, unitId }) {
@@ -127,11 +134,11 @@ export default function CourseDetailPage() {
       progressService.getCourseProgress(id, token).catch(() => null),
     ]).then(([courseRes, progressRes]) => ({
       course:   courseRes.course ?? courseRes,
-      progress: progressRes,
+      progress: progressRes?.progress ?? null,
     }))
   );
 
-  if (loading) return <LoadingState message="Cargando curso..." />;
+  if (loading) return <CourseDetailSkeleton />;
   if (error)   return <ErrorState message={error} />;
 
   const course   = data?.course   ?? null;
@@ -212,7 +219,7 @@ export default function CourseDetailPage() {
                 <Button
                   as={Link}
                   href={lessonHref(id, nextLesson.unitId, nextLesson.lessonId)}
-                  variant="primary"
+                  variant="accent"
                   size="sm"
                 >
                   Continuar

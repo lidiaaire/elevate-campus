@@ -7,7 +7,7 @@
   flex-direction: column;
   width: 220px;
   min-height: 100vh;
-  background-color: var(--brand-950);
+  background: var(--elevate-surface-brand-primary);
   padding: 1.5rem 0;
   flex-shrink: 0;
   position: sticky;
@@ -19,12 +19,24 @@
 
 /* ---- Logotipo / nombre de la app ---- */
 .brand {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
   padding: 0 1.25rem 1.25rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.brandMark {
+  width: var(--logo-mark-size);
+  height: var(--logo-mark-size);
+  flex-shrink: 0;
+}
+
+.brandName {
   font-size: 0.9375rem;
   font-weight: 700;
-  color: var(--text-inverse);
+  color: var(--elevate-surface-brand-light);
   letter-spacing: -0.02em;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 /* ---- Bloque de usuario ---- */
@@ -39,7 +51,7 @@
 .userName {
   font-size: 0.8125rem;
   font-weight: 600;
-  color: var(--brand-200);
+  color: var(--elevate-surface-brand-light);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -50,7 +62,7 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: var(--brand-400);
+  color: var(--elevate-text-brand-muted);
 }
 
 /* ---- Navegación ---- */
@@ -65,10 +77,11 @@
 .link {
   display: block;
   padding: 0.5625rem 0.75rem;
+  border-left: 3px solid transparent;
   border-radius: var(--radius-md);
   font-size: 0.875rem;
   font-weight: 500;
-  color: var(--brand-200);
+  color: var(--elevate-surface-brand-light);
   text-decoration: none;
   transition: background-color var(--dur-normal) var(--ease-out),
               color var(--dur-normal) var(--ease-out);
@@ -76,20 +89,46 @@
 
 .link:hover {
   background-color: rgba(255, 255, 255, 0.07);
-  color: var(--text-inverse);
+  color: var(--elevate-surface-brand-light);
 }
 
 .link:focus-visible {
-  outline: 2px solid var(--brand-400);
-  outline-offset: 1px;
+  outline: none;
+  box-shadow: var(--focus-ring-accent);
 }
 
 .linkActive {
-  background-color: var(--brand-600);
-  color: var(--text-inverse);
+  background-color: rgba(255, 87, 34, 0.12);
+  border-left-color: var(--elevate-accent-500);
+  color: var(--elevate-surface-brand-light);
   font-weight: 600;
 }
 
 .linkActive:hover {
-  background-color: var(--brand-700);
+  background-color: rgba(255, 87, 34, 0.18);
+}
+
+/* ---- Tablet / móvil — sidebar como panel deslizante ----
+   Breakpoint provisional: cubre tablet (768–481px) y móvil (≤480px)
+   hasta que la Iteración 23 sustituya el rango móvil por BottomNav. */
+@media (max-width: 768px) {
+  .sidebar {
+    position: fixed;
+    inset: 0 auto 0 0;
+    transform: translateX(-100%);
+    transition: transform var(--dur-normal) var(--ease-out);
+    box-shadow: var(--shadow-lg);
+    z-index: var(--z-modal);
+  }
+
+  .sidebarOpen {
+    transform: translateX(0);
+  }
+
+  .backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: var(--z-backdrop);
+  }
 }

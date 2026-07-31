@@ -68,7 +68,7 @@ export const DEFAULT_VISUAL = {
   slug:        null,
   tagline:     'Open your next opportunity.',
   coverImage:  null,
-  accentColor: '#f97316',   /* elevate-accent-500 */
+  accentColor: '#FF5722',   /* elevate-accent-500 */
   emotion:     null,
   scene:       null,
 };

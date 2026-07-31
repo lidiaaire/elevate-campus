@@ -11,11 +11,12 @@ export default function InactivityRanking({ students }) {
 
   return (
     <table>
+      <caption className="sr-only">Ranking de alumnos por inactividad</caption>
       <thead>
         <tr>
-          <th>Posición</th>
-          <th>Alumno</th>
-          <th>Días sin actividad</th>
+          <th scope="col">Posición</th>
+          <th scope="col">Alumno</th>
+          <th scope="col">Días sin actividad</th>
         </tr>
       </thead>
       <tbody>

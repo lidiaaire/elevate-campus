@@ -3,7 +3,6 @@
 import Link from 'next/link';
 import Card, { CardBody } from '@/components/ui/Card';
 import EmptyState from '@/components/ui/EmptyState';
-import Button from '@/components/ui/Button';
 import styles from './TodayInElevateCard.module.css';
 
 const TYPE_LABELS = {
@@ -88,9 +87,6 @@ export default function TodayInElevateCard({ upcomingActivities }) {
         {todayItems.length === 0 ? (
           <div className={styles.emptyWrapper}>
             <EmptyState title="No tienes actividades programadas para hoy." />
-            <Button as={Link} href="/calendar" variant="secondary" size="sm">
-              Ver agenda completa
-            </Button>
           </div>
         ) : (
           <ul className={styles.list}>

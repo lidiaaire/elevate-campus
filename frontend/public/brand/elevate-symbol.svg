@@ -1,0 +1,17 @@
+<!--
+  Elevate Your English — símbolo de marca (PROVISIONAL)
+  Reconstrucción geométrica del triángulo ascendente con hueco naranja,
+  a partir de la identidad visual definida (diálogo + ligadura + superación).
+  Sustituir por el asset vectorial oficial en cuanto esté disponible.
+  Colores: negro de marca #0F1115, hueco naranja #FF5722.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100" role="img" aria-label="Símbolo Elevate Your English">
+  <path
+    d="M50 8 L92 88 L68 88 L50 52 L32 88 L8 88 Z"
+    fill="#0F1115"
+  />
+  <path
+    d="M50 52 L61 74 L39 74 Z"
+    fill="#FF5722"
+  />
+</svg>

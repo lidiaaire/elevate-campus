@@ -22,3 +22,10 @@
   padding: 2rem;
   overflow-y: auto;
 }
+
+/* Reserva espacio para el BottomNav fijo (solo visible ≤480px, ver BottomNav.module.css) */
+@media (max-width: 480px) {
+  .content {
+    padding-bottom: calc(2rem + 56px);
+  }
+}

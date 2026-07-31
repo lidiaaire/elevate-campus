@@ -7,11 +7,12 @@ export default function StudentWeeklyTrendPanel({ weeklyTrend }) {
 
   return (
     <table>
+      <caption className="sr-only">Tendencia semanal del alumno seleccionado</caption>
       <thead>
         <tr>
-          <th>Semana</th>
-          <th>Lecciones completadas</th>
-          <th>Progreso acumulado</th>
+          <th scope="col">Semana</th>
+          <th scope="col">Lecciones completadas</th>
+          <th scope="col">Progreso acumulado</th>
         </tr>
       </thead>
       <tbody>

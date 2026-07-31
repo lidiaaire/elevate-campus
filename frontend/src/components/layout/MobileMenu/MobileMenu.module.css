@@ -1,0 +1,78 @@
+/* ============================================================
+   MobileMenu — Design System v1.0
+   Menú secundario (bottom sheet) activado desde el botón "Más"
+   de BottomNav. Mismo patrón de backdrop/transición que el
+   drawer de Sidebar (Sidebar.module.css), solo cambia el eje.
+   ============================================================ */
+
+.panel {
+  display: none;
+}
+
+/* Guardado bajo el mismo breakpoint que BottomNav (≤480px):
+   el panel solo debe poder mostrarse en el rango donde su
+   único disparador ("Más") es visible/interactuable. */
+@media (max-width: 480px) {
+  .backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: var(--z-backdrop);
+  }
+
+  .panel {
+    display: block;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 56px; /* apoyado justo encima del BottomNav */
+    background-color: var(--elevate-surface-brand-primary);
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    box-shadow: var(--shadow-lg);
+    z-index: var(--z-modal);
+    /* El panel está anclado con bottom:56px, así que translateY(100%) solo
+       lo desplaza su propia altura — su borde superior quedaría exactamente
+       sobre el BottomNav, cubriéndolo (mayor z-index) e interceptando sus
+       clics. Sumamos el offset del bottom para sacarlo completamente. */
+    transform: translateY(calc(100% + 56px));
+    transition: transform var(--dur-normal) var(--ease-out);
+  }
+
+  .panelOpen {
+    transform: translateY(0);
+  }
+}
+
+.nav {
+  display: flex;
+  flex-direction: column;
+  padding: 0.75rem;
+}
+
+.link {
+  padding: 0.875rem 1rem;
+  border-left: 3px solid transparent;
+  border-radius: var(--radius-md);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--elevate-surface-brand-light);
+  text-decoration: none;
+  transition: background-color var(--dur-normal) var(--ease-out);
+}
+
+.link:hover {
+  background-color: rgba(255, 255, 255, 0.07);
+}
+
+.link:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring-accent);
+}
+
+.linkActive {
+  background-color: rgba(255, 87, 34, 0.12);
+  border-left-color: var(--elevate-accent-500);
+  color: var(--elevate-surface-brand-light);
+  font-weight: 600;
+}

@@ -4,6 +4,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { notificationService } from '@/lib/services/notification.service';
 import { useAsyncData } from '@/hooks/useAsyncData';
 import NotificationCard from '@/components/notifications/NotificationCard';
+import PageHeader from '@/components/ui/PageHeader';
 import LoadingState from '@/components/ui/LoadingState';
 import ErrorState from '@/components/ui/ErrorState';
 import EmptyState from '@/components/ui/EmptyState';
@@ -23,7 +24,7 @@ export default function NotificationsPage() {
 
   return (
     <div className={styles.page}>
-      <h1>Mis notificaciones</h1>
+      <PageHeader title="Mis notificaciones" />
 
       {notifications.length === 0 && (
         <EmptyState title="No tienes notificaciones." />

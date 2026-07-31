@@ -8,6 +8,10 @@ import CohortComparisonTable          from '@/components/teacher-analytics/Cohor
 import InactivityRanking              from '@/components/teacher-analytics/InactivityRanking';
 import AssessmentBreakdownTable       from '@/components/teacher-analytics/AssessmentBreakdownTable';
 import StudentWeeklyTrendPanel        from '@/components/teacher-analytics/StudentWeeklyTrendPanel';
+import PageHeader                     from '@/components/ui/PageHeader';
+import LoadingState                   from '@/components/ui/LoadingState';
+import ErrorState                     from '@/components/ui/ErrorState';
+import styles from './TeacherAnalytics.module.css';
 
 export default function TeacherAnalyticsPage() {
   const { token } = useAuth();
@@ -43,31 +47,52 @@ export default function TeacherAnalyticsPage() {
       .finally(() => setTrendLoading(false));
   }, [token, selectedStudentId]);
 
-  if (loading) return <p>Cargando Teacher Analytics...</p>;
-  if (error)   return <p>Error cargando Teacher Analytics</p>;
+  if (loading) return <LoadingState message="Cargando Teacher Analytics..." />;
+  if (error)   return <ErrorState message={error} />;
 
   return (
-    <div>
-      <h1>Teacher Analytics</h1>
-
-      <CohortComparisonTable
-        students={teacherDashboard.students}
-        cohortProgressAvg={teacherDashboard.cohortSummary.cohortProgressAvg}
-        onSelectStudent={setSelectedStudentId}
+    <div className={styles.page}>
+      <PageHeader
+        title="Teacher Analytics"
+        description="Rendimiento y actividad de tu cohorte de alumnos"
       />
 
-      <InactivityRanking students={teacherDashboard.students} />
+      <section className={styles.section}>
+        <h2 className={styles.sectionTitle}>Comparativa de la cohorte</h2>
+        <div className={styles.tableWrap}>
+          <CohortComparisonTable
+            students={teacherDashboard.students}
+            cohortProgressAvg={teacherDashboard.cohortSummary.cohortProgressAvg}
+            onSelectStudent={setSelectedStudentId}
+          />
+        </div>
+      </section>
 
-      <AssessmentBreakdownTable assessments={assessments} />
+      <section className={styles.section}>
+        <h2 className={styles.sectionTitle}>Ranking de inactividad</h2>
+        <div className={styles.tableWrap}>
+          <InactivityRanking students={teacherDashboard.students} />
+        </div>
+      </section>
+
+      <section className={styles.section}>
+        <h2 className={styles.sectionTitle}>Desglose de evaluaciones</h2>
+        <div className={styles.tableWrap}>
+          <AssessmentBreakdownTable assessments={assessments} />
+        </div>
+      </section>
 
       {selectedStudentId && (
-        <>
-          <p>Tendencia semanal del alumno seleccionado</p>
-          {trendLoading
-            ? <p>Cargando tendencia...</p>
-            : <StudentWeeklyTrendPanel weeklyTrend={weeklyTrend ?? []} />
-          }
-        </>
+        <section className={styles.section}>
+          <h2 className={styles.sectionTitle}>Tendencia semanal del alumno seleccionado</h2>
+          {trendLoading ? (
+            <p className={styles.trendNote}>Cargando tendencia...</p>
+          ) : (
+            <div className={styles.tableWrap}>
+              <StudentWeeklyTrendPanel weeklyTrend={weeklyTrend ?? []} />
+            </div>
+          )}
+        </section>
       )}
     </div>
   );

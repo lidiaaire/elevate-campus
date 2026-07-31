@@ -26,7 +26,9 @@ function toEmbedUrl(url) {
     if (u.hostname === 'youtu.be') {
       return { type: 'iframe', src: `https://www.youtube.com/embed${u.pathname}` };
     }
-  } catch {}
+  } catch {
+    // URL no parseable: se usa el fallback de vídeo nativo de abajo.
+  }
   return { type: 'video', src: url };
 }
 
@@ -59,7 +61,9 @@ function parseQuiz(content) {
     const parsed = JSON.parse(content);
     const questions = Array.isArray(parsed) ? parsed : parsed?.questions;
     if (Array.isArray(questions) && questions.length > 0) return questions;
-  } catch {}
+  } catch {
+    // Contenido no es JSON válido: se trata como "sin preguntas".
+  }
   return null;
 }
 
@@ -160,8 +164,9 @@ export default function LessonPage() {
       lessonsService.getLessonById(courseId, unitId, lessonId, token),
       progressService.getCourseProgress(courseId, token).catch(() => null),
     ]).then(([lessonRes, progressRes]) => {
-      const lesson = lessonRes.lesson ?? lessonRes;
-      const units  = progressRes?.units ?? [];
+      const lesson   = lessonRes.lesson ?? lessonRes;
+      const progress = progressRes?.progress ?? null;
+      const units    = progress?.units ?? [];
 
       const flat = units.flatMap((u) =>
         (u.lessons ?? []).map((l) => ({
@@ -195,7 +200,7 @@ export default function LessonPage() {
         unitOrder,
         posInUnit,
         totalInUnit,
-        overallProgress: progressRes?.overallProgress ?? 0,
+        overallProgress: progress?.overallProgress ?? 0,
       };
     })
   );
@@ -295,20 +300,20 @@ export default function LessonPage() {
               <Button
                 as={Link}
                 href={lessonHref(next)}
-                variant="primary"
+                variant="accent"
                 size="sm"
                 disabled={next.locked}
               >
                 Siguiente →
               </Button>
             ) : (
-              <Button as={Link} href={`/courses/${courseId}`} variant="primary" size="sm">
+              <Button as={Link} href={`/courses/${courseId}`} variant="accent" size="sm">
                 Finalizar curso →
               </Button>
             )
           ) : (
             <Button
-              variant="primary"
+              variant="accent"
               size="sm"
               loading={completing}
               disabled={completing || (hasStructuredQuiz && !quizReady)}

@@ -15,8 +15,8 @@
  *     → Lecciones con content y videoUrl incluidos
  *
  *   findByCourseId(courseId)
- *     → Todas las lecciones del curso (usado en initializeProgress al matricular)
- *     → Solo proyecta _id, unitId, order
+ *     → Todas las lecciones del curso (usado en initializeProgress y en getCourseProgress)
+ *     → Sin content ni videoUrl (proyección reducida, igual que findByUnitId)
  *
  *   getMaxOrder(unitId)
  *     → Number — order más alto en la unidad
@@ -51,7 +51,7 @@ class LessonRepository extends BaseRepository {
 
   async findByCourseId(courseId) {
     return this.model
-      .find({ courseId }, { _id: 1, unitId: 1, order: 1 })
+      .find({ courseId }, { content: 0, videoUrl: 0 })
       .sort({ order: 1 });
   }
 

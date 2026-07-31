@@ -96,6 +96,14 @@
   margin: 0;
 }
 
+/* ---- Estado bloqueado por evaluación pendiente ---- */
+.pendingNote {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--warning-600);
+  margin: 0;
+}
+
 /* ---- Progreso ---- */
 .progressSection {
   display: flex;

@@ -22,7 +22,8 @@ export default function SkillRadarPage() {
   if (error)   return <ErrorState message={error} />;
 
   const { profile, skillProgress } = data ?? {};
-  const hasData = skillProgress?.length > 0;
+  const hasData = ['listening', 'reading', 'assessmentScore', 'writing', 'speaking']
+    .some((key) => skillProgress?.[key] != null);
 
   return (
     <div className={styles.container}>

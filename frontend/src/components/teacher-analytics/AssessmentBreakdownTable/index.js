@@ -7,14 +7,15 @@ export default function AssessmentBreakdownTable({ assessments }) {
 
   return (
     <table>
+      <caption className="sr-only">Desglose de resultados por evaluación</caption>
       <thead>
         <tr>
-          <th>Unidad</th>
-          <th>Curso</th>
-          <th>Pass Rate</th>
-          <th>Average Score</th>
-          <th>Average Attempts</th>
-          <th>Students Tried</th>
+          <th scope="col">Unidad</th>
+          <th scope="col">Curso</th>
+          <th scope="col">Pass Rate</th>
+          <th scope="col">Average Score</th>
+          <th scope="col">Average Attempts</th>
+          <th scope="col">Students Tried</th>
         </tr>
       </thead>
       <tbody>

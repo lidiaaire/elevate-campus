@@ -135,6 +135,47 @@
 }
 
 /* ================================================================
+   VARIANTE: Accent (Elevate brand — acción de alta intención)
+   ================================================================ */
+.accent {
+  background-color: var(--elevate-accent-500);
+  color: var(--text-inverse);
+  border: none;
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.12),
+    0 0 0 1px rgba(255, 87, 34, 0.3);
+}
+.accent:hover:not(:disabled):not([aria-disabled="true"]) {
+  background-color: var(--elevate-accent-600);
+  box-shadow:
+    0 4px 12px rgba(234, 88, 12, 0.30),
+    0 0 0 1px rgba(234, 88, 12, 0.4);
+  transform: translateY(-1px);
+}
+.accent:active:not(:disabled):not([aria-disabled="true"]) {
+  background-color: var(--elevate-accent-700);
+  transform: translateY(0);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.12);
+  transition: all var(--dur-fast) var(--ease-default);
+}
+.accent:focus-visible {
+  outline: 3px solid var(--color-focus-ring-accent);
+  outline-offset: 2px;
+}
+.accent:disabled,
+.accent[aria-disabled="true"] {
+  background-color: var(--elevate-accent-300);
+  color: rgba(255, 255, 255, 0.8);
+  box-shadow: none;
+  transform: none;
+  pointer-events: none;
+  cursor: not-allowed;
+}
+.accent.loading {
+  background-color: var(--elevate-accent-600);
+}
+
+/* ================================================================
    VARIANTE: Secondary
    ================================================================ */
 .secondary {

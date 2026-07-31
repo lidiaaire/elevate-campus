@@ -1,0 +1,22 @@
+{
+  "/(auth)/login/page": "/login",
+  "/(protected)/achievements/page": "/achievements",
+  "/(protected)/assessments/page": "/assessments",
+  "/(protected)/certificates/page": "/certificates",
+  "/(protected)/courses/[id]/page": "/courses/[id]",
+  "/(protected)/courses/[id]/units/[unitId]/assessment/page": "/courses/[id]/units/[unitId]/assessment",
+  "/(protected)/courses/[id]/units/[unitId]/lessons/[lessonId]/page": "/courses/[id]/units/[unitId]/lessons/[lessonId]",
+  "/(protected)/courses/[id]/units/[unitId]/page": "/courses/[id]/units/[unitId]",
+  "/(protected)/courses/page": "/courses",
+  "/(protected)/dashboard/page": "/dashboard",
+  "/(protected)/enrollments/page": "/enrollments",
+  "/(protected)/notifications/page": "/notifications",
+  "/(protected)/progress/page": "/progress",
+  "/(protected)/skill-radar/page": "/skill-radar",
+  "/(protected)/teacher-analytics/page": "/teacher-analytics",
+  "/(protected)/users/page": "/users",
+  "/_global-error/page": "/_global-error",
+  "/_not-found/page": "/_not-found",
+  "/favicon.ico/route": "/favicon.ico",
+  "/page": "/"
+}

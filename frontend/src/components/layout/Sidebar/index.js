@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
@@ -30,41 +31,76 @@ const STUDENT_LINKS = [
   { href: '/skill-radar',   label: 'Radar de habilidades' },
 ];
 
-export default function Sidebar() {
+const TEACHER_LINKS = [
+  { href: '/teacher-analytics', label: 'Analítica' },
+];
+
+export default function Sidebar({ open = false, onClose = () => {}, triggerRef }) {
   const { user } = useAuth();
   const pathname = usePathname();
+  const firstLinkRef = useRef(null);
 
   const links = user?.role === 'admin'
     ? [...NAV_LINKS, ...ADMIN_LINKS]
     : user?.role === 'student'
       ? [...NAV_LINKS, ...STUDENT_LINKS]
-      : NAV_LINKS;
+      : user?.role === 'teacher'
+        ? [...NAV_LINKS, ...TEACHER_LINKS]
+        : NAV_LINKS;
+
+  useEffect(() => {
+    if (!open) return;
+    const onKeyDown = (e) => { if (e.key === 'Escape') onClose(); };
+    document.addEventListener('keydown', onKeyDown);
+    return () => document.removeEventListener('keydown', onKeyDown);
+  }, [open, onClose]);
+
+  // Gestión de foco: al abrir, mueve el foco al panel; al cerrar, lo devuelve al disparador.
+  useEffect(() => {
+    if (open) {
+      firstLinkRef.current?.focus();
+    } else {
+      triggerRef?.current?.focus?.();
+    }
+  }, [open, triggerRef]);
 
   return (
-    <aside className={styles.sidebar}>
-      <div className={styles.brand}>Elevate Your English</div>
-
-      {user && (
-        <div className={styles.userBlock}>
-          <span className={styles.userName}>{user.firstName} {user.lastName}</span>
-          <span className={styles.role}>{ROLE_LABELS[user.role] ?? user.role}</span>
-        </div>
+    <>
+      {open && (
+        <div className={styles.backdrop} onClick={onClose} aria-hidden="true" />
       )}
 
-      <nav className={styles.nav}>
-        {links.map(({ href, label }) => {
-          const isActive = pathname === href || pathname.startsWith(href + '/');
-          return (
-            <Link
-              key={href}
-              href={href}
-              className={`${styles.link} ${isActive ? styles.linkActive : ''}`}
-            >
-              {label}
-            </Link>
-          );
-        })}
-      </nav>
-    </aside>
+      <aside id="app-sidebar" className={`${styles.sidebar} ${open ? styles.sidebarOpen : ''}`}>
+        <div className={styles.brand}>
+          <img src="/brand/elevate-symbol.svg" alt="" className={styles.brandMark} />
+          <span className={styles.brandName}>Elevate Your English</span>
+        </div>
+
+        {user && (
+          <div className={styles.userBlock}>
+            <span className={styles.userName}>{user.firstName} {user.lastName}</span>
+            <span className={styles.role}>{ROLE_LABELS[user.role] ?? user.role}</span>
+          </div>
+        )}
+
+        <nav className={styles.nav}>
+          {links.map(({ href, label }, index) => {
+            const isActive = pathname === href || pathname.startsWith(href + '/');
+            return (
+              <Link
+                key={href}
+                href={href}
+                ref={index === 0 ? firstLinkRef : undefined}
+                onClick={onClose}
+                aria-current={isActive ? 'page' : undefined}
+                className={`${styles.link} ${isActive ? styles.linkActive : ''}`}
+              >
+                {label}
+              </Link>
+            );
+          })}
+        </nav>
+      </aside>
+    </>
   );
 }

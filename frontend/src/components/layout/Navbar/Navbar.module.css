@@ -29,3 +29,15 @@
   font-weight: 500;
   color: var(--text-secondary);
 }
+
+/* ---- Toggle de sidebar — solo tablet/móvil ---- */
+.menuToggle {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .menuToggle {
+    display: inline-flex;
+    margin-right: auto;
+  }
+}

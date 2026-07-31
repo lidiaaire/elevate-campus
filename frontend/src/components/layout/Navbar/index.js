@@ -5,7 +5,7 @@ import { useAuth } from '@/hooks/useAuth';
 import Button from '@/components/ui/Button';
 import styles from './Navbar.module.css';
 
-export default function Navbar() {
+export default function Navbar({ sidebarOpen, onToggleSidebar, toggleRef }) {
   const { user, logout } = useAuth();
   const router = useRouter();
 
@@ -18,6 +18,19 @@ export default function Navbar() {
 
   return (
     <header className={styles.navbar}>
+      <Button
+        ref={toggleRef}
+        variant="ghost"
+        size="lg"
+        iconOnly
+        iconLeft={sidebarOpen ? '✕' : '☰'}
+        className={styles.menuToggle}
+        onClick={onToggleSidebar}
+        aria-expanded={sidebarOpen}
+        aria-controls="app-sidebar"
+        aria-label={sidebarOpen ? 'Cerrar menú de navegación' : 'Abrir menú de navegación'}
+      />
+
       {user && (
         <div className={styles.userInfo}>
           <span className={styles.name}>{fullName}</span>

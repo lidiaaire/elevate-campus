@@ -194,11 +194,10 @@ paths:
         matriculado en él — devuelve 200 con progreso vacío
         (`overallProgress: 0, units: []`) si no hay datos.
 
-        La proyección usada internamente por
-        `LessonRepository.findByCourseId` solo incluye `{ _id, unitId,
-        order }` de cada lección. El campo `lesson` dentro de
-        `units[].lessons[]` **no contiene `title`, `type`, `content`,
-        `videoUrl` ni `duration`**.
+        El campo `lesson` dentro de `units[].lessons[]` incluye `_id`,
+        `unitId`, `order`, `title`, `type` y `duration`. No incluye
+        `content` ni `videoUrl` (proyección reducida, igual que en los
+        listados de lecciones por unidad).
 
         **Solo accesible por STUDENT.**
       security:
@@ -599,9 +598,8 @@ components:
       type: object
       description: >
         Item de lección dentro de `CourseProgress.units[].lessons`.
-        La proyección de `LessonRepository.findByCourseId` incluye
-        únicamente `_id`, `unitId` y `order` — `title`, `type`,
-        `content`, `videoUrl` y `duration` no están presentes.
+        `lesson` incluye `_id`, `unitId`, `order`, `title`, `type` y
+        `duration` — no incluye `content` ni `videoUrl`.
       properties:
         lesson:
           type: object
@@ -615,6 +613,16 @@ components:
             order:
               type: integer
               example: 1
+            title:
+              type: string
+              example: "This Is My Family — Vocabulary"
+            type:
+              type: string
+              enum: [video, text, quiz]
+              example: "text"
+            duration:
+              type: integer
+              example: 15
         locked:
           type: boolean
           description: >

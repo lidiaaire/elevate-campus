@@ -4,6 +4,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { achievementService } from '@/lib/services/achievement.service';
 import { useAsyncData } from '@/hooks/useAsyncData';
 import AchievementCard from '@/components/achievements/AchievementCard';
+import PageHeader from '@/components/ui/PageHeader';
 import LoadingState from '@/components/ui/LoadingState';
 import ErrorState from '@/components/ui/ErrorState';
 import EmptyState from '@/components/ui/EmptyState';
@@ -23,7 +24,7 @@ export default function AchievementsPage() {
 
   return (
     <div className={styles.page}>
-      <h1>Mis logros</h1>
+      <PageHeader title="Mis logros" />
 
       {achievements.length === 0 && (
         <EmptyState

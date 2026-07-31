@@ -16,7 +16,7 @@ async function request(endpoint, { method = 'GET', body, token } = {}) {
   const data = await response.json();
 
   if (!response.ok) {
-    const message = data?.message ?? `Error ${response.status}`;
+    const message = data?.message ?? 'Ha ocurrido un error. Inténtalo de nuevo.';
     throw new Error(message);
   }
 
