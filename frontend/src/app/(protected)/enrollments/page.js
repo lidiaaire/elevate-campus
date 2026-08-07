@@ -17,6 +17,12 @@ const BADGE_CLASS = {
   completed: styles.badgeCompleted,
 };
 
+const STATUS_LABEL = {
+  active:    'Activa',
+  suspended: 'Suspendida',
+  completed: 'Completada',
+};
+
 function formatDate(iso) {
   if (!iso) return '—';
   return new Date(iso).toLocaleDateString('es-ES', {
@@ -78,64 +84,68 @@ export default function EnrollmentsPage() {
       )}
 
       {!loading && !error && enrollments.length > 0 && (
-        <table className={styles.table}>
-          <thead>
-            <tr>
-              <th>Curso</th>
-              <th>Estudiante</th>
-              <th>Estado</th>
-              <th>Fecha de matrícula</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            {enrollments.map((e) => {
-              const busy = actionLoading === e._id;
-              const courseId = e.courseId?._id ?? e.courseId;
-              const courseName = e.courseId?.title ?? courseMap[courseId] ?? courseId;
-              const studentId = e.studentId?._id ?? e.studentId;
-              const studentName = e.studentId
-                ? `${e.studentId.firstName ?? ''} ${e.studentId.lastName ?? ''}`.trim() || studentId
-                : userMap[studentId] ?? studentId;
-              return (
-                <tr key={e._id}>
-                  <td>{courseName ?? <span className={styles.idFallback}>{courseId}</span>}</td>
-                  <td>{studentName ?? <span className={styles.idFallback}>{studentId}</span>}</td>
-                  <td>
-                    <span className={`${styles.badge} ${BADGE_CLASS[e.status] ?? ''}`}>
-                      {e.status}
-                    </span>
-                  </td>
-                  <td>{formatDate(e.enrolledAt)}</td>
-                  <td>
-                    <div className={styles.actions}>
-                      {e.status === 'suspended' && (
-                        <Button
-                          variant="secondary"
-                          size="sm"
-                          disabled={busy}
-                          onClick={() => handleAction(e._id, enrollmentsService.activateEnrollment.bind(enrollmentsService))}
-                        >
-                          {busy ? '…' : 'Activate'}
-                        </Button>
-                      )}
-                      {e.status === 'active' && (
-                        <Button
-                          variant="secondary"
-                          size="sm"
-                          disabled={busy}
-                          onClick={() => handleAction(e._id, enrollmentsService.suspendEnrollment.bind(enrollmentsService))}
-                        >
-                          {busy ? '…' : 'Suspend'}
-                        </Button>
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+        <div className={styles.tableWrap}>
+          <table className={styles.table}>
+            <thead>
+              <tr>
+                <th>Curso</th>
+                <th>Estudiante</th>
+                <th>Estado</th>
+                <th>Fecha de matrícula</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {enrollments.map((e) => {
+                const busy = actionLoading === e._id;
+                const courseId = e.courseId?._id ?? e.courseId;
+                const courseName = e.courseId?.title ?? courseMap[courseId] ?? courseId;
+                const studentId = e.studentId?._id ?? e.studentId;
+                const studentName = e.studentId
+                  ? `${e.studentId.firstName ?? ''} ${e.studentId.lastName ?? ''}`.trim() || studentId
+                  : userMap[studentId] ?? studentId;
+                return (
+                  <tr key={e._id}>
+                    <td>{courseName ?? <span className={styles.idFallback}>Curso no disponible</span>}</td>
+                    <td>{studentName ?? <span className={styles.idFallback}>Alumno no disponible</span>}</td>
+                    <td>
+                      <span className={`${styles.badge} ${BADGE_CLASS[e.status] ?? ''}`}>
+                        {STATUS_LABEL[e.status] ?? e.status}
+                      </span>
+                    </td>
+                    <td>{formatDate(e.enrolledAt)}</td>
+                    <td>
+                      <div className={styles.actions}>
+                        {e.status === 'suspended' && (
+                          <Button
+                            variant="secondary"
+                            size="sm"
+                            loading={busy}
+                            disabled={busy}
+                            onClick={() => handleAction(e._id, enrollmentsService.activateEnrollment.bind(enrollmentsService))}
+                          >
+                            Activar
+                          </Button>
+                        )}
+                        {e.status === 'active' && (
+                          <Button
+                            variant="secondary"
+                            size="sm"
+                            loading={busy}
+                            disabled={busy}
+                            onClick={() => handleAction(e._id, enrollmentsService.suspendEnrollment.bind(enrollmentsService))}
+                          >
+                            Suspender
+                          </Button>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
   );

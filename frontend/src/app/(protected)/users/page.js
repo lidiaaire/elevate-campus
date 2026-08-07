@@ -71,7 +71,7 @@ export default function UsersPage() {
                     <td><span className={styles.roleBadge}>{u.role}</span></td>
                     <td>
                       <span className={u.isActive ? styles.badgeActive : styles.badgeInactive}>
-                        {u.isActive ? 'active' : 'inactive'}
+                        {u.isActive ? 'Activo' : 'Inactivo'}
                       </span>
                     </td>
                     <td>
@@ -80,20 +80,22 @@ export default function UsersPage() {
                           <Button
                             variant="secondary"
                             size="sm"
+                            loading={busy}
                             disabled={busy}
                             onClick={() => handleAction(u._id, usersService.activateUser.bind(usersService))}
                           >
-                            {busy ? '…' : 'Activate'}
+                            Activar
                           </Button>
                         )}
                         {u.isActive && (
                           <Button
                             variant="secondary"
                             size="sm"
+                            loading={busy}
                             disabled={busy}
                             onClick={() => handleAction(u._id, usersService.deactivateUser.bind(usersService))}
                           >
-                            {busy ? '…' : 'Deactivate'}
+                            Desactivar
                           </Button>
                         )}
                       </div>
