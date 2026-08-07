@@ -59,27 +59,21 @@ export default function TeacherAnalyticsPage() {
 
       <section className={styles.section}>
         <h2 className={styles.sectionTitle}>Comparativa de la cohorte</h2>
-        <div className={styles.tableWrap}>
-          <CohortComparisonTable
-            students={teacherDashboard.students}
-            cohortProgressAvg={teacherDashboard.cohortSummary.cohortProgressAvg}
-            onSelectStudent={setSelectedStudentId}
-          />
-        </div>
+        <CohortComparisonTable
+          students={teacherDashboard.students}
+          cohortProgressAvg={teacherDashboard.cohortSummary.cohortProgressAvg}
+          onSelectStudent={setSelectedStudentId}
+        />
       </section>
 
       <section className={styles.section}>
         <h2 className={styles.sectionTitle}>Ranking de inactividad</h2>
-        <div className={styles.tableWrap}>
-          <InactivityRanking students={teacherDashboard.students} />
-        </div>
+        <InactivityRanking students={teacherDashboard.students} />
       </section>
 
       <section className={styles.section}>
         <h2 className={styles.sectionTitle}>Desglose de evaluaciones</h2>
-        <div className={styles.tableWrap}>
-          <AssessmentBreakdownTable assessments={assessments} />
-        </div>
+        <AssessmentBreakdownTable assessments={assessments} />
       </section>
 
       {selectedStudentId && (
@@ -88,9 +82,7 @@ export default function TeacherAnalyticsPage() {
           {trendLoading ? (
             <p className={styles.trendNote}>Cargando tendencia...</p>
           ) : (
-            <div className={styles.tableWrap}>
-              <StudentWeeklyTrendPanel weeklyTrend={weeklyTrend ?? []} />
-            </div>
+            <StudentWeeklyTrendPanel weeklyTrend={weeklyTrend ?? []} />
           )}
         </section>
       )}

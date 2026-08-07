@@ -1,0 +1,55 @@
+/* ============================================================
+   CohortComparisonTable — Design System v1.0
+   ============================================================ */
+
+.wrap {
+  background: var(--bg-surface);
+  border: 1px solid var(--bg-subtle);
+  border-radius: var(--radius-lg, 12px);
+  overflow: auto;
+  padding: 0.25rem;
+}
+
+.wrap table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.wrap th {
+  text-align: left;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--bg-subtle);
+  white-space: nowrap;
+}
+
+.wrap td {
+  padding: 0.75rem 1rem;
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--bg-subtle);
+  white-space: nowrap;
+}
+
+.wrap tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.wrap tbody tr:hover {
+  background: var(--bg-hover, var(--bg-subtle));
+}
+
+/* ── Responsive ── */
+@media (max-width: 480px) {
+  .wrap table {
+    font-size: 0.8125rem;
+  }
+  .wrap th,
+  .wrap td {
+    padding: 0.625rem 0.75rem;
+  }
+}
