@@ -28,7 +28,13 @@ export default function SkillRadarChart({ skillProgress }) {
         <PolarGrid />
         <PolarAngleAxis dataKey="skill" />
         <PolarRadiusAxis domain={[0, 100]} tickCount={6} />
-        <Radar dataKey="value" isAnimationActive={false} />
+        <Radar
+          dataKey="value"
+          stroke="var(--elevate-accent-500)"
+          fill="var(--elevate-accent-500)"
+          fillOpacity={0.35}
+          isAnimationActive={true}
+        />
       </RadarChart>
     </ResponsiveContainer>
   );
