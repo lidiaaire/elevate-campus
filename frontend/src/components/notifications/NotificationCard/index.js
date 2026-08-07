@@ -6,7 +6,10 @@ export default function NotificationCard({ notification }) {
   const { title, message, type, isRead, createdAt } = notification;
 
   return (
-    <li className={styles.card}>
+    <li className={`${styles.card} ${!isRead ? styles.cardUnread : ''}`}>
+      {!isRead && (
+        <span className={styles.unreadDot} aria-hidden="true" />
+      )}
       <div className={styles.body}>
         <p className={styles.title}>{title}</p>
         <p className={styles.message}>{message}</p>

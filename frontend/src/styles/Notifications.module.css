@@ -14,6 +14,7 @@
 }
 
 .card {
+  position: relative;
   display: flex;
   align-items: flex-start;
   gap: 1rem;
@@ -21,6 +22,20 @@
   border: 1px solid var(--bg-subtle);
   border-radius: var(--radius-lg, 12px);
   background: var(--bg-surface);
+}
+
+.cardUnread {
+  border-color: var(--brand-200);
+  background: var(--brand-50);
+}
+
+.unreadDot {
+  flex-shrink: 0;
+  width: 0.5rem;
+  height: 0.5rem;
+  margin-top: 0.4rem;
+  border-radius: 50%;
+  background: var(--brand-500);
 }
 
 .body {
