@@ -14,6 +14,8 @@ import EmptyState   from '@/components/ui/EmptyState';
 import Button       from '@/components/ui/Button';
 import styles from './Certificates.module.css';
 
+// Paleta categórica intencional (colores fijos por nivel CEFR), no deuda de
+// marca — ver DESIGN_SYSTEM.md §10.6.
 const CEFR_COLOR = {
   A1: '#38bdf8', A2: '#34d399',
   B1: '#818cf8', B2: '#fbbf24',

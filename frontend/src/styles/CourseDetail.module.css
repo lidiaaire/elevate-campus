@@ -6,13 +6,13 @@
 }
 
 .status {
-  color: #6b7280;
+  color: var(--text-secondary);
   font-size: 0.95rem;
 }
 
 .card {
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
   border-radius: 8px;
   padding: 1.5rem 2rem;
   display: flex;
@@ -23,13 +23,13 @@
 .title {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #1a1a1a;
+  color: var(--text-display);
   margin: 0;
 }
 
 .description {
   font-size: 0.95rem;
-  color: #4b5563;
+  color: var(--text-secondary);
   line-height: 1.6;
   margin: 0;
 }
@@ -39,7 +39,7 @@
   grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
   gap: 1rem;
   padding-top: 1rem;
-  border-top: 1px solid #f3f4f6;
+  border-top: 1px solid var(--bg-subtle);
 }
 
 .metaItem {
@@ -53,13 +53,13 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: #9ca3af;
+  color: var(--text-muted);
 }
 
 .metaValue {
   font-size: 0.9rem;
   font-weight: 500;
-  color: #374151;
+  color: var(--text-primary);
   text-transform: capitalize;
 }
 
@@ -73,14 +73,14 @@
   width: fit-content;
 }
 
-.badgeDraft     { background-color: #f3f4f6; color: #6b7280; }
-.badgePublished { background-color: #d1fae5; color: #065f46; }
-.badgeArchived  { background-color: #fef3c7; color: #92400e; }
+.badgeDraft     { background-color: var(--bg-subtle); color: var(--text-secondary); }
+.badgePublished { background-color: var(--success-50); color: var(--success-700); }
+.badgeArchived  { background-color: var(--warning-100); color: var(--warning-800); }
 
 .sectionTitle {
   font-size: 1rem;
   font-weight: 600;
-  color: #374151;
+  color: var(--text-primary);
   margin: 0 0 0.75rem;
 }
 
@@ -97,8 +97,8 @@
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
   border-radius: 6px;
   padding: 0.75rem 1rem;
 }
@@ -109,8 +109,8 @@
   justify-content: center;
   width: 1.75rem;
   height: 1.75rem;
-  background-color: #ede9fe;
-  color: #4f46e5;
+  background-color: var(--brand-50);
+  color: var(--brand-700);
   border-radius: 50%;
   font-size: 0.8rem;
   font-weight: 700;
@@ -119,13 +119,13 @@
 
 .unitTitle {
   font-size: 0.9rem;
-  color: #1a1a1a;
+  color: var(--text-primary);
   font-weight: 500;
 }
 
 .unitEmpty {
   font-size: 0.9rem;
-  color: #9ca3af;
+  color: var(--text-muted);
   padding: 0.5rem 0;
 }
 
@@ -137,7 +137,7 @@
 
 .lessonStatus {
   font-size: 0.8rem;
-  color: #9ca3af;
+  color: var(--text-muted);
   margin: 0.5rem 0 0 2.5rem;
 }
 
@@ -160,7 +160,7 @@
   align-items: center;
   gap: 0.6rem;
   padding: 0.4rem 0.75rem;
-  background-color: #f9fafb;
+  background-color: var(--bg-page);
   border-radius: 4px;
   text-decoration: none;
   width: 100%;
@@ -168,17 +168,17 @@
 }
 
 .lessonLink:hover {
-  background-color: #ede9fe;
+  background-color: var(--bg-hover);
 }
 
 .lessonOrder {
   font-size: 0.72rem;
   font-weight: 700;
-  color: #9ca3af;
+  color: var(--text-muted);
   min-width: 1.25rem;
 }
 
 .lessonTitle {
   font-size: 0.875rem;
-  color: #374151;
+  color: var(--text-primary);
 }
