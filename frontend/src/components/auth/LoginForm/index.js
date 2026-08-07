@@ -45,15 +45,15 @@ export default function LoginForm() {
             <span className={styles.logoName}>ELEVATE</span>
           </div>
           <div className={styles.accentBar} />
-          <h1 className={styles.headline}>Open your next opportunity.</h1>
+          <h1 className={styles.headline}>Abre tu próxima oportunidad.</h1>
           <p className={styles.subline}>
-            Learn with purpose. Grow with confidence.
+            Aprende con propósito. Crece con confianza.
           </p>
         </div>
 
         {/* Glass card — formulario */}
         <div className={styles.card}>
-          <h2 className={styles.cardTitle}>Sign in to continue your journey.</h2>
+          <h2 className={styles.cardTitle}>Inicia sesión para continuar tu formación.</h2>
 
           <form onSubmit={handleSubmit}>
             <div className={styles.field}>
@@ -66,7 +66,7 @@ export default function LoginForm() {
                 value={email}
                 onChange={handleEmailChange}
                 className={styles.input}
-                placeholder="tu@empresa.com"
+                placeholder="tu@email.com"
                 required
               />
             </div>
@@ -105,7 +105,7 @@ export default function LoginForm() {
       </main>
 
       <footer className={styles.footer}>
-        <p>© 2025 Elevate Your English</p>
+        <p>© 2026 Elevate Your English</p>
       </footer>
     </div>
   );
