@@ -155,7 +155,16 @@
   overflow: hidden;
 }
 
-.lessonLink {
+.lessonItemDone {
+  background: var(--success-50);
+}
+
+.lessonItemLocked {
+  opacity: 0.55;
+}
+
+.lessonLink,
+.lessonStatic {
   display: flex;
   align-items: center;
   gap: 0.6rem;
@@ -181,4 +190,33 @@
 .lessonTitle {
   font-size: 0.875rem;
   color: var(--text-primary);
+  flex: 1;
+}
+
+/* Icono de estado (✓ / 🔒 / →) */
+.statusIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 50%;
+  font-size: 0.625rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.iconDone {
+  background: var(--success-100, #dcfce7);
+  color: var(--success-700, #15803d);
+}
+
+.iconLocked {
+  background: var(--bg-subtle);
+  font-size: 0.5625rem;
+}
+
+.iconOpen {
+  background: var(--brand-50);
+  color: var(--brand-600);
 }
