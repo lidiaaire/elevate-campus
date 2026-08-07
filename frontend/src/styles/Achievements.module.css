@@ -21,6 +21,18 @@
   border: 1px solid var(--bg-subtle);
   border-radius: var(--radius-lg, 12px);
   background: var(--bg-surface);
+  animation: unlockIn var(--dur-slow) var(--ease-out) both;
+}
+
+@keyframes unlockIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 .icon {
@@ -59,4 +71,37 @@
   background: var(--bg-subtle);
   color: var(--text-secondary);
   font-weight: 500;
+}
+
+/* ── Color por rareza ── */
+.rarityCommon {
+  background: var(--bg-subtle);
+  color: var(--text-secondary);
+}
+
+.rarityRare {
+  background: var(--brand-50);
+  color: var(--brand-700);
+}
+
+.rarityEpic {
+  background: var(--warning-50);
+  color: var(--warning-700);
+}
+
+.rarityLegendary {
+  background: var(--elevate-accent-50);
+  color: var(--elevate-accent-700);
+}
+
+/* ── Responsive ── */
+@media (max-width: 480px) {
+  .card {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .icon {
+    font-size: 1.5rem;
+  }
 }
