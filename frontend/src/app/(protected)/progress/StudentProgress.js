@@ -10,18 +10,9 @@ import LoadingState      from '@/components/ui/LoadingState';
 import ErrorState        from '@/components/ui/ErrorState';
 import EmptyState        from '@/components/ui/EmptyState';
 import ProgressBar       from '@/components/ui/ProgressBar';
+import StatCard          from '@/components/ui/StatCard';
 import SkillProgressList from '@/components/dashboard/student/SkillProgressList';
 import styles from './Progress.module.css';
-
-function StatCard({ value, label, sub }) {
-  return (
-    <div className={styles.statCard}>
-      <span className={styles.statValue}>{value ?? '—'}</span>
-      <span className={styles.statLabel}>{label}</span>
-      {sub && <span className={styles.statSub}>{sub}</span>}
-    </div>
-  );
-}
 
 function CourseProgressRow({ enrollment }) {
   const visual = getCourseVisual(enrollment.courseTitle);
@@ -96,18 +87,18 @@ export default function StudentProgress() {
         <div className={styles.statsGrid}>
           <StatCard
             value={`${summary.overallProgressAvg ?? 0}%`}
-            label="Progreso global"
-            sub={`${summary.totalEnrollments ?? 0} curso${summary.totalEnrollments !== 1 ? 's' : ''}`}
+            title="Progreso global"
+            subtitle={`${summary.totalEnrollments ?? 0} curso${summary.totalEnrollments !== 1 ? 's' : ''}`}
           />
           <StatCard
             value={summary.streakDays ?? 0}
-            label="Días de racha"
-            sub={summary.streakDays > 0 ? 'Sigue así' : 'Empieza hoy'}
+            title="Días de racha"
+            subtitle={summary.streakDays > 0 ? 'Sigue así' : 'Empieza hoy'}
           />
           <StatCard
             value={summary.totalLessonsCompleted ?? 0}
-            label="Lecciones completadas"
-            sub={`de ${summary.totalLessons ?? 0} totales`}
+            title="Lecciones completadas"
+            subtitle={`de ${summary.totalLessons ?? 0} totales`}
           />
           <StatCard
             value={
@@ -115,8 +106,8 @@ export default function StudentProgress() {
                 ? `${summary.assessmentsPassed} / ${summary.assessmentsTotal}`
                 : '—'
             }
-            label="Evaluaciones superadas"
-            sub={summary.avgBestScore != null ? `Media: ${summary.avgBestScore}%` : undefined}
+            title="Evaluaciones superadas"
+            subtitle={summary.avgBestScore != null ? `Media: ${summary.avgBestScore}%` : undefined}
           />
         </div>
       </section>
