@@ -230,7 +230,12 @@ const getCourseProgress = async (studentId, courseId) => {
 };
 
 const getProgressOverview = async (studentId) => {
-  const { docs: enrollments } = await EnrollmentRepository.findAll({ studentId, status: ENROLLMENT_STATUS.ACTIVE });
+  // Incluye 'completed' además de 'active' — un curso terminado sigue siendo
+  // parte del progreso del student, no debe desaparecer de su propia vista.
+  const { docs: enrollments } = await EnrollmentRepository.findAll({
+    studentId,
+    status: { $in: [ENROLLMENT_STATUS.ACTIVE, ENROLLMENT_STATUS.COMPLETED] },
+  });
 
   return Promise.all(
     enrollments.map(async (enrollment) => {

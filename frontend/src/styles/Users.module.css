@@ -4,6 +4,72 @@
   gap: 1.5rem;
 }
 
+/* ── Controles: búsqueda + filtros ── */
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.search {
+  flex: 1 1 240px;
+  min-width: 180px;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  color: var(--text-primary);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+}
+
+.search:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+  border-color: var(--border-focus);
+}
+
+.select {
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  color: var(--text-primary);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+}
+
+.select:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+  border-color: var(--border-focus);
+}
+
+/* ── Celda de usuario: avatar + nombre/email ── */
+
+.userCell {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+}
+
+.userCellText {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.userName {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.userEmail {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
 .tableWrap {
   overflow-x: auto;
   background: var(--bg-surface);
@@ -64,10 +130,13 @@
   border-radius: var(--radius-full);
   font-size: 0.75rem;
   font-weight: 600;
-  text-transform: capitalize;
   background-color: var(--brand-50);
   color: var(--brand-700);
 }
+
+.role_student { background-color: var(--brand-50);   color: var(--brand-700); }
+.role_teacher { background-color: var(--success-50); color: var(--success-700); }
+.role_admin   { background-color: var(--warning-100); color: var(--warning-800); }
 
 .actions {
   display: flex;

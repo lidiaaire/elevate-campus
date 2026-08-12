@@ -16,6 +16,9 @@ const COLLECTIONS = [
   'lessonprogresses',
   'assessmentattempts',
   'achievements',
+  'userachievements',
+  'certificates',
+  'notifications',
 ];
 
 const run = async () => {
@@ -49,8 +52,8 @@ const run = async () => {
   await require('./achievements.seed')();
   logger.info('[seed] Achievements creados (10 logros)');
 
-  // await require('./enrollments.seed')();
-  // logger.info('[seed] Matrículas y progreso creados');
+  await require('./enrollments.seed')();
+  logger.info('[seed] Matrículas, progreso y evaluaciones demo creados');
 
   await mongoose.disconnect();
   process.exit(0);

@@ -3,7 +3,9 @@
 import styles from '@/styles/Notifications.module.css';
 
 export default function NotificationCard({ notification }) {
-  const { title, message, type, isRead, createdAt } = notification;
+  // El backend expone createdAtNotification (campo propio del modelo), no el
+  // createdAt automático de Mongoose — de ahí que createdAt viniera undefined.
+  const { title, message, type, isRead, createdAtNotification } = notification;
 
   return (
     <li className={`${styles.card} ${!isRead ? styles.cardUnread : ''}`}>
@@ -16,7 +18,7 @@ export default function NotificationCard({ notification }) {
         <div className={styles.meta}>
           <span className={styles.badge}>{type}</span>
           <span className={styles.badge}>{isRead ? 'Leída' : 'No leída'}</span>
-          <span>{new Date(createdAt).toLocaleDateString('es-ES')}</span>
+          <span>{new Date(createdAtNotification).toLocaleDateString('es-ES')}</span>
         </div>
       </div>
     </li>

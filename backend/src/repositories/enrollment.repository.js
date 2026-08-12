@@ -58,12 +58,30 @@ class EnrollmentRepository extends BaseRepository {
     return this.model.findOne({ studentId, courseId, status: ENROLLMENT_STATUS.ACTIVE });
   }
 
+  // Override (en vez de delegar a super.findAll) porque admin/teacher necesitan
+  // el nombre real del student y del curso, no solo el ObjectId — mismo
+  // populate que ya usan findByStudent/findByCourse.
   async findAll(filters = {}, options = {}) {
     const query = {};
     if (filters.studentId !== undefined) query.studentId = filters.studentId;
     if (filters.courseId  !== undefined) query.courseId  = filters.courseId;
     if (filters.status    !== undefined) query.status    = filters.status;
-    return super.findAll(query, options);
+
+    const skip  = options.skip  ?? 0;
+    const limit = options.limit ?? 20;
+    const sort  = options.sort  ?? { enrolledAt: -1 };
+
+    const [docs, total] = await Promise.all([
+      this.model
+        .find(query)
+        .populate('studentId', 'firstName lastName email')
+        .populate('courseId', 'title level coverImageUrl status')
+        .sort(sort)
+        .skip(skip)
+        .limit(limit),
+      this.model.countDocuments(query),
+    ]);
+    return { docs, total };
   }
 
   async markCompleted(enrollmentId) {

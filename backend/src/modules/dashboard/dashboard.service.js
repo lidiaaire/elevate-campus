@@ -393,8 +393,13 @@ const _calculatePlatformGrowth = async () => {
 
 const getStudentDashboard = async (studentId) => {
   // 1. Enrollments con courseId poblado
+  // Incluye 'completed' además de 'active': de lo contrario un curso terminado
+  // desaparece del propio dashboard/progreso/skill radar del student en cuanto
+  // se completa, que es exactamente cuando más querría verlo reflejado.
   const { docs: allEnrollments } = await EnrollmentRepository.findByStudent(studentId, { limit: 100 });
-  const activeEnrollments = allEnrollments.filter((e) => e.status === ENROLLMENT_STATUS.ACTIVE);
+  const activeEnrollments = allEnrollments.filter(
+    (e) => e.status === ENROLLMENT_STATUS.ACTIVE || e.status === ENROLLMENT_STATUS.COMPLETED,
+  );
 
   // 2. Perfil de usuario + progreso por curso en paralelo
   const [user, ...batchResults] = await Promise.all([
@@ -746,12 +751,13 @@ const getTeacherDashboard = async (teacherId) => {
     ? null
     : Math.floor((passedAttempts / totalAttempts) * 100);
 
-  const studentsList = perStudentData.map(({ student, progressData, lastActivity, isAtRisk }) => ({
+  const studentsList = perStudentData.map(({ student, progressData, lastActivity, isAtRisk, overallProgressAvg }) => ({
     studentId:            student._id,
     firstName:            student.firstName,
     lastName:             student.lastName,
     avatarUrl:            student.avatarUrl,
     isAtRisk,
+    overallProgressAvg,
     daysSinceLastActivity: daysBetween(lastActivity),
     enrollments: progressData.map((p) => ({
       courseId:         p.courseId,

@@ -59,9 +59,11 @@ const listCourses = async (actorRole, actorId, filters = {}, query = {}) => {
   const options = pagination.toMongoOptions(query.page, query.limit, query.sortBy, query.sortOrder);
 
   if (actorRole === ROLES.STUDENT) {
+    // 'Mis cursos' debe incluir tanto matrículas activas como completadas —
+    // solo 'suspended' queda fuera (curso al que el student no debe ver acceso).
     const { docs: enrollments } = await EnrollmentRepository.findAll({
       studentId: actorId,
-      status:    ENROLLMENT_STATUS.ACTIVE,
+      status:    { $in: [ENROLLMENT_STATUS.ACTIVE, ENROLLMENT_STATUS.COMPLETED] },
     });
     const courseIds = enrollments.map((e) => e.courseId?.toString());
     const { docs, total } = await CourseRepository.findAll({ status: COURSE_STATUS.PUBLISHED });

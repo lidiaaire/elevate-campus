@@ -6,8 +6,10 @@ import { useAuth } from '@/hooks/useAuth';
 import { dashboardService } from '@/lib/services/dashboard.service';
 import DashboardLayout, { DashboardSection, DashboardStatGrid } from '@/components/dashboard/DashboardLayout';
 import StatCard from '@/components/ui/StatCard';
+import Avatar from '@/components/ui/Avatar';
 import Card, { CardHeader, CardBody, CardFooter } from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
+import ProgressBar from '@/components/ui/ProgressBar';
 import LoadingState from '@/components/ui/LoadingState';
 import ErrorState from '@/components/ui/ErrorState';
 import EmptyState from '@/components/ui/EmptyState';
@@ -36,6 +38,16 @@ function summarizeActivity(series) {
   return { dailyAvg, delta, direction, peakDay, inactiveDays, totalDays: series.length };
 }
 
+function StatusChip({ atRiskCount }) {
+  const ok = atRiskCount === 0;
+  return (
+    <span className={`${styles.statusChip} ${ok ? styles.statusChipOk : styles.statusChipWarn}`}>
+      <span className={styles.statusDot} aria-hidden="true" />
+      {ok ? 'Plataforma sin alertas' : `${atRiskCount} alumno${atRiskCount !== 1 ? 's' : ''} en riesgo`}
+    </span>
+  );
+}
+
 export default function AdminDashboard() {
   const { user, token } = useAuth();
   const [data,    setData]    = useState(null);
@@ -61,196 +73,206 @@ export default function AdminDashboard() {
   const { threshold, count, students: atRiskStudents } = data.atRisk;
   const activitySummary = summarizeActivity(series);
 
-  const lowestProgressCourse = coursesSummary.reduce(
-    (worst, c) => (worst === null || c.avgProgress < worst.avgProgress ? c : worst),
-    null,
-  );
+  const today = new Date().toLocaleDateString('es-ES', {
+    weekday: 'long', day: 'numeric', month: 'long',
+  });
 
   return (
     <DashboardLayout
       title={`${user.firstName} ${user.lastName}`}
-      description="Panel de administración"
+      description={`Panel de administración · ${today}`}
+      actions={<StatusChip atRiskCount={count} />}
     >
       {/* 1. Alertas operativas — lo que necesita atención ahora */}
       <DashboardSection title="Alertas operativas">
         <Card>
           <CardHeader divided>
             <h3 className={styles.cardSectionTitle}>Alumnos en riesgo</h3>
+            <span className={styles.cardSectionMeta}>
+              Sin actividad {threshold.days}+ días o progreso &lt;{threshold.progressBelow}%
+            </span>
           </CardHeader>
           <CardBody>
-            <DashboardStatGrid>
-              <StatCard
-                as="li"
-                variant={count > 0 ? 'danger' : 'success'}
-                title="En riesgo"
-                value={count}
-                subtitle={`Sin actividad ${threshold.days}+ días o progreso <${threshold.progressBelow}%`}
-              />
-            </DashboardStatGrid>
-
             {count === 0 ? (
               <EmptyState title="No hay alumnos en riesgo actualmente." />
             ) : (
-              <ul className={styles.studentList}>
-                {atRiskStudents.map((s) => (
-                  <li key={s.studentId} className={styles.studentRow}>
-                    <div className={styles.studentInfo}>
-                      <span className={styles.studentName}>
-                        {s.firstName} {s.lastName}
-                      </span>
-                      <span className={styles.badgeDanger}>En riesgo</span>
-                    </div>
-                    <div className={styles.studentMeta}>
-                      <span>Progreso medio: {s.overallProgressAvg}%</span>
-                      <span className={styles.metaDaysWarn}>
-                        {s.daysSinceLastActivity !== null
-                          ? `${s.daysSinceLastActivity}d sin actividad`
-                          : 'Sin actividad registrada'}
-                      </span>
-                      <span>
-                        {s.assignedTeacher
-                          ? `Profesor: ${s.assignedTeacher.firstName} ${s.assignedTeacher.lastName}`
-                          : 'Sin profesor asignado'}
-                      </span>
-                    </div>
-                  </li>
-                ))}
+              <ul className={styles.riskList}>
+                {atRiskStudents.map((s) => {
+                  const courseLabel = s.enrollments.length > 0
+                    ? s.enrollments.map((e) => `${e.courseTitle} (${e.overallProgress}%)`).join(' · ')
+                    : 'Sin curso activo';
+                  const query = encodeURIComponent(`${s.firstName} ${s.lastName}`);
+
+                  return (
+                    <li key={s.studentId} className={styles.riskRow}>
+                      <Avatar firstName={s.firstName} lastName={s.lastName} role="student" />
+
+                      <div className={styles.riskInfo}>
+                        <div className={styles.riskTopRow}>
+                          <span className={styles.riskName}>{s.firstName} {s.lastName}</span>
+                          <span className={styles.badgeDanger}>En riesgo</span>
+                        </div>
+                        <div className={styles.riskMeta}>
+                          <span className={styles.riskCourse}>{courseLabel}</span>
+                          <span className={styles.metaDaysWarn}>
+                            {s.daysSinceLastActivity !== null
+                              ? `${s.daysSinceLastActivity}d sin actividad`
+                              : 'Sin actividad registrada'}
+                          </span>
+                          <span>
+                            {s.assignedTeacher
+                              ? `Profesor: ${s.assignedTeacher.firstName} ${s.assignedTeacher.lastName}`
+                              : 'Sin profesor asignado'}
+                          </span>
+                        </div>
+                      </div>
+
+                      <Button as={Link} href={`/users?q=${query}`} variant="secondary" size="sm">
+                        Ver en Usuarios
+                      </Button>
+                    </li>
+                  );
+                })}
               </ul>
             )}
           </CardBody>
         </Card>
       </DashboardSection>
 
-      {/* 2. Panorama general — estado de la plataforma ahora mismo */}
+      {/* 2. Panorama general + distribución por curso, lado a lado */}
       <DashboardSection title="Panorama general">
-        <DashboardStatGrid>
-          <StatCard
-            as="li"
-            title="Usuarios totales"
-            value={platform.users.total}
-            subtitle={`${platform.users.activeTotal} activos`}
-          />
-          <StatCard
-            as="li"
-            variant="brand"
-            title="Matrículas activas"
-            value={platform.enrollments.active}
-            subtitle={`de ${platform.enrollments.total} totales`}
-          />
-          <StatCard
-            as="li"
-            title="Cursos publicados"
-            value={platform.courses.published}
-            subtitle={`de ${platform.courses.total} totales`}
-          />
-          <StatCard
-            as="li"
-            variant="brand"
-            title="Pass rate assessments"
-            value={platform.assessments.passRate !== null ? `${platform.assessments.passRate}%` : '—'}
-            subtitle={`${platform.assessments.totalAttempts} intentos`}
-          />
-        </DashboardStatGrid>
+        <div className={styles.twoCol}>
+          <DashboardStatGrid>
+            <StatCard
+              as="li"
+              title="Usuarios totales"
+              value={platform.users.total}
+              subtitle={`${platform.users.activeTotal} activos`}
+            />
+            <StatCard
+              as="li"
+              variant="brand"
+              title="Matrículas activas"
+              value={platform.enrollments.active}
+              subtitle={`de ${platform.enrollments.total} totales`}
+            />
+            <StatCard
+              as="li"
+              title="Cursos publicados"
+              value={platform.courses.published}
+              subtitle={`de ${platform.courses.total} totales · ${platform.courses.draft} borrador`}
+            />
+            <StatCard
+              as="li"
+              variant="brand"
+              title="Pass rate assessments"
+              value={platform.assessments.passRate !== null ? `${platform.assessments.passRate}%` : '—'}
+              subtitle={`${platform.assessments.totalAttempts} intentos`}
+            />
+          </DashboardStatGrid>
+
+          <Card>
+            <CardHeader divided>
+              <h3 className={styles.cardSectionTitle}>Distribución por curso</h3>
+            </CardHeader>
+            <CardBody>
+              {coursesSummary.length === 0 ? (
+                <EmptyState title="No hay cursos registrados." />
+              ) : (
+                <ul className={styles.courseDistList}>
+                  {coursesSummary.map((c) => (
+                    <li key={String(c.courseId)} className={styles.courseDistRow}>
+                      <div className={styles.courseDistTop}>
+                        <span className={styles.courseDistTitle}>{c.title}</span>
+                        <span className={styles.courseDistPct}>{c.avgProgress}%</span>
+                      </div>
+                      <ProgressBar value={c.avgProgress} ariaLabel={`Progreso medio de ${c.title}`} />
+                      <span className={styles.courseDistMeta}>
+                        {c.activeEnrollments} activas · {c.completedEnrollments} completadas de {c.totalEnrollments}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </CardBody>
+            <CardFooter align="end" divided>
+              <Button as={Link} href="/progress" variant="secondary">
+                Ver progreso completo
+              </Button>
+            </CardFooter>
+          </Card>
+        </div>
       </DashboardSection>
 
-      {/* 3. Crecimiento reciente — tendencia, no snapshot */}
-      <DashboardSection title="Crecimiento reciente">
-        <DashboardStatGrid minWidth="200px">
-          <StatCard
-            as="li"
-            variant="success"
-            title="Nuevas matrículas"
-            value={platformGrowth.newEnrollments7d}
-            subtitle={`${platformGrowth.newEnrollments30d} en 30 días`}
-            trend={{ direction: 'up', value: `+${platformGrowth.newEnrollments7d}`, label: 'esta semana' }}
-          />
-          <StatCard
-            as="li"
-            variant="success"
-            title="Lecciones completadas"
-            value={platformGrowth.lessonsCompleted7d}
-            subtitle={`${platformGrowth.lessonsCompleted30d} en 30 días`}
-          />
-          <StatCard
-            as="li"
-            variant="brand"
-            title="Usuarios activos"
-            value={platformGrowth.activeUsers7d}
-            subtitle={`${platformGrowth.activeUsers30d} en 30 días`}
-          />
-          <StatCard
-            as="li"
-            variant="success"
-            title="Assessments aprobados"
-            value={platformGrowth.assessmentsPassed30d}
-            subtitle="Últimos 30 días"
-          />
-        </DashboardStatGrid>
-      </DashboardSection>
+      {/* 3. Evolución — crecimiento y actividad, lado a lado */}
+      <DashboardSection title="Evolución">
+        <div className={styles.twoCol}>
+          <div className={styles.subSection}>
+            <h3 className={styles.subSectionTitle}>Crecimiento reciente</h3>
+            <DashboardStatGrid minWidth="150px">
+              <StatCard
+                as="li"
+                variant="success"
+                title="Nuevas matrículas"
+                value={platformGrowth.newEnrollments7d}
+                subtitle={`${platformGrowth.newEnrollments30d} en 30 días`}
+                trend={{ direction: 'up', value: `+${platformGrowth.newEnrollments7d}`, label: 'esta semana' }}
+              />
+              <StatCard
+                as="li"
+                variant="success"
+                title="Lecciones completadas"
+                value={platformGrowth.lessonsCompleted7d}
+                subtitle={`${platformGrowth.lessonsCompleted30d} en 30 días`}
+              />
+              <StatCard
+                as="li"
+                variant="brand"
+                title="Usuarios activos"
+                value={platformGrowth.activeUsers7d}
+                subtitle={`${platformGrowth.activeUsers30d} en 30 días`}
+              />
+              <StatCard
+                as="li"
+                variant="success"
+                title="Assessments aprobados"
+                value={platformGrowth.assessmentsPassed30d}
+                subtitle="Últimos 30 días"
+              />
+            </DashboardStatGrid>
+          </div>
 
-      {/* 4. Actividad reciente — resumen ejecutivo, no tabla de 30 filas */}
-      <DashboardSection title="Actividad reciente">
-        <DashboardStatGrid>
-          <StatCard
-            as="li"
-            title="Media diaria"
-            value={activitySummary.dailyAvg}
-            subtitle="Lecciones/día, últimos 7 días"
-            trend={{
-              direction: activitySummary.direction,
-              value: `${activitySummary.delta >= 0 ? '+' : ''}${activitySummary.delta}`,
-              label: 'vs. semana anterior',
-            }}
-          />
-          <StatCard
-            as="li"
-            variant="brand"
-            title="Día más activo"
-            value={activitySummary.peakDay?.lessonsCompleted ?? 0}
-            subtitle={activitySummary.peakDay ? activitySummary.peakDay.date : 'Sin datos'}
-          />
-          <StatCard
-            as="li"
-            variant={activitySummary.inactiveDays > 0 ? 'warning' : 'success'}
-            title="Días sin actividad"
-            value={activitySummary.inactiveDays}
-            subtitle={`de ${activitySummary.totalDays} días analizados`}
-          />
-        </DashboardStatGrid>
-      </DashboardSection>
-
-      {/* 5. Resumen de cursos — panorama + acceso a detalle en /progress */}
-      <DashboardSection title="Cursos">
-        <Card>
-          <CardBody>
-            {coursesSummary.length === 0 ? (
-              <EmptyState title="No hay cursos registrados." />
-            ) : (
-              <DashboardStatGrid>
-                <StatCard
-                  as="li"
-                  title="Cursos totales"
-                  value={platform.courses.total}
-                  subtitle={`${platform.courses.published} publicados · ${platform.courses.draft} borrador`}
-                />
-                {lowestProgressCourse && (
-                  <StatCard
-                    as="li"
-                    variant="warning"
-                    title="Menor progreso medio"
-                    value={`${lowestProgressCourse.avgProgress}%`}
-                    subtitle={lowestProgressCourse.title}
-                  />
-                )}
-              </DashboardStatGrid>
-            )}
-          </CardBody>
-          <CardFooter align="end" divided>
-            <Button as={Link} href="/progress" variant="secondary">
-              Ver progreso completo
-            </Button>
-          </CardFooter>
-        </Card>
+          <div className={styles.subSection}>
+            <h3 className={styles.subSectionTitle}>Actividad reciente</h3>
+            <DashboardStatGrid minWidth="150px">
+              <StatCard
+                as="li"
+                title="Media diaria"
+                value={activitySummary.dailyAvg}
+                subtitle="Lecciones/día, últimos 7 días"
+                trend={{
+                  direction: activitySummary.direction,
+                  value: `${activitySummary.delta >= 0 ? '+' : ''}${activitySummary.delta}`,
+                  label: 'vs. semana anterior',
+                }}
+              />
+              <StatCard
+                as="li"
+                variant="brand"
+                title="Día más activo"
+                value={activitySummary.peakDay?.lessonsCompleted ?? 0}
+                subtitle={activitySummary.peakDay ? activitySummary.peakDay.date : 'Sin datos'}
+              />
+              <StatCard
+                as="li"
+                variant={activitySummary.inactiveDays > 0 ? 'warning' : 'success'}
+                title="Días sin actividad"
+                value={activitySummary.inactiveDays}
+                subtitle={`de ${activitySummary.totalDays} días analizados`}
+              />
+            </DashboardStatGrid>
+          </div>
+        </div>
       </DashboardSection>
     </DashboardLayout>
   );

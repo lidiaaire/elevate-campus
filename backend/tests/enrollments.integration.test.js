@@ -146,7 +146,9 @@ describe('GET /api/enrollments', () => {
       .set(authHeader(teacherToken));
 
     expect(res.status).toBe(200);
-    const studentIds = res.body.docs.map((e) => e.studentId);
+    // studentId viene poblado ({_id, firstName, lastName, email}) para mostrar
+    // el nombre real en vez del ObjectId crudo.
+    const studentIds = res.body.docs.map((e) => e.studentId._id);
     expect(studentIds).toContain(cohortStudentId);
     expect(studentIds).not.toContain(studentId);
   });
@@ -168,7 +170,7 @@ describe('GET /api/enrollments', () => {
       .set(authHeader(teacherToken));
 
     expect(res.status).toBe(200);
-    expect(res.body.docs.every((e) => e.studentId === cohortStudentId)).toBe(true);
+    expect(res.body.docs.every((e) => e.studentId._id === cohortStudentId)).toBe(true);
   });
 });
 

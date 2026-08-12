@@ -15,12 +15,15 @@ const ROLE_LABELS = {
 const NAV_LINKS = [
   { href: '/dashboard',    label: 'Inicio' },
   { href: '/courses',      label: 'Cursos' },
-  { href: '/enrollments',  label: 'Matrículas' },
   { href: '/progress',     label: 'Progreso' },
 ];
 
+// '/enrollments' está restringido a admin/teacher en routePermissions.js —
+// no puede vivir en NAV_LINKS (compartido con student) sin producir un
+// enlace del propio menú que lleva a "Acceso denegado" para todo student.
 const ADMIN_LINKS = [
-  { href: '/users', label: 'Usuarios' },
+  { href: '/enrollments', label: 'Matrículas' },
+  { href: '/users',       label: 'Usuarios' },
 ];
 
 const STUDENT_LINKS = [
@@ -32,6 +35,7 @@ const STUDENT_LINKS = [
 ];
 
 const TEACHER_LINKS = [
+  { href: '/enrollments',       label: 'Matrículas' },
   { href: '/teacher-analytics', label: 'Analítica' },
 ];
 

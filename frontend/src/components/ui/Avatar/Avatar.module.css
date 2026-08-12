@@ -1,0 +1,26 @@
+.avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border-radius: var(--radius-full);
+  font-weight: var(--font-weight-semibold);
+  line-height: 1;
+  user-select: none;
+}
+
+.sm {
+  width: 28px;
+  height: 28px;
+  font-size: var(--font-size-xs);
+}
+
+.md {
+  width: 36px;
+  height: 36px;
+  font-size: var(--font-size-sm);
+}
+
+.brand   { background-color: var(--brand-50);   color: var(--brand-700); }
+.success { background-color: var(--success-50); color: var(--success-700); }
+.warning { background-color: var(--warning-100); color: var(--warning-800); }

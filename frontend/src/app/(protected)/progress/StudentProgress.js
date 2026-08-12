@@ -17,7 +17,7 @@ import styles from './Progress.module.css';
 function CourseProgressRow({ enrollment }) {
   const visual = getCourseVisual(enrollment.courseTitle);
   const pct    = enrollment.overallProgress ?? 0;
-  const done   = pct === 100;
+  const done   = enrollment.enrollmentStatus === 'completed';
 
   return (
     <Link href={`/courses/${enrollment.courseId}`} className={styles.courseRow}>
