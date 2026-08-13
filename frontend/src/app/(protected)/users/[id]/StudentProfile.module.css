@@ -1,0 +1,760 @@
+/* ============================================================
+   StudentProfile — Ficha individual de alumno (/users/[id])
+   V2 — "Learning Profile" editorial: el alumno como protagonista,
+   menos rectángulos grises, más jerarquía, ritmo y reacción visual
+   al estado real (normal vs en riesgo).
+   ============================================================ */
+
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+}
+
+/* Entrada escalonada muy sutil por sección — sustituye a una única
+   animación de bloque para toda la página. `both` mantiene opacity:0
+   antes de arrancar (sin flash). Respeta prefers-reduced-motion vía
+   el bloque global ya existente en globals.css. */
+.page > * {
+  animation: fadeSlideUp var(--dur-slow) var(--ease-out) both;
+}
+
+.page > *:nth-child(1) { animation-delay: 0ms; }
+.page > *:nth-child(2) { animation-delay: 40ms; }
+.page > *:nth-child(3) { animation-delay: 90ms; }
+.page > *:nth-child(4) { animation-delay: 140ms; }
+.page > *:nth-child(5) { animation-delay: 190ms; }
+.page > *:nth-child(6) { animation-delay: 240ms; }
+
+.backLink {
+  align-self: flex-start;
+}
+
+/* ================================================================
+   HERO — el alumno como protagonista.
+   65/35 información/foto en desktop; el resumen académico vive como
+   una banda dentro del mismo bloque (misma superficie, mismo borde
+   redondeado), no como una card aparte.
+   ================================================================ */
+.hero {
+  position: relative;
+  background: var(--elevate-surface-brand-primary);
+  border-radius: var(--radius-lg);
+  border: 1px solid transparent;
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+}
+
+/* Señal de riesgo: discreta e inequívoca, sin teñir la pantalla de rojo */
+.heroAtRisk {
+  border-color: var(--danger-200);
+}
+
+.heroGlow {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse 45% 55% at 8% 15%,
+    rgba(255, 87, 34, 0.22) 0%,
+    transparent 70%
+  );
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+
+.heroGrid {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+@media (min-width: 760px) {
+  .heroGrid {
+    flex-direction: row;
+    align-items: stretch;
+    min-height: 220px;
+  }
+}
+
+.heroContent {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.625rem;
+  padding: 2rem 1.75rem 1.25rem;
+}
+
+@media (min-width: 760px) {
+  .heroContent {
+    flex: 0 1 65%;
+    padding: 2.25rem 2.5rem;
+  }
+}
+
+.heroTopRow {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  flex-wrap: wrap;
+}
+
+.heroRole {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--elevate-accent-500);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.heroName {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--elevate-surface-brand-light);
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  margin: 0;
+}
+
+@media (min-width: 760px) {
+  .heroName {
+    font-size: 2.5rem;
+  }
+}
+
+.statusActive,
+.statusInactive {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 0.2rem 0.6rem;
+  border-radius: var(--radius-full);
+}
+
+.statusActive {
+  background: var(--success-50);
+  color: var(--success-400);
+  border: 1px solid var(--success-200);
+}
+
+.statusInactive {
+  background: var(--bg-subtle);
+  color: var(--text-muted);
+  border: 1px solid var(--border-default);
+}
+
+.heroMetaGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4375rem;
+  margin-top: 0.5rem;
+}
+
+@media (min-width: 560px) {
+  .heroMetaGrid {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.5rem;
+  }
+}
+
+.metaItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.8125rem;
+  color: var(--elevate-text-brand-muted);
+}
+
+.metaIcon {
+  color: var(--elevate-accent-500);
+  flex-shrink: 0;
+}
+
+/* Última actividad con mayor peso cuando hay riesgo real */
+.metaItemWarn {
+  color: var(--danger-400);
+  font-weight: 600;
+}
+
+.metaItemWarn .metaIcon {
+  color: var(--danger-400);
+}
+
+.riskBadgeDanger,
+.riskBadgeOk {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.25rem 0.625rem;
+  border-radius: var(--radius-full);
+}
+
+.riskBadgeDanger {
+  background: var(--danger-50);
+  color: var(--danger-400);
+  border: 1px solid var(--danger-200);
+}
+
+.riskBadgeOk {
+  background: var(--success-50);
+  color: var(--success-400);
+  border: 1px solid var(--success-200);
+}
+
+/* ---- Zona de fotografía ----
+   30-35% del hero en desktop. Fallback Avatar XL centrado sobre un panel
+   de marca (grafito→negro) cuando no hay foto — nunca queda vacío ni se
+   ve "roto". Cuando exista photoUrl real, se integra con el mismo fundido
+   ya usado en los heroes de Student/Teacher Dashboard. */
+.heroPhotoZone {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 160px;
+  flex-shrink: 0;
+  overflow: hidden;
+  background: linear-gradient(155deg, var(--elevate-surface-brand-secondary) 0%, var(--elevate-surface-brand-primary) 100%);
+}
+
+@media (min-width: 760px) {
+  .heroPhotoZone {
+    flex: 0 0 35%;
+    min-height: auto;
+  }
+}
+
+.heroPhotoImg {
+  object-fit: cover;
+  object-position: center 20%;
+}
+
+.heroPhotoFadeBottom {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, var(--elevate-surface-brand-primary) 0%, transparent 45%);
+  pointer-events: none;
+}
+
+.heroPhotoFadeSide {
+  display: none;
+  pointer-events: none;
+}
+
+@media (min-width: 760px) {
+  .heroPhotoFadeSide {
+    display: block;
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to right, var(--elevate-surface-brand-primary) 0%, transparent 30%);
+  }
+}
+
+/* ---- Banda de resumen — extensión del hero, no una card aparte ---- */
+.summaryBand {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+  padding: 1.125rem 1.75rem 1.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+@media (min-width: 760px) {
+  .summaryBand {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.125rem 2.5rem 1.5rem;
+  }
+}
+
+.summaryPrimary {
+  display: flex;
+  align-items: baseline;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.summaryStat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.summaryValue {
+  font-size: 2.25rem;
+  font-weight: 800;
+  color: var(--elevate-accent-500);
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+.summaryValueSm {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--elevate-surface-brand-light);
+  line-height: 1;
+}
+
+.summaryLabel {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: var(--elevate-text-brand-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.summaryDivider {
+  width: 1px;
+  height: 30px;
+  background: rgba(255, 255, 255, 0.12);
+  flex-shrink: 0;
+}
+
+.summarySecondary {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.summaryChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.75rem;
+  color: var(--elevate-surface-brand-light);
+  padding: 0.3rem 0.625rem;
+  border-radius: var(--radius-full);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.summaryChip svg {
+  color: var(--elevate-accent-500);
+}
+
+/* ================================================================
+   SECCIONES
+   ================================================================ */
+.sectionTitle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0.875rem;
+}
+
+/* ================================================================
+   TRAYECTORIA DE APRENDIZAJE — pieza protagonista, no cards pequeñas
+   ================================================================ */
+.trajectoryRow {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+}
+
+.enrollmentCard {
+  position: relative;
+  flex: 1 1 280px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+  padding: 1.5rem;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-top: 3px solid var(--course-accent, var(--border-strong));
+  border-radius: var(--radius-lg);
+  transition: transform var(--dur-normal) var(--ease-out),
+              box-shadow var(--dur-normal) var(--ease-out),
+              border-color var(--dur-normal) var(--ease-out);
+}
+
+.enrollmentCard:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--border-strong);
+}
+
+/* Conector visual entre cursos — continuidad de la trayectoria, sin JS
+   ni librerías: una línea corta dentro del hueco entre cards contiguas. */
+@media (min-width: 760px) {
+  .enrollmentCard:not(:first-child)::before {
+    content: '';
+    position: absolute;
+    left: -1.3rem;
+    top: 2.5rem;
+    width: 1.1rem;
+    height: 2px;
+    background: var(--border-strong);
+  }
+}
+
+.enrollmentHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.enrollmentLevel {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-default);
+  padding: 0.1rem 0.5rem;
+  border-radius: var(--radius-full);
+}
+
+.enrollmentStatus {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  padding: 0.15rem 0.5rem;
+  border-radius: var(--radius-full);
+}
+
+.status_active {
+  background: var(--color-ink-soft);
+  color: var(--color-ink);
+}
+
+.status_completed {
+  background: var(--success-50);
+  color: var(--success-400);
+}
+
+.status_suspended {
+  background: var(--warning-50);
+  color: var(--warning-400);
+}
+
+.enrollmentTitle {
+  font-size: 1.1875rem;
+  font-weight: 700;
+  color: var(--text-display);
+  margin: 0;
+  line-height: 1.25;
+}
+
+.enrollmentMeta {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.enrollmentProgress {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.375rem;
+}
+
+.enrollmentProgressTop {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.enrollmentPct {
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.enrollmentNoProgress {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-style: italic;
+  margin: 0.25rem 0 0;
+}
+
+.enrollmentNext {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin: 0.125rem 0 0;
+  padding-top: 0.625rem;
+  border-top: 1px solid var(--border-default);
+}
+
+.enrollmentNext span {
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+/* ================================================================
+   PROGRESO ACADÉMICO (60) + COMPETENCIAS (40)
+   ================================================================ */
+.progressGrid {
+  display: grid;
+  grid-template-columns: 3fr 2fr;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+@media (max-width: 860px) {
+  .progressGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.progressMain {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.progressList {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 1.125rem;
+}
+
+.progressItem {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.progressItemTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 0.9375rem;
+}
+
+.progressItemTitle {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.progressItemPct {
+  font-weight: 800;
+  font-size: 1.125rem;
+  color: var(--elevate-accent-500);
+}
+
+.progressItemMeta {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.pendingBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-default);
+}
+
+.pendingLabel {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+}
+
+.pendingList {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.pendingItem {
+  font-size: 0.8125rem;
+  color: var(--text-primary);
+}
+
+.pendingItem span {
+  color: var(--text-muted);
+}
+
+.progressSide {
+  min-width: 0;
+}
+
+/* ================================================================
+   ACTIVIDAD RECIENTE — timeline compacto con línea temporal sutil
+   ================================================================ */
+.activityCardBody {
+  padding: 1.125rem 1.375rem;
+}
+
+.activityList {
+  position: relative;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+}
+
+.activityList::before {
+  content: '';
+  position: absolute;
+  left: 12px;
+  top: 10px;
+  bottom: 10px;
+  width: 1px;
+  background: var(--border-default);
+}
+
+.activityRow {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.5rem 0;
+}
+
+.activityIcon {
+  position: relative;
+  z-index: 1;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--success-50);
+  color: var(--success-400);
+}
+
+.activityBody {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.activityTitle {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.activityCourse {
+  font-size: 0.6875rem;
+  color: var(--text-muted);
+}
+
+.activityDate {
+  flex-shrink: 0;
+  font-size: 0.6875rem;
+  color: var(--text-muted);
+}
+
+/* ================================================================
+   LOGROS Y CERTIFICADOS — secundario, con carácter propio
+   ================================================================ */
+.secondaryGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+@media (max-width: 760px) {
+  .secondaryGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.achievementList,
+.certificateList {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+}
+
+.achievementChip,
+.certificateChip {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.625rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-default);
+  transition: border-color var(--dur-normal) var(--ease-out),
+              background-color var(--dur-normal) var(--ease-out),
+              transform var(--dur-normal) var(--ease-out);
+}
+
+.achievementChip:hover,
+.certificateChip:hover {
+  border-color: var(--border-strong);
+  background: var(--bg-hover);
+  transform: translateY(-1px);
+}
+
+.achievementIcon {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-md);
+  background: var(--elevate-accent-50);
+  font-size: 1.125rem;
+}
+
+/* Certificados: tratamiento más documental — sello redondo en vez de
+   chip cuadrado, número de certificado visible como dato de autenticidad. */
+.certificateSeal {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--success-50);
+  color: var(--success-400);
+  border: 1px dashed var(--success-200);
+}
+
+.achievementBody,
+.certificateBody {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.achievementName,
+.certificateName {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.certificateNumber {
+  font-size: 0.6875rem;
+  font-family: var(--font-family-mono);
+  color: var(--text-muted);
+  letter-spacing: 0.02em;
+}
+
+.achievementMeta,
+.certificateMeta {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}

@@ -17,7 +17,12 @@ async function request(endpoint, { method = 'GET', body, token } = {}) {
 
   if (!response.ok) {
     const message = data?.message ?? 'Ha ocurrido un error. Inténtalo de nuevo.';
-    throw new Error(message);
+    const error = new Error(message);
+    // Aditivo: los consumidores existentes solo leen .message y siguen intactos.
+    // Nuevo: permite distinguir 403/404/etc. sin parsear el mensaje.
+    error.status = response.status;
+    error.code   = data?.error;
+    throw error;
   }
 
   return data;

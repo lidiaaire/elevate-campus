@@ -13,6 +13,12 @@ export const dashboardService = {
     return api.get(`/dashboard/teacher/students/${studentId}`, token);
   },
 
+  // Mismo shape que getTeacherStudentDetail (backend: getStudentAcademicDetail
+  // compartido), montado en /admin/students/:studentId para el actor admin.
+  getAdminStudentDetail(studentId, token) {
+    return api.get(`/dashboard/admin/students/${studentId}`, token);
+  },
+
   getAdminDashboard(token) {
     return api.get('/dashboard/admin', token);
   },

@@ -6,7 +6,8 @@
  * Métodos:
  *   getStudentDashboard     → DashboardService.getStudentDashboard(studentId)
  *   getTeacherDashboard     → DashboardService.getTeacherDashboard(teacherId)
- *   getTeacherStudentDetail → DashboardService.getTeacherStudentDetail(teacherId, studentId)
+ *   getStudentAcademicDetail → DashboardService.getStudentAcademicDetail(role, userId, studentId)
+ *     (montado en /teacher/students/:studentId y /admin/students/:studentId)
  *   getAdminDashboard       → DashboardService.getAdminDashboard()
  *   getAdminActivityFeed    → DashboardService.getAdminActivityFeed(days)
  *   getAdminAtRisk          → DashboardService.getAdminAtRisk()
@@ -30,10 +31,10 @@ const getTeacherDashboard = asyncHandler(async (req, res) => {
   res.status(200).json(dashboard);
 });
 
-const getTeacherStudentDetail = asyncHandler(async (req, res) => {
-  const { userId }    = req.user;
-  const { studentId } = req.params;
-  const detail = await DashboardService.getTeacherStudentDetail(userId, studentId);
+const getStudentAcademicDetail = asyncHandler(async (req, res) => {
+  const { userId, role } = req.user;
+  const { studentId }    = req.params;
+  const detail = await DashboardService.getStudentAcademicDetail(role, userId, studentId);
   res.status(200).json(detail);
 });
 
@@ -56,7 +57,7 @@ const getAdminAtRisk = asyncHandler(async (req, res) => {
 module.exports = {
   getStudentDashboard,
   getTeacherDashboard,
-  getTeacherStudentDetail,
+  getStudentAcademicDetail,
   getAdminDashboard,
   getAdminActivityFeed,
   getAdminAtRisk,

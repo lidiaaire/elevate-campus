@@ -7,6 +7,11 @@ export const certificateService = {
     return api.get('/certificates/me', token);
   },
 
+  // Admin: cualquier alumno. Teacher: solo su cohorte (scope validado en backend).
+  getStudentCertificates(studentId, token) {
+    return api.get(`/certificates/students/${studentId}`, token);
+  },
+
   verifyCertificate(certificateNumber) {
     return api.get(`/certificates/verify/${certificateNumber}`);
   },

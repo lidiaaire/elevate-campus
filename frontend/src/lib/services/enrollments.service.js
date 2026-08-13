@@ -5,6 +5,11 @@ export const enrollmentsService = {
     return api.get('/enrollments', token);
   },
 
+  // Admin: cualquier alumno. Teacher: solo su cohorte (scope validado en backend).
+  getEnrollmentsByStudent(studentId, token) {
+    return api.get(`/enrollments?studentId=${studentId}`, token);
+  },
+
   getEnrollmentById(id, token) {
     return api.get(`/enrollments/${id}`, token);
   },

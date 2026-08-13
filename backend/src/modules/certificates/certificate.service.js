@@ -21,6 +21,8 @@ const CourseRepository           = require('../../repositories/course.repository
 const { generateCertificatePdf } = require('./certificatePdf.service');
 const { NotFoundError, ForbiddenError } = require('../../utils/ApiError');
 const { createNotification }     = require('../notifications/notification.service');
+const { ROLES }                  = require('../../config/constants');
+const validateTeacherScope       = require('../../utils/validateTeacherScope');
 
 const UPLOADS_DIR = path.join(__dirname, '../../../../uploads/certificates');
 
@@ -127,4 +129,30 @@ const verifyCertificate = async (certificateNumber) => {
   };
 };
 
-module.exports = { issueCertificate, getMyCertificates, getCertificatePdf, verifyCertificate };
+// getStudentCertificates — mismo criterio que achievement.service.js
+// getStudentAchievements: acceso propio (isSelf) siempre permitido para que
+// /me no cambie de comportamiento para ningún rol; fuera de ese caso, student
+// nunca ve certificados ajenos, teacher solo los de su cohorte, admin sin
+// restricción.
+const getStudentCertificates = async (actorRole, actorId, studentId) => {
+  const isSelf = actorId.toString() === studentId.toString();
+
+  if (!isSelf) {
+    if (actorRole === ROLES.STUDENT) {
+      throw new ForbiddenError('FORBIDDEN', 'Solo puedes consultar tus propios certificados');
+    }
+    if (actorRole === ROLES.TEACHER) {
+      await validateTeacherScope(actorId, studentId);
+    }
+  }
+
+  return getMyCertificates(studentId);
+};
+
+module.exports = {
+  issueCertificate,
+  getMyCertificates,
+  getCertificatePdf,
+  verifyCertificate,
+  getStudentCertificates,
+};

@@ -26,6 +26,7 @@ export const ROUTE_PERMISSIONS = [
   { path: '/enrollments',       match: 'exact',  roles: ['admin', 'teacher'] },
   { path: '/progress',          match: 'exact',  roles: ['admin', 'teacher', 'student'] },
   { path: '/users',             match: 'exact',  roles: ['admin'] },
+  { path: '/users',             match: 'prefix', roles: ['admin', 'teacher'] },
   { path: '/assessments',       match: 'exact',  roles: ['student'] },
   { path: '/certificates',      match: 'exact',  roles: ['student'] },
   { path: '/achievements',      match: 'exact',  roles: ['student'] },

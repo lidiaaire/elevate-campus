@@ -9,7 +9,8 @@
  * Métodos públicos:
  *   getStudentDashboard(studentId)
  *   getTeacherDashboard(teacherId)
- *   getTeacherStudentDetail(teacherId, studentId)  ← scope validation como primera operación
+ *   getStudentAcademicDetail(actorRole, actorId, studentId)  ← scope validation primero,
+ *     compartido por Admin (sin restricción) y Teacher (validateTeacherScope)
  *   getAdminDashboard()
  *   getAdminActivityFeed(days)
  *   getAdminAtRisk()
@@ -55,7 +56,8 @@ const {
   AT_RISK_DAYS,
   AT_RISK_PROGRESS_THRESHOLD,
 } = require('../../config/constants');
-const { NotFoundError, ForbiddenError } = require('../../utils/ApiError');
+const { NotFoundError } = require('../../utils/ApiError');
+const validateTeacherScope = require('../../utils/validateTeacherScope');
 
 // ---------------------------------------------------------------------------
 // Utilidades internas
@@ -800,15 +802,29 @@ const getTeacherDashboard = async (teacherId) => {
   };
 };
 
-const getTeacherStudentDetail = async (teacherId, studentId) => {
-  // Scope validation — primera operación, antes de cualquier query de datos.
+// getStudentAcademicDetail — fuente única para la ficha académica de un
+// alumno, usada tanto por Admin como por Teacher (dos rutas, mismo Service).
+// Reutiliza getStudentDashboard tal cual — mismo shape que ve el propio
+// student en su dashboard (profile, summary, growth, skillProgress,
+// enrollments, continueLearning, pendingAssessments, recentActivity).
+//
+// Scope: Admin sin restricción. Teacher solo alumnos de su cohorte, vía
+// validateTeacherScope (misma fuente de verdad que user.service.js/
+// progress.service.js/enrollment.service.js — no se reimplementa el check).
+const getStudentAcademicDetail = async (actorRole, actorId, studentId) => {
+  // Validación de existencia + rol — primera operación, antes de cualquier
+  // query de datos. Un id que no sea un student real se trata como 404,
+  // no como 403: no tiene sentido "pedir permiso" para un recurso que
+  // conceptualmente no existe en este endpoint.
   const student = await UserRepository.findById(studentId);
-  if (!student) {
+  if (!student || student.role !== ROLES.STUDENT) {
     throw new NotFoundError('STUDENT_NOT_FOUND', 'Alumno no encontrado');
   }
-  if (!student.assignedTeacherId || student.assignedTeacherId.toString() !== teacherId.toString()) {
-    throw new ForbiddenError('STUDENT_NOT_IN_COHORT', 'Este alumno no pertenece a tu cohorte');
+
+  if (actorRole === ROLES.TEACHER) {
+    await validateTeacherScope(actorId, studentId);
   }
+
   return getStudentDashboard(studentId);
 };
 
@@ -1043,7 +1059,7 @@ const getAdminAtRisk = async () => {
 module.exports = {
   getStudentDashboard,
   getTeacherDashboard,
-  getTeacherStudentDetail,
+  getStudentAcademicDetail,
   getAdminDashboard,
   getAdminActivityFeed,
   getAdminAtRisk,

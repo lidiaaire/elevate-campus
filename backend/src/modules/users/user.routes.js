@@ -29,8 +29,8 @@ router.get(
   userController.listUsers,
 );
 
-// GET /api/users/:id — Admin y Teacher pueden consultar cualquier perfil
-// MVP: Teacher puede ver perfiles ajenos (restricción relacional fuera de alcance)
+// GET /api/users/:id — Admin consulta cualquier perfil. Teacher solo perfiles
+// de alumnos de su propia cohorte (validateTeacherScope, ver user.service.js).
 router.get(
   '/:id',
   requireRole('admin', 'teacher'),

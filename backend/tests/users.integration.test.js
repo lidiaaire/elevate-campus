@@ -10,9 +10,18 @@ const { getToken, authHeader }                      = require('./setup/auth');
 // ── Estado compartido ─────────────────────────────────────────────────────────
 
 let adminToken;
+let adminId;
 let teacherToken;
 let studentToken;
 let studentId;
+
+// Segundo teacher + su propio alumno — exclusivamente para probar el scope
+// de GET /api/users/:id (Teacher no debe poder consultar alumnos ajenos).
+let teacher;
+let otherTeacherToken;
+let otherTeacherId;
+let ownStudentId;
+let otherCohortStudentId;
 
 // ── Ciclo de vida ─────────────────────────────────────────────────────────────
 
@@ -20,13 +29,33 @@ beforeAll(async () => {
   await connectDatabase();
 
   const { user: admin,   password: adminPass   } = await createAdmin();
-  const { user: teacher, password: teacherPass } = await createTeacher();
+  const { user: teacherUser, password: teacherPass } = await createTeacher();
   const { user: student, password: studentPass } = await createStudent();
 
+  teacher      = teacherUser;
+  adminId      = admin._id.toString();
   adminToken   = await getToken(admin.email,   adminPass);
   teacherToken = await getToken(teacher.email, teacherPass);
   studentToken = await getToken(student.email, studentPass);
   studentId    = student._id.toString();
+
+  const { user: otherTeacher, password: otherTeacherPass } = await createTeacher({
+    email: 'other.teacher@test.com',
+  });
+  otherTeacherToken = await getToken(otherTeacher.email, otherTeacherPass);
+  otherTeacherId    = otherTeacher._id.toString();
+
+  const { user: ownStudent } = await createStudent({
+    email:             'own.student@test.com',
+    assignedTeacherId: teacher._id,
+  });
+  ownStudentId = ownStudent._id.toString();
+
+  const { user: otherCohortStudent } = await createStudent({
+    email:             'other.cohort.student@test.com',
+    assignedTeacherId: otherTeacher._id,
+  });
+  otherCohortStudentId = otherCohortStudent._id.toString();
 });
 
 afterAll(async () => {
@@ -67,6 +96,80 @@ describe('GET /api/users', () => {
 
   test('sin token → 401 TOKEN_MISSING', async () => {
     const res = await request(app).get('/api/users');
+
+    expect(res.status).toBe(401);
+    expect(res.body.error).toBe('TOKEN_MISSING');
+  });
+});
+
+// ── GET /api/users/:id ────────────────────────────────────────────────────────
+// Gap de seguridad corregido: Teacher solo puede consultar alumnos de su
+// propia cohorte (validateTeacherScope), no cualquier perfil.
+
+describe('GET /api/users/:id', () => {
+  test('ADMIN → 200 consultando un student', async () => {
+    const res = await request(app)
+      .get(`/api/users/${ownStudentId}`)
+      .set(authHeader(adminToken));
+
+    expect(res.status).toBe(200);
+    expect(res.body.user._id).toBe(ownStudentId);
+  });
+
+  test('ADMIN → 200 consultando un teacher', async () => {
+    const res = await request(app)
+      .get(`/api/users/${otherTeacherId}`)
+      .set(authHeader(adminToken));
+
+    expect(res.status).toBe(200);
+    expect(res.body.user._id).toBe(otherTeacherId);
+  });
+
+  test('TEACHER → 200 consultando un alumno de su propia cohorte', async () => {
+    const res = await request(app)
+      .get(`/api/users/${ownStudentId}`)
+      .set(authHeader(teacherToken));
+
+    expect(res.status).toBe(200);
+    expect(res.body.user._id).toBe(ownStudentId);
+  });
+
+  test('TEACHER → 403 consultando un alumno de OTRO teacher', async () => {
+    const res = await request(app)
+      .get(`/api/users/${otherCohortStudentId}`)
+      .set(authHeader(teacherToken));
+
+    expect(res.status).toBe(403);
+    expect(res.body.error).toBe('STUDENT_NOT_IN_COHORT');
+  });
+
+  test('TEACHER → 403 consultando a OTRO teacher (no un alumno)', async () => {
+    const res = await request(app)
+      .get(`/api/users/${otherTeacherId}`)
+      .set(authHeader(teacherToken));
+
+    expect(res.status).toBe(403);
+  });
+
+  test('TEACHER → 403 consultando a un admin', async () => {
+    const res = await request(app)
+      .get(`/api/users/${adminId}`)
+      .set(authHeader(teacherToken));
+
+    expect(res.status).toBe(403);
+  });
+
+  test('STUDENT → 403 INSUFFICIENT_ROLE (bloqueado a nivel de ruta)', async () => {
+    const res = await request(app)
+      .get(`/api/users/${ownStudentId}`)
+      .set(authHeader(studentToken));
+
+    expect(res.status).toBe(403);
+    expect(res.body.error).toBe('INSUFFICIENT_ROLE');
+  });
+
+  test('sin token → 401 TOKEN_MISSING', async () => {
+    const res = await request(app).get(`/api/users/${ownStudentId}`);
 
     expect(res.status).toBe(401);
     expect(res.body.error).toBe('TOKEN_MISSING');

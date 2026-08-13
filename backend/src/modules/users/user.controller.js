@@ -1,8 +1,7 @@
 'use strict';
 
-// Limitación conocida MVP: Teacher puede consultar cualquier perfil vía GET /users/:id.
-// La restricción relacional "solo sus propios alumnos" queda fuera del alcance de esta fase.
-// Se implementará en una fase posterior cuando se añada autorización relacional.
+// GET /users/:id — Teacher restringido a alumnos de su cohorte vía
+// validateTeacherScope (ver user.service.js getUserById). Admin sin restricción.
 
 const asyncHandler = require('../../utils/asyncHandler');
 const userService  = require('./user.service');
@@ -34,7 +33,7 @@ const listUsers = asyncHandler(async (req, res) => {
 // getUserById — GET /api/users/:id
 // ---------------------------------------------------------------------------
 const getUserById = asyncHandler(async (req, res) => {
-  const user = await userService.getUserById(req.params.id);
+  const user = await userService.getUserById(req.params.id, req.user);
   res.json({ user });
 });
 

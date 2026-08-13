@@ -11,6 +11,7 @@ const { ConflictError,
         UnprocessableError }        = require('../../utils/ApiError');
 const { ROLES }                     = require('../../config/constants');
 const achievementService            = require('../achievements/achievement.service');
+const validateTeacherScope          = require('../../utils/validateTeacherScope');
 
 const BCRYPT_ROUNDS = 10;
 
@@ -87,10 +88,22 @@ const createUser = async (data) => {
 // Responsabilidad: obtener cualquier usuario por ID, activo o inactivo.
 // El filtrado por isActive es responsabilidad del middleware de autorización,
 // no de esta consulta — el admin necesita poder ver usuarios inactivos.
+//
+// Scope: Admin sin restricción. Teacher solo puede consultar alumnos de su
+// propia cohorte — reutiliza validateTeacherScope (misma fuente de verdad
+// que dashboard/progress/enrollments), fail-closed: cualquier target que no
+// sea un student asignado a este teacher (otro teacher, admin, alumno ajeno)
+// lanza ForbiddenError, porque validateTeacherScope compara assignedTeacherId
+// y ningún no-student lo tiene poblado con el id del teacher.
 // ---------------------------------------------------------------------------
-const getUserById = async (id) => {
+const getUserById = async (id, actor) => {
   const user = await userRepository.findById(id);
   if (!user) throw new NotFoundError('USER_NOT_FOUND', 'El usuario no existe');
+
+  if (actor.role === ROLES.TEACHER) {
+    await validateTeacherScope(actor.userId, id);
+  }
+
   return user;
 };
 

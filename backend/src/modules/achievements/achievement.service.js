@@ -19,6 +19,9 @@ const UserAchievement            = require('../../models/userAchievement.model')
 const UserRepository             = require('../../repositories/user.repository');
 const UserAchievementRepository  = require('../../repositories/userAchievement.repository');
 const { createNotification }     = require('../notifications/notification.service');
+const { ROLES }                  = require('../../config/constants');
+const { ForbiddenError }         = require('../../utils/ApiError');
+const validateTeacherScope       = require('../../utils/validateTeacherScope');
 
 const unlockAchievement = async (userId, achievementSlug, metadata = {}) => {
   const achievement = await Achievement.findOne({ slug: achievementSlug, isActive: true });
@@ -64,4 +67,24 @@ const getUserAchievements = async (userId) => {
   }));
 };
 
-module.exports = { unlockAchievement, getUserAchievements };
+// getStudentAchievements — punto único de scope para /me y /students/:studentId.
+// Acceso propio (isSelf) siempre permitido, sea cual sea el rol — así /me
+// sigue funcionando igual para student, teacher y admin. Fuera de ese caso:
+// student nunca puede ver logros ajenos, teacher solo los de su cohorte
+// (validateTeacherScope), admin sin restricción.
+const getStudentAchievements = async (actorRole, actorId, studentId) => {
+  const isSelf = actorId.toString() === studentId.toString();
+
+  if (!isSelf) {
+    if (actorRole === ROLES.STUDENT) {
+      throw new ForbiddenError('FORBIDDEN', 'Solo puedes consultar tus propios logros');
+    }
+    if (actorRole === ROLES.TEACHER) {
+      await validateTeacherScope(actorId, studentId);
+    }
+  }
+
+  return getUserAchievements(studentId);
+};
+
+module.exports = { unlockAchievement, getUserAchievements, getStudentAchievements };
