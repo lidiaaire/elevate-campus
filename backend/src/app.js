@@ -24,6 +24,7 @@ const liveSessionRoutes       = require('./modules/liveSessions/liveSession.rout
 const attendanceRoutes        = require('./modules/attendance/attendance.routes');
 const assignmentRoutes        = require('./modules/assignments/assignment.routes');
 const submissionRoutes        = require('./modules/submissions/submission.routes');
+const communityRoutes          = require('./modules/community/community.routes');
 
 const swaggerRouter = require('./docs/swagger');
 
@@ -50,6 +51,7 @@ app.use('/api/live-sessions',   liveSessionRoutes);
 app.use('/api/attendance',      attendanceRoutes);
 app.use('/api/assignments',     assignmentRoutes);
 app.use('/api/submissions',     submissionRoutes);
+app.use('/api/community',       communityRoutes);
 
 app.use('/api/docs', swaggerRouter);
 

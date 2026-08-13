@@ -20,6 +20,18 @@ class CertificateRepository extends BaseRepository {
       .lean();
   }
 
+  // Usado por community.service para el feed de academia/cohorte: mismo
+  // populate que findByStudentWithCourse, pero para un conjunto de
+  // students (el scope ya resuelto por rol) en vez de uno solo.
+  async findByStudents(studentIds) {
+    return this.model
+      .find({ student: { $in: studentIds } })
+      .populate('student', 'firstName lastName email role')
+      .populate('course', 'title level')
+      .sort({ issueDate: -1 })
+      .lean();
+  }
+
   async findByStudentAndCourse(studentId, courseId) {
     return this.model.findOne({ student: studentId, course: courseId });
   }

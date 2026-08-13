@@ -16,6 +16,7 @@ const NAV_LINKS = [
   { href: '/dashboard',    label: 'Inicio' },
   { href: '/courses',      label: 'Cursos' },
   { href: '/progress',     label: 'Progreso' },
+  { href: '/community',    label: 'Comunidad' },
 ];
 
 // '/enrollments' está restringido a admin/teacher en routePermissions.js —
