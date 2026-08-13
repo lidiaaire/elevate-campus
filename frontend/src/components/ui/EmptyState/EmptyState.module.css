@@ -14,7 +14,7 @@
   width: 36px;  /* tamaño de icon container: sin token exacto en DS */
   height: 36px;
   border-radius: 50%;
-  background-color: var(--brand-50);
+  background-color: var(--color-ink-soft);
   color: var(--text-muted);
   font-size: var(--font-size-lg);
   line-height: 1;

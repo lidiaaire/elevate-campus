@@ -30,7 +30,7 @@ Elevate Your English Campus es una plataforma educativa SaaS dirigida a estudian
 - **Densidad funcional**: las vistas de teacher y admin muestran tablas, métricas y listas. El sistema debe soportar densidad sin sacrificar legibilidad.
 - **Accesibilidad no negociable**: contraste mínimo WCAG AA (4.5:1 para texto, 3:1 para elementos interactivos). Focus visible en todos los elementos.
 
-La estética de referencia es la de SaaS modernos de productividad (Linear, Notion, Vercel Dashboard): superficies blancas, grises fríos, un único color de acento usado con parsimonia.
+La estética de referencia ya no es la de un SaaS de productividad genérico. Sigue la identidad propia de Elevate Your English (ver §10): superficies claras para contenido de lectura prolongada, grafito/negro como color funcional de alto contraste, y el naranja de marca (`#FF5722`) como acento único por vista — nunca decoración repetida ni fondo extenso.
 
 ---
 
@@ -501,16 +501,12 @@ Tokens en `globals.css` (bloque "Elevate Identity v3"):
 
 ### 10.2 Regla de uso del naranja
 
-> **El naranja es un acento único por vista, nunca un color dominante.**
-
-Se reserva para: el símbolo de marca, el estado activo de navegación, el foco visible y un único CTA destacado por pantalla. No se usa como fondo extenso, no se aplica a botones funcionales genéricos (guardar, cancelar, confirmar), y no debe repetirse más de una vez como protagonista en la misma vista.
+> **SUPERSEDIDA desde la iteración Dark Theme Global (§10.8, 2026-08-12).**
+> La regla original — "el naranja es un acento único por vista, nunca un color dominante" — se calibró para un sistema con superficies blancas, donde el naranja necesitaba dosificarse para no verse gratuito. Con el sistema dark global el naranja pasa a ser el color funcional habitual de progreso, CTA y selección: puede aparecer varias veces por vista (p. ej. el Student Dashboard combina barra de progreso del hero, barra del curso activo y dos barras de objetivos, todas naranjas). Lo que sigue vigente: **no se usa como fondo extenso de página ni de card completa** — vive en barras, botones, chips, focos y highlights puntuales, nunca como superficie dominante.
 
 ### 10.3 Superficies de marca vs. superficies de trabajo
 
-- **Superficies de marca** (`--elevate-surface-brand-*`): portan la identidad visual de forma persistente. Uso previsto: navegación futura (Sidebar) y elementos de identidad (Login, símbolo, favicon). Fondo oscuro.
-- **Superficies de trabajo** (`--bg-*`, `--brand-*`, sistema actual): contenido LMS, lectura prolongada, Navbar, formularios, tablas. Se mantienen claras — no reciben tratamiento de marca oscuro, priorizan contraste y legibilidad sostenida.
-
-Esta separación evita que la identidad de marca compita con la lectura de contenido académico.
+> **SUPERSEDIDA desde §10.8.** Ya no existe esa distinción: con el sistema dark global, `--bg-page`/`--bg-surface`/`--bg-subtle` (superficies de trabajo) se derivan directamente de `--elevate-surface-brand-primary` — son la misma superficie de marca, no una alternativa clara para "no competir con la lectura". Toda la app, incluida la superficie de trabajo, es ahora superficie de marca.
 
 ### 10.4 Estado por fase
 
@@ -523,6 +519,8 @@ Esta separación evita que la identidad de marca compita con la lectura de conte
 | 4.1 — Login consolidado | Superficies unificadas con Sidebar, sin rediseño | ✅ Completada |
 | 5 — Navegación móvil | `BottomNav` + `MobileMenu` migrados junto con Sidebar | ✅ Completada |
 | 6 — Consolidación técnica | Limpieza de tokens legacy/deprecated sin consumo real | ✅ Completada |
+| 7 — Vertical slice de marca | Ver §10.7 | ✅ Completada |
+| 8 — Dark theme global (1ª iteración) | Ver §10.8 | ✅ Completada (tokens + UI compartida + Student Dashboard; Teacher/Admin heredan, sin rediseño propio todavía) |
 
 `Navbar` permanece neutro por decisión de producto (superficie de trabajo, no de marca) — no es deuda pendiente.
 
@@ -532,7 +530,8 @@ Asset de símbolo: `frontend/public/brand/elevate-symbol.svg` es una **reconstru
 
 | Deuda | Detalle |
 |-------|---------|
-| Sistema azul activo | `--brand-*` sigue siendo el color funcional real de gran parte de la interfaz (Button `primary`, cards, progreso, etc.); migración pendiente de fase futura |
+| Sistema azul activo (parcial) | `--brand-*` migrado a `--color-ink-*` en el vertical slice y consolidado en el dark theme global (§10.8). **Sigue azul** en Courses, Assessment, Lesson, Certificates y CourseDetail legacy — migración pendiente de fase futura |
+| Teacher/Admin sin rediseño propio | Heredan el dark theme global vía tokens compartidos (fondos, texto, bordes, Button, Card, StatCard, Avatar, ProgressBar) y no están rotos, pero no han recibido el tratamiento de composición/jerarquía que sí recibió Student Dashboard. Es el siguiente slice (ver §10.8) |
 | `--color-text-secondary` | Sin consumidores tras Fase 6; candidato a retirada en una futura fase de limpieza |
 | `CourseDetail.module.css` legacy | `frontend/src/styles/CourseDetail.module.css` (activo, usado por `courses/[id]/units/[unitId]/page.js`) no usa tokens del Design System — colores, radios, etc. en crudo, incluido el indigo antiguo `#4f46e5`. Requiere una migración propia, no puntual |
 | Paletas funcionales de contenido | `courseVisuals.js` (colores decorativos por curso) y `CEFR_COLOR` en `certificates/page.js` (colores por nivel A1-C2) usan hex fijos por diseño — no son deuda de marca, son paletas categóricas intencionales |
@@ -544,6 +543,49 @@ Existen **8 archivos `.module.css` en `frontend/src/styles/`** sin ningún `impo
 **Advertencia:** un `grep` de un token o color por nombre de archivo puede devolver falsos positivos si coincide con estos huérfanos (ocurrió en la auditoría de Fase 1, que documentó incorrectamente `Dashboard.module.css` como consumidor activo de tokens deprecated). **Antes de dar por válido cualquier hallazgo de auditoría, confirmar que el archivo encontrado está realmente importado** por algún `index.js`/`page.js` (`grep -r "NombreArchivo.module.css" src --include=*.js`).
 
 Su eliminación no se ha decidido — requiere una iteración propia que confirme ausencia de imports dinámicos y de referencias externas antes de borrar.
+
+### 10.7 Vertical slice "Marca antes que dashboard genérico" (2026-08-12)
+
+Primera fase de corrección de la desconexión BRAND/PRODUCT identificada en auditoría. Alcance: Sidebar/Layout, Student/Teacher/Admin Dashboard, componentes base consumidos por ellos. No toca Courses, Assessment, Lesson, Certificates ni backend.
+
+**Tokens nuevos** (`globals.css`):
+- `--color-ink` / `--color-ink-hover` / `--color-ink-active` / `--color-ink-soft` — reutilizan `--elevate-surface-brand-primary/secondary` como color funcional de alto contraste, sustituyendo a `--brand-*` en el slice migrado.
+- `--border-focus` y `--color-focus-ring` repuntados a naranja de marca (antes azul) — corrección **global**, afecta a toda la app: el foco es un estado efímero (solo teclado), no compite con la regla de acento único por vista.
+
+**Componentes modificados**:
+- `Button` — `primary`/`link`/`groupActive` de azul a `--color-ink`. `accent` (naranja) sin cambios.
+- `ProgressBar` — nueva prop `variant` (`'default'|'accent'`). Default ahora grafito; `accent` (naranja) reservado al indicador protagonista de cada vista.
+- `StatCard` y `Avatar` — variante `brand` redefinida de azul a `--color-ink` (mismo nombre de prop, sin romper consumidores).
+- `Card` — estado `selected` de azul a naranja de marca (`--elevate-accent-*`).
+
+**Pantallas**:
+- **Student Dashboard** — Hero convertido en bloque editorial oscuro (`--elevate-surface-brand-primary`), único punto de la vista con naranja (barra de progreso `variant="accent"`). Badges de `WeeklyGoalsCard`/`RecommendedCard`/`TodayInElevateCard`/`ContinueLearningCard`/`LearningPathCard`/`CourseProgressCard`/`SkillProgressList` de azul a grafito.
+- **Teacher Dashboard** — `Avatar` añadido a la lista de alumnos (antes solo texto), alineado con el patrón ya usado en Admin. KPIs "brand" heredan el grafito automáticamente vía token.
+- **Admin Dashboard** — sin cambios estructurales (principio "más sobrio"); KPIs "brand" y `courseDistPct` heredan grafito vía token.
+
+**Pendiente de validar visualmente** (ver resumen de conversación): contraste del Hero oscuro, legibilidad del foco naranja sobre fondos claros y oscuros, y si el grafito en StatCard/Avatar necesita más contraste en pantallas de alta densidad (Admin).
+
+### 10.8 Dark theme global — 1ª iteración (2026-08-12)
+
+Salto de "identidad de marca aplicada en puntos concretos" (§10.7) a **sistema dark completo**: toda la app-shell (fondos, texto, bordes, sombras, componentes UI compartidos) se re-derivó para funcionar como si se hubiera diseñado en oscuro desde el origen, no como un filtro sobre el sistema claro anterior.
+
+**Principio de tokens**: cero colores nuevos. Todo se deriva de los 4 oficiales (`#0F1115`, `#2A2D33`, `#F4F5F7`, `#FF5722`) vía referencia directa o `color-mix()` — un patrón ya usado en el proyecto (Login, ContinueLearningCard) antes de esta iteración.
+
+**Tokens rehechos en `globals.css`**:
+- `--bg-page` = `--elevate-surface-brand-primary` directo. `--bg-surface`/`--bg-subtle` = ese mismo negro aclarado 12%/8% vía `color-mix` (nunca un gris neutro inventado). `--bg-elevated` (nuevo) = `--elevate-surface-brand-secondary`, para modales/popovers.
+- `--text-display`/`--text-primary` = `--elevate-surface-brand-light`. `--text-secondary` reutiliza el token ya oficial `--elevate-text-brand-muted` (no se creó un gris nuevo). `--text-inverse` se mantiene claro (sigue sirviendo para texto sobre superficies saturadas, que no cambian de polaridad).
+- `--border-default`/`--border-strong` pasan de gris plano a alfa claro (`rgba(244,245,247,.08/.16)`) — escala igual sobre cualquier superficie oscura.
+- `--shadow-*` muy reducidas: una sombra negra sobre fondo casi negro no aporta nada: la separación entre superficies la da el borde, no la sombra.
+- `--success/danger/warning-50/100/200` (los tonos "soft", pensados para badge sobre blanco) se re-derivan con `color-mix()` sobre `--elevate-surface-brand-primary` en vez de mantener el pastel claro original — evita "tarjetas blancas" semánticas encima de un sistema negro.
+- **`--color-ink*` invierte su polaridad**: en el sistema anterior era "oscuro sobre superficie clara" (botón primario negro sobre fondo blanco); ahora que el fondo de toda la app es oscuro, el neutro de alto contraste pasa a ser el claro oficial (`--elevate-surface-brand-light`). Es el cambio de mayor riesgo de esta iteración — cualquier componente que combinara `--color-ink` con un color de texto fijo (no derivado del propio ink) necesitaba revisión manual, no solo el cambio de tokens.
+
+**Regla de progreso actualizada**: las barras de progreso que no representan un estado semántico (éxito/aviso/error) ahora usan naranja por defecto (`ProgressBar` sin `variant`, y los mini-fills locales de `WeeklyGoalsCard`/`RecommendedCard`). `variant="accent"` queda para el indicador protagonista único de cada vista (color sólido + resplandor sutil, en vez de degradado).
+
+**Componentes compartidos revisados** (todos consumidos también por Teacher/Admin): `Button` (`.primary` ahora es píldora clara con texto oscuro — antes negro con texto claro —, spinner propio; `.groupActive` pasa de ink a naranja: "selección" es un uso explícitamente reservado al acento), `Card` (`.elevated` gana borde — en dark theme una sombra sola no separa dos negros), `StatCard`/`Avatar` (icono de la variante `brand` invierte texto/fondo; variantes `success`/`warning`/`danger` usan el tono "400" en vez de "700" para texto sobre badge oscuro), `EmptyState`/`ErrorState`/`LoadingState`/`AccessDenied`/`Toast` (tokens `--brand-*` legacy y hex sueltos eliminados a favor de tokens ya oficiales), `Sidebar` (borde derecho sutil — ya no se diferencia del contenido por color, porque ambos comparten el mismo negro de marca).
+
+**Student Dashboard** llevado a este lenguaje: Hero con halo radial naranja (`mix-blend-mode: screen`) en la costura entre contenido y fotografía, para que ambos lean como una sola composición; badges y mini-progreso de `WeeklyGoalsCard`/`RecommendedCard`/`TodayInElevateCard`/`TodayActivityCard`/`LearningPathCard` migrados a los tonos "400" + naranja no-semántico.
+
+**Teacher/Admin**: sin cambios propios en esta iteración — auditados y confirmados **sin colores hardcodeados** en sus `.module.css` (0 coincidencias de hex), por lo que heredan el sistema dark completo únicamente a través de los tokens y componentes compartidos ya corregidos arriba. Su rediseño de composición/jerarquía específico queda para el siguiente slice.
 
 ---
 

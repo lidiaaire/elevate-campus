@@ -8,6 +8,9 @@
   width: 220px;
   min-height: 100vh;
   background: var(--elevate-surface-brand-primary);
+  /* Ahora que el contenido principal comparte el mismo negro de marca,
+     la diferenciación "ligera" viene del borde, no de un salto de color. */
+  border-right: 1px solid var(--border-default);
   padding: 1.5rem 0;
   flex-shrink: 0;
   position: sticky;

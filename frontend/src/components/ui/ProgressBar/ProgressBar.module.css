@@ -9,9 +9,18 @@
   overflow: hidden;
 }
 
+/* Naranja por defecto: en el sistema dark el progreso NO representa un
+   estado semántico (éxito/error/aviso), así que usa el acento de marca,
+   no un neutro. "accent" queda como variante de énfasis máximo (color
+   sólido + resplandor), para el indicador protagonista de cada vista. */
 .fill {
   height: 100%;
-  background: linear-gradient(to right, var(--brand-400), var(--brand-600));
+  background: linear-gradient(to right, var(--elevate-accent-400), var(--elevate-accent-500));
   border-radius: var(--radius-full);
   transition: width var(--dur-slow) var(--ease-out);
+}
+
+.fillAccent {
+  background: var(--elevate-accent-500);
+  box-shadow: 0 0 10px rgba(255, 87, 34, 0.45);
 }

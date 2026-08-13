@@ -94,27 +94,32 @@
 .lg .badge    { margin-left: 3px; } /* gap(7) + 3 = target 10px del DS */
 
 /* ================================================================
-   VARIANTE: Primary
+   VARIANTE: Primary (píldora clara neutra — acción funcional de
+   énfasis medio, un escalón por debajo de "accent"/naranja. En dark
+   theme --color-ink es claro sobre superficie oscura, así que el
+   texto va oscuro, no --text-inverse — aquí NO se usa ese token
+   porque su significado ["texto claro sobre color saturado"] no
+   aplica a un fondo ya claro).
    ================================================================ */
 .primary {
-  background-color: var(--brand-500);
-  color: var(--text-inverse);
+  background-color: var(--color-ink);
+  color: var(--elevate-surface-brand-primary);
   border: none;
-  box-shadow:
-    0 1px 2px rgba(15, 23, 42, 0.12),
-    0 0 0 1px rgba(59, 130, 246, 0.3);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+
+  /* Fondo claro: el spinner por defecto (blanco sobre blanco) es invisible */
+  --_spinner-border: rgba(15, 17, 21, 0.25);
+  --_spinner-top:    var(--elevate-surface-brand-primary);
 }
 .primary:hover:not(:disabled):not([aria-disabled="true"]) {
-  background-color: var(--brand-600);
-  box-shadow:
-    0 4px 12px rgba(37, 99, 235, 0.30),
-    0 0 0 1px rgba(37, 99, 235, 0.4);
+  background-color: var(--color-ink-hover);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
   transform: translateY(-1px);
 }
 .primary:active:not(:disabled):not([aria-disabled="true"]) {
-  background-color: var(--brand-700);
+  background-color: var(--color-ink-active);
   transform: translateY(0);
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.12);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
   transition: all var(--dur-fast) var(--ease-default);
 }
 .primary:focus-visible {
@@ -123,15 +128,15 @@
 }
 .primary:disabled,
 .primary[aria-disabled="true"] {
-  background-color: var(--brand-300);
-  color: rgba(255, 255, 255, 0.8);
+  background-color: var(--color-ink-soft);
+  color: var(--text-muted);
   box-shadow: none;
   transform: none;
   pointer-events: none;
   cursor: not-allowed;
 }
 .primary.loading {
-  background-color: var(--brand-600);
+  background-color: var(--color-ink-hover);
 }
 
 /* ================================================================
@@ -185,7 +190,7 @@
   box-shadow: var(--shadow-sm);
 
   --_spinner-border: var(--border-default);
-  --_spinner-top:    var(--brand-500);
+  --_spinner-top:    var(--color-ink);
 }
 .secondary:hover:not(:disabled):not([aria-disabled="true"]) {
   background-color: var(--bg-page);
@@ -326,7 +331,7 @@
    ================================================================ */
 .link {
   background-color: transparent;
-  color: var(--brand-500);
+  color: var(--color-ink);
   border: none;
   box-shadow: none;
   font-weight: 500;
@@ -334,16 +339,16 @@
   padding-right: 0;
 
   --_spinner-border: transparent;
-  --_spinner-top:    var(--brand-500);
+  --_spinner-top:    var(--color-ink);
 }
 .link:hover:not(:disabled):not([aria-disabled="true"]) {
-  color: var(--brand-600);
+  color: var(--color-ink-hover);
   text-decoration: underline;
   text-underline-offset: 3px;
   text-decoration-thickness: 1px;
 }
 .link:active:not(:disabled):not([aria-disabled="true"]) {
-  color: var(--brand-700);
+  color: var(--color-ink-active);
 }
 .link:focus-visible {
   outline: 3px solid var(--color-focus-ring);
@@ -401,14 +406,17 @@
 .group .button:only-child {
   border-radius: var(--radius-md);
 }
+/* Estado seleccionado dentro de un grupo — naranja de marca, no ink:
+   "selección" es exactamente uno de los usos que el sistema reserva
+   para el acento naranja. */
 .group .button.groupActive {
-  background-color: var(--brand-500);
+  background-color: var(--elevate-accent-500);
   color: var(--text-inverse);
-  border-color: var(--brand-500);
+  border-color: var(--elevate-accent-500);
   box-shadow: none;
 }
 .group .button.groupActive:hover:not(:disabled):not([aria-disabled="true"]) {
-  background-color: var(--brand-600);
-  border-color: var(--brand-600);
+  background-color: var(--elevate-accent-600);
+  border-color: var(--elevate-accent-600);
   transform: none;
 }

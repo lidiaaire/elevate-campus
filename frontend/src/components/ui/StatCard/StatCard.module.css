@@ -15,9 +15,11 @@
 
 /* ---- Variantes ---- */
 
+/* KPI destacado — grafito de marca (antes azul). Reservar a la métrica
+   más relevante de cada vista; el resto usa 'default'. */
 .brand {
-  background-color: var(--brand-50);
-  border-color: var(--brand-200);
+  background-color: var(--color-ink-soft);
+  border-color: var(--border-strong);
 }
 
 .success {
@@ -64,24 +66,29 @@
   color: var(--text-secondary);
 }
 
+/* --color-ink es claro en dark theme: el chip queda claro, el icono va
+   oscuro (antes era al revés, con --elevate-surface-brand-light). */
 .brand .icon {
-  background-color: var(--brand-200);
-  color: var(--brand-700);
+  background-color: var(--color-ink);
+  color: var(--elevate-surface-brand-primary);
 }
 
+/* Los tonos "700" estaban pensados como texto sobre badge pastel claro;
+   sobre el nuevo fondo oscuro con tinte (--success-200 etc.) se usa el
+   tono "400", más brillante y legible. */
 .success .icon {
   background-color: var(--success-200);
-  color: var(--success-700);
+  color: var(--success-400);
 }
 
 .warning .icon {
   background-color: var(--warning-200);
-  color: var(--warning-700);
+  color: var(--warning-400);
 }
 
 .danger .icon {
   background-color: var(--danger-200);
-  color: var(--danger-700);
+  color: var(--danger-400);
 }
 
 .body {
@@ -98,10 +105,10 @@
   letter-spacing: -0.02em;
 }
 
-.brand .value  { color: var(--brand-700);   }
-.success .value { color: var(--success-700); }
-.warning .value { color: var(--warning-700);  }
-.danger .value  { color: var(--danger-700);  }
+.brand .value  { color: var(--color-ink);   }
+.success .value { color: var(--success-400); }
+.warning .value { color: var(--warning-400);  }
+.danger .value  { color: var(--danger-400);  }
 
 .subtitle {
   font-size: var(--font-size-xs);

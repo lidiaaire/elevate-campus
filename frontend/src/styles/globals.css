@@ -20,24 +20,40 @@
    ------------------------------------------------------------ */
 :root {
 
-  /* ---- Fondos ---- */
-  --bg-page:    #f8fafc;
-  --bg-surface: #ffffff;
-  --bg-subtle:  #f1f5f9;
-  --bg-hover:   rgba(15, 23, 42, 0.04);
-  --bg-active:  rgba(15, 23, 42, 0.08);
-
-  /* ---- Texto ----
-     --text-display: valor inferido de la escala (doc no da hex explícito).
-     --text-inverse: inferido del uso semántico (texto sobre fondos oscuros).
+  /* ---- Fondos — DARK THEME GLOBAL (Iteración 2026-08-12)
+     Derivados de los dos tonos oscuros oficiales de marca
+     (--elevate-surface-brand-primary/secondary), no de valores nuevos.
+     --bg-page es el lienzo de toda la app-shell (sidebar + contenido
+     comparten el mismo tono; se diferencian por borde, no por color).
+     --bg-surface/--bg-subtle son pasos de luminosidad sobre ese mismo
+     negro, vía color-mix — nunca un gris neutro genérico.
      ---- */
-  --text-display:   #0f172a;
-  --text-primary:   #1e293b;
-  --text-secondary: #475569;
-  --text-muted:     #94a3b8;
-  --text-inverse:   #ffffff;
+  --bg-page:    var(--elevate-surface-brand-primary);
+  --bg-subtle:  color-mix(in srgb, var(--elevate-surface-brand-primary) 92%, white);
+  --bg-surface: color-mix(in srgb, var(--elevate-surface-brand-primary) 86%, white);
+  --bg-elevated: var(--elevate-surface-brand-secondary);
+  --bg-hover:   rgba(244, 245, 247, 0.045);
+  --bg-active:  rgba(244, 245, 247, 0.08);
 
-  /* ---- Brand (Blue)
+  /* ---- Texto — DARK THEME GLOBAL
+     --text-secondary reutiliza el mismo derivado ya oficial que usaba
+     Sidebar/Login (--elevate-text-brand-muted) en vez de inventar un
+     nuevo gris. --text-inverse se mantiene claro: sigue sirviendo para
+     texto sobre superficies saturadas (accent/danger/success), que no
+     cambian de polaridad con el tema.
+     ---- */
+  --text-display:   var(--elevate-surface-brand-light);
+  --text-primary:   var(--elevate-surface-brand-light);
+  --text-secondary: var(--elevate-text-brand-muted);
+  --text-muted:     rgba(244, 245, 247, 0.42);
+  --text-inverse:   var(--elevate-surface-brand-light);
+
+  /* ---- Brand (Blue) — LEGACY, en migración
+     Azul funcional heredado, no forma parte de la identidad oficial de
+     Elevate (ver bloque "Elevate Identity v3" más abajo). Sustituido por
+     --color-ink-* en el vertical slice (Sidebar/Layout/Student/Teacher/
+     Admin dashboards). Se mantiene para pantallas aún no migradas
+     (Courses, Assessment, Lesson, etc.) — no usar en código nuevo.
      --brand-400/#60a5fa: Tailwind blue-400, referenciado en gradiente de progress bar.
      --brand-950/#172554: Tailwind blue-950, listado en preamble sin hex explícito.
      ---- */
@@ -51,43 +67,43 @@
   --brand-950: #172554;
 
   /* ---- Success (Green)
-     --success-400/#4ade80: Tailwind green-400, referenciado en assessment
-     (estado "correcta no seleccionada") sin hex explícito.
+     Los tonos vivos (300-800) son los mismos de siempre — legibles sobre
+     fondo oscuro sin cambios. Los tonos "soft" (50/200), pensados en el
+     sistema original para fondos de badge/card sobre BLANCO, se
+     re-derivan con color-mix sobre --bg-surface: en dark theme un badge
+     "success" es una superficie oscura con un leve tinte verde, no un
+     verde pastel plano. Ver DESIGN_SYSTEM.md § Dark theme.
      ---- */
-  --success-50:  #f0fdf4;
-  --success-200: #bbf7d0;
   --success-300: #86efac;
   --success-400: #4ade80;
   --success-500: #22c55e;
   --success-600: #16a34a;
   --success-700: #15803d;
   --success-800: #166534;
+  --success-50:  color-mix(in srgb, var(--success-500) 14%, var(--elevate-surface-brand-primary));
+  --success-200: color-mix(in srgb, var(--success-500) 32%, var(--elevate-surface-brand-primary));
 
-  /* ---- Danger (Red)
-     --danger-400/#f87171: Tailwind red-400, referenciado en assessment
-     (navigation dots incorrectos) sin hex explícito.
-     ---- */
-  --danger-50:  #fef2f2;
-  --danger-200: #fecaca;
+  /* ---- Danger (Red) — mismo criterio que Success ---- */
   --danger-300: #fca5a5;
   --danger-400: #f87171;
   --danger-500: #ef4444;
   --danger-600: #dc2626;
   --danger-700: #b91c1c;
   --danger-800: #991b1b;
+  --danger-50:  color-mix(in srgb, var(--danger-500) 14%, var(--elevate-surface-brand-primary));
+  --danger-200: color-mix(in srgb, var(--danger-500) 32%, var(--elevate-surface-brand-primary));
 
-  /* ---- Warning (Amber)
-     Tokens semánticos para estados de advertencia/pendiente/borrador.
+  /* ---- Warning (Amber) — mismo criterio que Success ----
      Los nombres --amber-* se mantienen como aliases por compatibilidad.
      ---- */
-  --warning-50:  #fffbeb;
-  --warning-100: #fef3c7;
-  --warning-200: #fde68a;
   --warning-400: #fbbf24;
   --warning-500: #f59e0b;
   --warning-600: #d97706;
   --warning-700: #b45309;
   --warning-800: #92400e;
+  --warning-50:  color-mix(in srgb, var(--warning-500) 14%, var(--elevate-surface-brand-primary));
+  --warning-100: color-mix(in srgb, var(--warning-500) 22%, var(--elevate-surface-brand-primary));
+  --warning-200: color-mix(in srgb, var(--warning-500) 32%, var(--elevate-surface-brand-primary));
 
   /* Aliases para compatibilidad con código existente */
   --amber-50:  var(--warning-50);
@@ -99,25 +115,33 @@
   --amber-700: var(--warning-700);
   --amber-800: var(--warning-800);
 
-  /* ---- Bordes e interacción ---- */
-  --border-default: #e2e8f0;
-  --border-strong:  #cbd5e1;
-  --border-focus:   var(--brand-500);
+  /* ---- Bordes e interacción
+     --border-focus / --color-focus-ring: corregidos a naranja de marca
+     (antes azul --brand-500). El foco es un estado efímero (solo
+     navegación por teclado/inputs activos), por lo que reforzar la
+     identidad aquí no compite con la regla de "acento único por vista".
+     ---- */
+  /* Gris oscuro/translúcido sobre superficie oscura — la técnica estándar
+     para bordes en dark UI: una línea de luz alfa que escala igual sobre
+     --bg-page, --bg-surface o --bg-elevated, en vez de un gris plano que
+     solo funciona sobre un fondo concreto. */
+  --border-default: rgba(244, 245, 247, 0.08);
+  --border-strong:  rgba(244, 245, 247, 0.16);
+  --border-focus:   var(--elevate-accent-500);
 
-  --color-focus-ring: rgba(59, 130, 246, 0.4);
+  --color-focus-ring: rgba(255, 87, 34, 0.4);
   --focus-ring:       0 0 0 3px var(--color-focus-ring);
 
-  /* ---- Sombras
-     --shadow-sm y --shadow-md: valores del globals.css anterior, confirmados
-     por el documento como equivalentes a --shadow-card y --shadow-hover.
-     --shadow-xl: derivado del valor hardcoded del Modal spec en el documento
-     (0 25px 50px / 0 8px 20px).
-     --shadow-lg: derivado de la progresión de escala — sin valor explícito en doc.
+  /* ---- Sombras — DARK THEME GLOBAL
+     Muy discretas a propósito: una sombra negra sobre un fondo ya casi
+     negro no aporta profundidad. La separación entre superficies la da
+     --border-default; la sombra solo añade un empuje sutil hacia abajo
+     en elementos realmente elevados (modal, dropdown, card en hover).
      ---- */
-  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
-  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08), 0 2px 6px rgba(0, 0, 0, 0.05);
-  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.10), 0 4px 10px rgba(0, 0, 0, 0.06);
-  --shadow-xl: 0 25px 50px rgba(15, 23, 42, 0.18), 0 8px 20px rgba(15, 23, 42, 0.08);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 14px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 10px 28px rgba(0, 0, 0, 0.5);
+  --shadow-xl: 0 25px 55px rgba(0, 0, 0, 0.6);
 
   /* ---- Radios ---- */
   --radius-xs:   4px;
@@ -264,6 +288,20 @@
 
   /* ---- Elevate Identity v3 — Texto secundario sobre superficie de marca ---- */
   --elevate-text-brand-muted: rgba(244, 245, 247, 0.62);
+
+  /* ---- Elevate Identity v3 — Ink (neutro funcional de alto contraste)
+     Sustituye a --brand-* (azul). En el sistema DARK GLOBAL (iteración
+     2026-08-12) invierte su polaridad respecto a la fase anterior: ya
+     no es "negro sobre superficie clara" sino "claro sobre superficie
+     oscura" — el fondo de toda la app ahora ES la superficie de marca
+     oscura, así que el neutro de alto contraste pasa a ser el claro
+     oficial (--elevate-surface-brand-light), no el oscuro. Sigue
+     reutilizando únicamente tokens de marca ya oficiales.
+     ---- */
+  --color-ink:        var(--elevate-surface-brand-light);                                    /* #F4F5F7 */
+  --color-ink-hover:   color-mix(in srgb, var(--elevate-surface-brand-light) 88%, transparent);
+  --color-ink-active:  color-mix(in srgb, var(--elevate-surface-brand-light) 74%, transparent);
+  --color-ink-soft:    rgba(244, 245, 247, 0.08); /* tinte sutil de --color-ink para fondos/badges sobre superficie oscura */
 }
 
 /* ------------------------------------------------------------
@@ -334,6 +372,22 @@ a {
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+/* ------------------------------------------------------------
+   MOTION — respeto a prefers-reduced-motion
+   Bloque global auditado y pendiente desde la fase de Dark Theme.
+   Anula duración/iteración de cualquier animation/transition (incluidas
+   las que llegan después, como las de la ficha de alumno) sin tener que
+   condicionar cada una individualmente en su propio CSS Module.
+   ------------------------------------------------------------ */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }
 

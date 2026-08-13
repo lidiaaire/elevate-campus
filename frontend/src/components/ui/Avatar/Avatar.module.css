@@ -3,6 +3,8 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
   border-radius: var(--radius-full);
   font-weight: var(--font-weight-semibold);
   line-height: 1;
@@ -21,6 +23,39 @@
   font-size: var(--font-size-sm);
 }
 
-.brand   { background-color: var(--brand-50);   color: var(--brand-700); }
-.success { background-color: var(--success-50); color: var(--success-700); }
-.warning { background-color: var(--warning-100); color: var(--warning-800); }
+/* Social/feed — más grande que md pero sin ser protagonista (p. ej. items
+   del feed de Comunidad, donde el contenido manda, no la foto). */
+.lg {
+  width: 48px;
+  height: 48px;
+  font-size: var(--font-size-sm);
+}
+
+/* Fallback grande para cabeceras de tipo ficha/perfil (p. ej. hero de
+   /users/[id]) — mismo componente, sin duplicar estilos de iniciales. */
+.xl {
+  width: 96px;
+  height: 96px;
+  font-size: 2rem;
+}
+
+.brand   { background-color: var(--color-ink-soft); color: var(--color-ink); }
+.success { background-color: var(--success-50); color: var(--success-400); }
+.warning { background-color: var(--warning-100); color: var(--warning-400); }
+
+/* Fotografía individual (student/teacher) — llena el círculo */
+.photoImg {
+  object-fit: cover;
+}
+
+/* Símbolo de marca (admin) — insignia, no foto: no cubre el círculo
+   entero, se centra sobre la superficie oscura oficial. */
+.symbolAvatar {
+  background-color: var(--elevate-surface-brand-primary);
+}
+
+.symbolImg {
+  width: 58%;
+  height: 58%;
+  object-fit: contain;
+}

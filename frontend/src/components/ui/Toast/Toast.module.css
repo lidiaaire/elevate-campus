@@ -29,21 +29,21 @@
 }
 
 .success {
-  background: var(--success-50, #f0fdf4);
-  border-color: var(--success-200, #bbf7d0);
-  color: var(--success-700, #15803d);
+  background: var(--success-50);
+  border-color: var(--success-200);
+  color: var(--success-400);
 }
 
 .error {
-  background: #fef2f2;
-  border-color: #fecaca;
-  color: #b91c1c;
+  background: var(--danger-50);
+  border-color: var(--danger-200);
+  color: var(--danger-400);
 }
 
 .info {
-  background: var(--brand-50, #eff6ff);
-  border-color: var(--brand-200, #bfdbfe);
-  color: var(--brand-700, #1d4ed8);
+  background: var(--color-ink-soft);
+  border-color: var(--border-strong);
+  color: var(--color-ink);
 }
 
 .icon {

@@ -25,9 +25,11 @@
   box-shadow: var(--shadow-sm);
 }
 
-/* Elevated: sin borde, sombra pronunciada */
+/* Elevated: en light theme bastaba con sombra; en dark theme una sombra
+   negra sobre fondo casi negro no se ve — necesita también un borde
+   sutil para separarse de la superficie, igual que el resto de variantes. */
 .elevated {
-  border: none;
+  border: 1px solid var(--border-default);
   box-shadow: var(--shadow-md);
 }
 
@@ -96,18 +98,18 @@
    ESTADO: Selected
    ================================================================ */
 .selected {
-  border-color: var(--brand-400);
-  box-shadow: 0 0 0 1px var(--brand-400), var(--shadow-sm);
-  background-color: var(--brand-50);
+  border-color: var(--elevate-accent-500);
+  box-shadow: 0 0 0 1px var(--elevate-accent-500), var(--shadow-sm);
+  background-color: var(--elevate-accent-50);
 }
 
 .selected.elevated {
-  box-shadow: 0 0 0 2px var(--brand-400), var(--shadow-md);
+  box-shadow: 0 0 0 2px var(--elevate-accent-500), var(--shadow-md);
 }
 
 .selected.filled {
-  background-color: var(--brand-50);
-  box-shadow: 0 0 0 1px var(--brand-400);
+  background-color: var(--elevate-accent-50);
+  box-shadow: 0 0 0 1px var(--elevate-accent-500);
 }
 
 /* ================================================================
