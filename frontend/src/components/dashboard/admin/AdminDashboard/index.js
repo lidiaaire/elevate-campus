@@ -4,10 +4,9 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
 import { dashboardService } from '@/lib/services/dashboard.service';
-import DashboardLayout, { DashboardSection, DashboardStatGrid } from '@/components/dashboard/DashboardLayout';
-import StatCard from '@/components/ui/StatCard';
+import { getCourseVisual } from '@/lib/config/courseVisuals';
 import Avatar from '@/components/ui/Avatar';
-import Card, { CardHeader, CardBody, CardFooter } from '@/components/ui/Card';
+import Card, { CardBody, CardFooter } from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import ProgressBar from '@/components/ui/ProgressBar';
 import LoadingState from '@/components/ui/LoadingState';
@@ -38,16 +37,6 @@ function summarizeActivity(series) {
   return { dailyAvg, delta, direction, peakDay, inactiveDays, totalDays: series.length };
 }
 
-function StatusChip({ atRiskCount }) {
-  const ok = atRiskCount === 0;
-  return (
-    <span className={`${styles.statusChip} ${ok ? styles.statusChipOk : styles.statusChipWarn}`}>
-      <span className={styles.statusDot} aria-hidden="true" />
-      {ok ? 'Plataforma sin alertas' : `${atRiskCount} alumno${atRiskCount !== 1 ? 's' : ''} en riesgo`}
-    </span>
-  );
-}
-
 export default function AdminDashboard() {
   const { user, token } = useAuth();
   const [data,    setData]    = useState(null);
@@ -71,28 +60,56 @@ export default function AdminDashboard() {
   const { platform, platformGrowth, coursesSummary } = data.dashboard;
   const { series } = data.activity;
   const { threshold, count, students: atRiskStudents } = data.atRisk;
-  const activitySummary = summarizeActivity(series);
+  const activity = summarizeActivity(series);
 
   const today = new Date().toLocaleDateString('es-ES', {
     weekday: 'long', day: 'numeric', month: 'long',
   });
 
+  const rankedCourses = [...coursesSummary].sort((a, b) => b.avgProgress - a.avgProgress);
+
   return (
-    <DashboardLayout
-      title={`${user.firstName} ${user.lastName}`}
-      description={`Panel de administración · ${today}`}
-      actions={<StatusChip atRiskCount={count} />}
-    >
-      {/* 1. Alertas operativas — lo que necesita atención ahora */}
-      <DashboardSection title="Alertas operativas">
-        <Card>
-          <CardHeader divided>
-            <h3 className={styles.cardSectionTitle}>Alumnos en riesgo</h3>
-            <span className={styles.cardSectionMeta}>
-              Sin actividad {threshold.days}+ días o progreso &lt;{threshold.progressBelow}%
-            </span>
-          </CardHeader>
-          <CardBody>
+    <div className={styles.dashboard}>
+
+      {/* Cabecera operativa — densa, sin fotografía: estado de la
+          plataforma de un vistazo, no un saludo emocional. */}
+      <section className={styles.header}>
+        <span className={styles.headerGlyph} aria-hidden="true" />
+
+        <div className={styles.headerIdentity}>
+          <span className={styles.headerEyebrow}>Admin Elevate</span>
+          <h1 className={styles.headerName}>{user.firstName} {user.lastName}</h1>
+          <p className={styles.headerContext}>Panel de administración · {today}</p>
+        </div>
+
+        <div className={styles.headerIndicators}>
+          <span className={`${styles.statusChip} ${count === 0 ? styles.statusChipOk : styles.statusChipWarn}`}>
+            <span className={styles.statusDot} aria-hidden="true" />
+            {count === 0 ? 'Plataforma sin alertas' : `${count} alumno${count !== 1 ? 's' : ''} en riesgo`}
+          </span>
+          <span className={styles.headerIndicator}>
+            <span className={styles.headerIndicatorValue}>{platform.users.activeTotal}</span>
+            <span className={styles.headerIndicatorLabel}>usuarios activos</span>
+          </span>
+          <span className={styles.headerIndicator}>
+            <span className={styles.headerIndicatorValue}>{activity.dailyAvg}</span>
+            <span className={styles.headerIndicatorLabel}>lecciones/día</span>
+          </span>
+        </div>
+      </section>
+
+      {/* Alerta de riesgo + Resumen de plataforma — mismo beat visual */}
+      <div className={styles.twoCol}>
+
+        <Card variant="default" noPadding>
+          <CardBody className={styles.riskBody}>
+            <div className={styles.riskHeader}>
+              <h2 className={styles.cardSectionTitle}>Alumnos en riesgo</h2>
+              <span className={styles.cardSectionMeta}>
+                Sin actividad {threshold.days}+ días o progreso &lt;{threshold.progressBelow}%
+              </span>
+            </div>
+
             {count === 0 ? (
               <EmptyState title="No hay alumnos en riesgo actualmente." />
             ) : (
@@ -101,11 +118,10 @@ export default function AdminDashboard() {
                   const courseLabel = s.enrollments.length > 0
                     ? s.enrollments.map((e) => `${e.courseTitle} (${e.overallProgress}%)`).join(' · ')
                     : 'Sin curso activo';
-                  const query = encodeURIComponent(`${s.firstName} ${s.lastName}`);
 
                   return (
                     <li key={s.studentId} className={styles.riskRow}>
-                      <Avatar firstName={s.firstName} lastName={s.lastName} role="student" />
+                      <Avatar firstName={s.firstName} lastName={s.lastName} role="student" size="md" />
 
                       <div className={styles.riskInfo}>
                         <div className={styles.riskTopRow}>
@@ -127,8 +143,8 @@ export default function AdminDashboard() {
                         </div>
                       </div>
 
-                      <Button as={Link} href={`/users?q=${query}`} variant="secondary" size="sm">
-                        Ver en Usuarios
+                      <Button as={Link} href={`/users/${s.studentId}`} variant="accent" size="sm">
+                        Ver perfil
                       </Button>
                     </li>
                   );
@@ -137,143 +153,135 @@ export default function AdminDashboard() {
             )}
           </CardBody>
         </Card>
-      </DashboardSection>
 
-      {/* 2. Panorama general + distribución por curso, lado a lado */}
-      <DashboardSection title="Panorama general">
-        <div className={styles.twoCol}>
-          <DashboardStatGrid>
-            <StatCard
-              as="li"
-              title="Usuarios totales"
-              value={platform.users.total}
-              subtitle={`${platform.users.activeTotal} activos`}
-            />
-            <StatCard
-              as="li"
-              variant="brand"
-              title="Matrículas activas"
-              value={platform.enrollments.active}
-              subtitle={`de ${platform.enrollments.total} totales`}
-            />
-            <StatCard
-              as="li"
-              title="Cursos publicados"
-              value={platform.courses.published}
-              subtitle={`de ${platform.courses.total} totales · ${platform.courses.draft} borrador`}
-            />
-            <StatCard
-              as="li"
-              variant="brand"
-              title="Pass rate assessments"
-              value={platform.assessments.passRate !== null ? `${platform.assessments.passRate}%` : '—'}
-              subtitle={`${platform.assessments.totalAttempts} intentos`}
-            />
-          </DashboardStatGrid>
+        <Card variant="default" noPadding>
+          <CardBody className={styles.summaryBody}>
+            <h2 className={styles.cardSectionTitle}>Panorama general</h2>
 
-          <Card>
-            <CardHeader divided>
-              <h3 className={styles.cardSectionTitle}>Distribución por curso</h3>
-            </CardHeader>
-            <CardBody>
-              {coursesSummary.length === 0 ? (
-                <EmptyState title="No hay cursos registrados." />
-              ) : (
-                <ul className={styles.courseDistList}>
-                  {coursesSummary.map((c) => (
-                    <li key={String(c.courseId)} className={styles.courseDistRow}>
-                      <div className={styles.courseDistTop}>
-                        <span className={styles.courseDistTitle}>{c.title}</span>
-                        <span className={styles.courseDistPct}>{c.avgProgress}%</span>
-                      </div>
-                      <ProgressBar value={c.avgProgress} ariaLabel={`Progreso medio de ${c.title}`} />
-                      <span className={styles.courseDistMeta}>
-                        {c.activeEnrollments} activas · {c.completedEnrollments} completadas de {c.totalEnrollments}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
+            <div className={styles.summaryPrimary}>
+              <div className={styles.summaryStat}>
+                <span className={styles.summaryValue}>{platform.users.total}</span>
+                <span className={styles.summaryLabel}>Usuarios</span>
+              </div>
+              <span className={styles.summaryDivider} aria-hidden="true" />
+              <div className={styles.summaryStat}>
+                <span className={styles.summaryValue}>{platform.enrollments.active}</span>
+                <span className={styles.summaryLabel}>Matrículas activas</span>
+              </div>
+            </div>
+
+            <div className={styles.summarySecondary}>
+              <span className={styles.summaryChip}>
+                {platform.enrollments.total} matrículas totales
+              </span>
+              <span className={styles.summaryChip}>
+                {platform.courses.published} cursos publicados
+              </span>
+              {platform.courses.draft > 0 && (
+                <span className={styles.summaryChip}>
+                  {platform.courses.draft} en borrador
+                </span>
               )}
-            </CardBody>
-            <CardFooter align="end" divided>
-              <Button as={Link} href="/progress" variant="secondary">
-                Ver progreso completo
-              </Button>
-            </CardFooter>
-          </Card>
-        </div>
-      </DashboardSection>
+              <span className={styles.summaryChipStrong}>
+                {platform.assessments.passRate !== null ? `${platform.assessments.passRate}%` : '—'} pass rate
+              </span>
+            </div>
+          </CardBody>
+        </Card>
 
-      {/* 3. Evolución — crecimiento y actividad, lado a lado */}
-      <DashboardSection title="Evolución">
-        <div className={styles.twoCol}>
-          <div className={styles.subSection}>
-            <h3 className={styles.subSectionTitle}>Crecimiento reciente</h3>
-            <DashboardStatGrid minWidth="150px">
-              <StatCard
-                as="li"
-                variant="success"
-                title="Nuevas matrículas"
-                value={platformGrowth.newEnrollments7d}
-                subtitle={`${platformGrowth.newEnrollments30d} en 30 días`}
-                trend={{ direction: 'up', value: `+${platformGrowth.newEnrollments7d}`, label: 'esta semana' }}
-              />
-              <StatCard
-                as="li"
-                variant="success"
-                title="Lecciones completadas"
-                value={platformGrowth.lessonsCompleted7d}
-                subtitle={`${platformGrowth.lessonsCompleted30d} en 30 días`}
-              />
-              <StatCard
-                as="li"
-                variant="brand"
-                title="Usuarios activos"
-                value={platformGrowth.activeUsers7d}
-                subtitle={`${platformGrowth.activeUsers30d} en 30 días`}
-              />
-              <StatCard
-                as="li"
-                variant="success"
-                title="Assessments aprobados"
-                value={platformGrowth.assessmentsPassed30d}
-                subtitle="Últimos 30 días"
-              />
-            </DashboardStatGrid>
-          </div>
+      </div>
 
-          <div className={styles.subSection}>
-            <h3 className={styles.subSectionTitle}>Actividad reciente</h3>
-            <DashboardStatGrid minWidth="150px">
-              <StatCard
-                as="li"
-                title="Media diaria"
-                value={activitySummary.dailyAvg}
-                subtitle="Lecciones/día, últimos 7 días"
-                trend={{
-                  direction: activitySummary.direction,
-                  value: `${activitySummary.delta >= 0 ? '+' : ''}${activitySummary.delta}`,
-                  label: 'vs. semana anterior',
-                }}
-              />
-              <StatCard
-                as="li"
-                variant="brand"
-                title="Día más activo"
-                value={activitySummary.peakDay?.lessonsCompleted ?? 0}
-                subtitle={activitySummary.peakDay ? activitySummary.peakDay.date : 'Sin datos'}
-              />
-              <StatCard
-                as="li"
-                variant={activitySummary.inactiveDays > 0 ? 'warning' : 'success'}
-                title="Días sin actividad"
-                value={activitySummary.inactiveDays}
-                subtitle={`de ${activitySummary.totalDays} días analizados`}
-              />
-            </DashboardStatGrid>
-          </div>
-        </div>
-      </DashboardSection>
-    </DashboardLayout>
+      {/* Distribución por curso — ranking visual, no barras idénticas */}
+      <section>
+        <h2 className={styles.sectionTitle}>Distribución por curso</h2>
+        <Card variant="default" noPadding>
+          <CardBody className={styles.courseDistBody}>
+            {rankedCourses.length === 0 ? (
+              <EmptyState title="No hay cursos registrados." />
+            ) : (
+              <ul className={styles.courseDistList}>
+                {rankedCourses.map((c, i) => {
+                  const { accentColor } = getCourseVisual(c.title);
+                  return (
+                    <li
+                      key={String(c.courseId)}
+                      className={styles.courseDistRow}
+                      style={{ '--course-accent': accentColor }}
+                    >
+                      <span className={styles.courseDistRank}>{i + 1}</span>
+
+                      <div className={styles.courseDistMain}>
+                        <div className={styles.courseDistTop}>
+                          <span className={styles.courseDistTitle}>{c.title}</span>
+                          <span className={styles.courseDistPct}>{c.avgProgress}%</span>
+                        </div>
+                        <ProgressBar value={c.avgProgress} ariaLabel={`Progreso medio de ${c.title}`} />
+                        <span className={styles.courseDistMeta}>
+                          {c.activeEnrollments} activas · {c.completedEnrollments} completadas de {c.totalEnrollments}
+                        </span>
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </CardBody>
+          <CardFooter align="end" divided>
+            <Button as={Link} href="/progress" variant="secondary">
+              Ver progreso completo
+            </Button>
+          </CardFooter>
+        </Card>
+      </section>
+
+      {/* Evolución — 2 piezas compactas, no 7 cards iguales */}
+      <div className={styles.twoCol}>
+
+        <Card variant="default" noPadding>
+          <CardBody className={styles.evoBody}>
+            <h3 className={styles.subSectionTitle}>Crecimiento</h3>
+            <div className={styles.evoPrimary}>
+              <span className={styles.evoValue}>{platformGrowth.newEnrollments7d}</span>
+              <span className={styles.evoLabel}>nuevas matrículas · 7 días</span>
+              <span className={styles.evoSub}>{platformGrowth.newEnrollments30d} en 30 días</span>
+            </div>
+            <div className={styles.evoChips}>
+              <span className={styles.evoChip}>
+                <strong>{platformGrowth.lessonsCompleted7d}</strong> lecciones · 7d
+              </span>
+              <span className={styles.evoChip}>
+                <strong>{platformGrowth.activeUsers7d}</strong> usuarios activos · 7d
+              </span>
+              <span className={styles.evoChip}>
+                <strong>{platformGrowth.assessmentsPassed30d}</strong> assessments aprobados · 30d
+              </span>
+            </div>
+          </CardBody>
+        </Card>
+
+        <Card variant="default" noPadding>
+          <CardBody className={styles.evoBody}>
+            <h3 className={styles.subSectionTitle}>Actividad</h3>
+            <div className={styles.evoPrimary}>
+              <span className={styles.evoValue}>{activity.dailyAvg}</span>
+              <span className={styles.evoLabel}>lecciones/día de media · 7 días</span>
+              <span className={`${styles.evoTrend} ${styles[`evoTrend--${activity.direction}`]}`}>
+                {activity.delta >= 0 ? '+' : ''}{activity.delta} vs. semana anterior
+              </span>
+            </div>
+            <div className={styles.evoChips}>
+              <span className={styles.evoChip}>
+                <strong>{activity.peakDay?.lessonsCompleted ?? 0}</strong> día más activo
+                {activity.peakDay ? ` · ${activity.peakDay.date}` : ''}
+              </span>
+              <span className={activity.inactiveDays > 0 ? styles.evoChipWarn : styles.evoChip}>
+                <strong>{activity.inactiveDays}</strong> días sin actividad de {activity.totalDays}
+              </span>
+            </div>
+          </CardBody>
+        </Card>
+
+      </div>
+    </div>
   );
 }

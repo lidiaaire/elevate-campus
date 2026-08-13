@@ -57,6 +57,24 @@
   color: var(--text-muted);
 }
 
+/* Alumno con studentId fiable (populado por backend) — enlaza a su ficha
+   académica (/users/[id]). Discreto: mismo color de texto, solo hover/focus. */
+.studentLink {
+  color: inherit;
+  text-decoration: none;
+  border-radius: var(--radius-sm);
+}
+
+.studentLink:hover {
+  color: var(--elevate-accent-500);
+  text-decoration: underline;
+}
+
+.studentLink:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
 .badge {
   display: inline-block;
   padding: 0.2rem 0.6rem;

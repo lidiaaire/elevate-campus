@@ -52,6 +52,25 @@
   gap: 0.625rem;
 }
 
+/* Solo alumnos: enlace a su ficha académica (/users/[id]). Discreto —
+   no convierte la fila entera en link porque contiene acciones
+   administrativas (Activar/Desactivar). */
+.userCellLink {
+  display: block;
+  width: fit-content;
+  border-radius: var(--radius-sm);
+}
+
+.userCellLink:hover .userName {
+  color: var(--elevate-accent-500);
+  text-decoration: underline;
+}
+
+.userCellLink:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
 .userCellText {
   display: flex;
   flex-direction: column;

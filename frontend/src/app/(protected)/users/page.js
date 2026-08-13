@@ -1,9 +1,12 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
 import { useAsyncData } from '@/hooks/useAsyncData';
 import { usersService } from '@/lib/services/users.service';
+import { getStudentPhoto } from '@/lib/config/studentPhotos';
+import { getTeacherPhoto } from '@/lib/config/teacherPhotos';
 import { DashboardStatGrid } from '@/components/dashboard/DashboardLayout';
 import StatCard from '@/components/ui/StatCard';
 import Avatar from '@/components/ui/Avatar';
@@ -149,16 +152,38 @@ export default function UsersPage() {
                 <tbody>
                   {filtered.map((u) => {
                     const busy = actionLoading === u._id;
+                    // Identidad visual por rol: alumno → foto individual si hay
+                    // mapping; profesor → foto corporativa si hay mapping; admin
+                    // → símbolo de marca (resuelto dentro de Avatar, ignora photoUrl).
+                    const photoUrl = u.role === 'student'
+                      ? getStudentPhoto(u.email)
+                      : u.role === 'teacher'
+                        ? getTeacherPhoto(u.email)
+                        : null;
                     return (
                       <tr key={u._id}>
                         <td>
-                          <div className={styles.userCell}>
-                            <Avatar firstName={u.firstName} lastName={u.lastName} role={u.role} />
-                            <div className={styles.userCellText}>
-                              <span className={styles.userName}>{u.firstName} {u.lastName}</span>
-                              <span className={styles.userEmail}>{u.email}</span>
+                          {u.role === 'student' ? (
+                            // Solo el alumno tiene ficha académica (/users/[id]) — admin
+                            // y teacher no enlazan a sí mismos ni entre ellos aquí.
+                            <Link href={`/users/${u._id}`} className={styles.userCellLink}>
+                              <div className={styles.userCell}>
+                                <Avatar firstName={u.firstName} lastName={u.lastName} role={u.role} photoUrl={photoUrl} />
+                                <div className={styles.userCellText}>
+                                  <span className={styles.userName}>{u.firstName} {u.lastName}</span>
+                                  <span className={styles.userEmail}>{u.email}</span>
+                                </div>
+                              </div>
+                            </Link>
+                          ) : (
+                            <div className={styles.userCell}>
+                              <Avatar firstName={u.firstName} lastName={u.lastName} role={u.role} photoUrl={photoUrl} />
+                              <div className={styles.userCellText}>
+                                <span className={styles.userName}>{u.firstName} {u.lastName}</span>
+                                <span className={styles.userEmail}>{u.email}</span>
+                              </div>
                             </div>
-                          </div>
+                          )}
                         </td>
                         <td>
                           <span className={`${styles.roleBadge} ${styles[`role_${u.role}`] ?? ''}`}>

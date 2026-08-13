@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
+import Link from 'next/link';
 import { useAuth } from '@/hooks/useAuth';
 import { enrollmentsService } from '@/lib/services/enrollments.service';
 import { buildCourseMap, buildUserMap } from '@/lib/resolvers';
@@ -107,7 +108,15 @@ export default function EnrollmentsPage() {
                 return (
                   <tr key={e._id}>
                     <td>{courseName ?? <span className={styles.idFallback}>Curso no disponible</span>}</td>
-                    <td>{studentName ?? <span className={styles.idFallback}>Alumno no disponible</span>}</td>
+                    <td>
+                      {studentName ? (
+                        <Link href={`/users/${studentId}`} className={styles.studentLink}>
+                          {studentName}
+                        </Link>
+                      ) : (
+                        <span className={styles.idFallback}>Alumno no disponible</span>
+                      )}
+                    </td>
                     <td>
                       <span className={`${styles.badge} ${BADGE_CLASS[e.status] ?? ''}`}>
                         {STATUS_LABEL[e.status] ?? e.status}
