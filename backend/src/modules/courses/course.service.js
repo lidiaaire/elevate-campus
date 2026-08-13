@@ -9,8 +9,11 @@
  *
  *   listCourses(actorRole, filters)
  *     → Admin: todos los estados + filtros completos
- *     → Teacher: sobreescribe status='published'
- *     → Student: solo cursos con Enrollment activa del student
+ *     → Teacher y Student: catálogo publicado completo (findPublished) —
+ *       el estado personal (matriculado/progreso) lo resuelve el frontend
+ *       combinando esta lista con GET /enrollments y GET /progress/overview,
+ *       ya existentes. No se filtra por matrícula: un student debe poder
+ *       descubrir cursos en los que todavía no está matriculado.
  *
  *   getCourseById(actorRole, actorId, courseId)
  *     → Incluye UnitSummary[] con campo locked calculado para Student
@@ -41,7 +44,7 @@ const CourseRepository     = require('../../repositories/course.repository');
 const UnitRepository       = require('../../repositories/unit.repository');
 const EnrollmentRepository = require('../../repositories/enrollment.repository');
 const pagination           = require('../../utils/pagination');
-const { ROLES, COURSE_STATUS, ENROLLMENT_STATUS } = require('../../config/constants');
+const { ROLES, COURSE_STATUS } = require('../../config/constants');
 const {
   NotFoundError,
   ConflictError,
@@ -58,20 +61,14 @@ const getCourseOrThrow = async (courseId) => {
 const listCourses = async (actorRole, actorId, filters = {}, query = {}) => {
   const options = pagination.toMongoOptions(query.page, query.limit, query.sortBy, query.sortOrder);
 
-  if (actorRole === ROLES.STUDENT) {
-    // 'Mis cursos' debe incluir tanto matrículas activas como completadas —
-    // solo 'suspended' queda fuera (curso al que el student no debe ver acceso).
-    const { docs: enrollments } = await EnrollmentRepository.findAll({
-      studentId: actorId,
-      status:    { $in: [ENROLLMENT_STATUS.ACTIVE, ENROLLMENT_STATUS.COMPLETED] },
-    });
-    const courseIds = enrollments.map((e) => e.courseId?.toString());
-    const { docs, total } = await CourseRepository.findAll({ status: COURSE_STATUS.PUBLISHED });
-    const enrolled = docs.filter((c) => courseIds.includes(c._id.toString()));
-    return { docs: enrolled, total: enrolled.length };
-  }
-
-  if (actorRole === ROLES.TEACHER) {
+  // Teacher y Student ven el mismo catálogo: todo lo publicado, sin filtrar
+  // por matrícula. Antes, Student solo recibía cursos en los que ya tenía
+  // Enrollment activa/completada — eso rompía el flujo "descubrir un curso
+  // nuevo → matricularse", porque nunca aparecía nada para matricularse.
+  // El propio EnrollmentRepository queda sin usar aquí: la relación
+  // matrícula↔curso la resuelve el frontend con GET /enrollments +
+  // GET /progress/overview, que ya existen y ya hacen ese cruce.
+  if (actorRole === ROLES.TEACHER || actorRole === ROLES.STUDENT) {
     return CourseRepository.findPublished(options);
   }
 

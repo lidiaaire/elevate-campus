@@ -3,14 +3,16 @@
 const request = require('supertest');
 const app     = require('../src/app');
 
-const { connectDatabase, disconnectDatabase } = require('./setup/db');
-const { createAdmin, createStudent }          = require('./setup/user.factory');
-const { getToken, authHeader }                = require('./setup/auth');
+const { connectDatabase, disconnectDatabase }        = require('./setup/db');
+const { createAdmin, createStudent, createTeacher }  = require('./setup/user.factory');
+const { getToken, authHeader }                       = require('./setup/auth');
 
 // ── Estado compartido ─────────────────────────────────────────────────────────
 
 let adminToken;
 let studentToken;
+let teacherToken;
+let studentId;
 
 // ── Ciclo de vida ─────────────────────────────────────────────────────────────
 
@@ -19,9 +21,12 @@ beforeAll(async () => {
 
   const { user: admin,   password: adminPass   } = await createAdmin();
   const { user: student, password: studentPass } = await createStudent();
+  const { user: teacher, password: teacherPass } = await createTeacher();
 
   adminToken   = await getToken(admin.email,   adminPass);
   studentToken = await getToken(student.email, studentPass);
+  teacherToken = await getToken(teacher.email, teacherPass);
+  studentId    = student._id.toString();
 });
 
 afterAll(async () => {
@@ -41,7 +46,7 @@ describe('GET /api/courses', () => {
     expect(typeof res.body.total).toBe('number');
   });
 
-  test('STUDENT → 200 con lista de cursos matriculados', async () => {
+  test('STUDENT → 200 con el catálogo publicado (shape sin cambios)', async () => {
     const res = await request(app)
       .get('/api/courses')
       .set(authHeader(studentToken));
@@ -56,6 +61,102 @@ describe('GET /api/courses', () => {
 
     expect(res.status).toBe(401);
     expect(res.body.error).toBe('TOKEN_MISSING');
+  });
+});
+
+// ── GET /api/courses — catálogo completo para Student (no solo matriculados) ──
+// Corrige el bug que impedía "descubrir → matricularse": Student ya no debe
+// recibir únicamente los cursos en los que tiene Enrollment.
+
+describe('GET /api/courses — catálogo para Student', () => {
+  let publishedCourseId;
+  let draftCourseId;
+
+  beforeAll(async () => {
+    // Curso publicado — debe verlo el student aunque NO esté matriculado.
+    const pubRes = await request(app)
+      .post('/api/courses')
+      .set(authHeader(adminToken))
+      .send({
+        title:       'Catálogo — curso publicado sin matrícula',
+        description: 'Descripción válida para el curso publicado del catálogo.',
+        level:       'A1',
+      });
+    publishedCourseId = pubRes.body.course._id;
+
+    await request(app)
+      .post(`/api/courses/${publishedCourseId}/units`)
+      .set(authHeader(adminToken))
+      .send({ title: 'Unidad requerida para publicar' });
+
+    await request(app)
+      .patch(`/api/courses/${publishedCourseId}/publish`)
+      .set(authHeader(adminToken));
+
+    // Curso en draft — nunca debe llegar a Student ni Teacher.
+    const draftRes = await request(app)
+      .post('/api/courses')
+      .set(authHeader(adminToken))
+      .send({
+        title:       'Catálogo — curso en borrador',
+        description: 'Descripción válida para el curso en borrador del catálogo.',
+        level:       'A2',
+      });
+    draftCourseId = draftRes.body.course._id;
+
+    // Matrícula real sobre el mismo curso publicado — para comprobar que
+    // estar matriculado no lo oculta ni lo duplica en el catálogo.
+    await request(app)
+      .post('/api/enrollments')
+      .set(authHeader(adminToken))
+      .send({ studentId, courseId: publishedCourseId });
+  });
+
+  test('STUDENT → recibe el curso publicado aunque NO esté matriculado', async () => {
+    const res = await request(app)
+      .get('/api/courses')
+      .set(authHeader(studentToken));
+
+    const ids = res.body.docs.map((c) => c._id);
+    expect(ids).toContain(publishedCourseId);
+  });
+
+  test('STUDENT → NO recibe cursos en draft', async () => {
+    const res = await request(app)
+      .get('/api/courses')
+      .set(authHeader(studentToken));
+
+    const ids = res.body.docs.map((c) => c._id);
+    expect(ids).not.toContain(draftCourseId);
+  });
+
+  test('STUDENT → el curso matriculado aparece una sola vez (sin duplicar)', async () => {
+    const res = await request(app)
+      .get('/api/courses')
+      .set(authHeader(studentToken));
+
+    const matches = res.body.docs.filter((c) => c._id === publishedCourseId);
+    expect(matches.length).toBe(1);
+  });
+
+  test('TEACHER → comportamiento previo intacto: solo cursos publicados', async () => {
+    const res = await request(app)
+      .get('/api/courses')
+      .set(authHeader(teacherToken));
+
+    const ids = res.body.docs.map((c) => c._id);
+    expect(ids).toContain(publishedCourseId);
+    expect(ids).not.toContain(draftCourseId);
+  });
+
+  test('ADMIN → comportamiento previo intacto: ve también los cursos en draft', async () => {
+    const res = await request(app)
+      .get('/api/courses')
+      .set(authHeader(adminToken));
+
+    const ids = res.body.docs.map((c) => c._id);
+    expect(ids).toContain(publishedCourseId);
+    expect(ids).toContain(draftCourseId);
   });
 });
 

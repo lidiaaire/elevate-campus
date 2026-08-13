@@ -1,14 +1,99 @@
 /* ============================================================
-   CoursesPage — Design System v1.0
+   CoursesPage (Student) — Design System v2.0
+   "Explorar y avanzar en tu aprendizaje", no un listado de registros.
+   Ritmo: cabecera + resumen → spotlight → camino → explorar.
+   Covers reales de courseVisuals.js recortados (aspect-ratio) para
+   mostrar solo la parte gráfica (gradiente/formas/nivel), nunca el
+   título/tagline horneados en el propio SVG — el texto real siempre
+   se pinta en HTML, nunca duplicado.
    ============================================================ */
 
-/* ---- Buscador + tabs ---- */
-.controls {
+.page {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 1.75rem;
 }
 
+.page > * {
+  animation: fadeSlideUp var(--dur-slow) var(--ease-out) both;
+}
+
+.page > *:nth-child(1) { animation-delay: 0ms; }
+.page > *:nth-child(2) { animation-delay: 40ms; }
+.page > *:nth-child(3) { animation-delay: 90ms; }
+.page > *:nth-child(4) { animation-delay: 140ms; }
+.page > *:nth-child(5) { animation-delay: 190ms; }
+
+/* ---- Cabecera + resumen ---- */
+.pageHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+@media (min-width: 760px) {
+  .pageHeader {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+.pageHeaderText {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1875rem;
+}
+
+.pageEyebrow {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--elevate-accent-500);
+}
+
+.pageTitle {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--text-display);
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+
+.headerStats {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.headerStat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.0625rem;
+}
+
+.headerStatValue {
+  font-size: 1.375rem;
+  font-weight: 800;
+  color: var(--text-display);
+  line-height: 1;
+}
+
+.headerStatLabel {
+  font-size: 0.6875rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.headerDivider {
+  width: 1px;
+  height: 26px;
+  background: var(--border-default);
+}
+
+/* ---- Buscador ---- */
 .search {
   width: 100%;
   max-width: 320px;
@@ -16,195 +101,427 @@
   font-size: 0.875rem;
   color: var(--text-primary);
   background: var(--bg-surface);
-  border: 1px solid var(--bg-subtle);
-  border-radius: var(--radius-md, 8px);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
   outline: none;
-  transition: border-color 120ms ease, box-shadow 120ms ease;
+  transition: border-color var(--dur-fast) var(--ease-default), box-shadow var(--dur-fast) var(--ease-default);
 }
 
-.search:focus {
-  border-color: var(--brand-400, #60a5fa);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+.search:focus-visible {
+  border-color: var(--border-focus);
+  box-shadow: var(--focus-ring);
 }
 
 .search::placeholder {
   color: var(--text-muted);
 }
 
-.tabs {
-  display: flex;
-  gap: 0.25rem;
-  flex-wrap: wrap;
-}
-
-.tab {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.375rem;
-  padding: 0.375rem 0.75rem;
-  font-size: 0.8125rem;
-  font-weight: 500;
-  color: var(--text-secondary);
-  background: transparent;
-  border: 1px solid transparent;
-  border-radius: var(--radius-md, 8px);
-  cursor: pointer;
-  transition: background-color 120ms ease, color 120ms ease;
-}
-
-.tab:hover {
-  background-color: var(--bg-hover);
-  color: var(--text-primary);
-}
-
-.tabActive {
-  background-color: var(--brand-50, #eff6ff);
-  color: var(--brand-700, #1d4ed8);
-  border-color: var(--brand-200, #bfdbfe);
-  font-weight: 600;
-}
-
-.tabCount {
-  font-size: 0.6875rem;
-  font-weight: 700;
-  padding: 0.1rem 0.4rem;
-  border-radius: 999px;
-  background: var(--bg-subtle);
-  color: var(--text-muted);
-}
-
-.tabActive .tabCount {
-  background: var(--brand-100, #dbeafe);
-  color: var(--brand-700, #1d4ed8);
-}
-
-/* ---- Sección heading ---- */
 .sectionTitle {
-  font-size: 0.9375rem;
-  font-weight: 600;
-  color: var(--text-primary);
-  margin: 0 0 0.75rem;
-}
-
-/* ---- Barra de acento en tarjeta ---- */
-.accentBar {
-  height: 4px;
-  border-radius: var(--radius-lg, 12px) var(--radius-lg, 12px) 0 0;
-}
-
-/* ---- Fila de progreso ---- */
-.progressRow {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  margin-bottom: 0.375rem;
-}
-
-.progressPct {
-  font-size: 0.8125rem;
-  font-weight: 700;
-  color: var(--brand-600, #2563eb);
-}
-
-.progressMeta {
-  font-size: 0.75rem;
-  color: var(--text-muted);
-}
-
-.page {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-}
-
-/* ---- Grid ---- */
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 1rem;
-}
-
-/* ---- Enlace envolvente ---- */
-.cardLink {
-  display: block;
-  text-decoration: none;
-  color: inherit;
-  border-radius: var(--radius-lg);
-}
-
-.cardLink:focus-visible {
-  outline: 3px solid rgba(59, 130, 246, 0.45);
-  outline-offset: 2px;
-}
-
-.card {
-  height: 100%;
-}
-
-/* ---- Contenido ---- */
-.cardTitle {
   font-size: 1rem;
   font-weight: 600;
   color: var(--text-primary);
+  margin: 0 0 0.875rem;
+}
+
+/* ================================================================
+   COVER — recorte compartido por spotlight/camino/explorar.
+   aspect-ratio 800/300 muestra solo el ~66% superior del SVG
+   (gradiente + formas + badge de nivel decorativo), recortando el
+   título/tagline horneados para que nunca choquen con el HTML real.
+   ================================================================ */
+.coverImg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top;
+  transition: transform var(--dur-slow) var(--ease-out);
+}
+
+.coverFallback {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(155deg, var(--course-accent, var(--elevate-accent-500)) 0%, color-mix(in srgb, var(--course-accent, var(--elevate-accent-500)) 55%, #000) 100%);
+}
+
+/* ================================================================
+   SPOTLIGHT — "Continuar aprendiendo", pieza protagonista horizontal
+   ================================================================ */
+.spotlightCard {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  color: inherit;
+  text-decoration: none;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  transition: transform var(--dur-normal) var(--ease-out),
+              box-shadow var(--dur-normal) var(--ease-out),
+              border-color var(--dur-normal) var(--ease-out);
+}
+
+@media (min-width: 760px) {
+  .spotlightCard {
+    flex-direction: row;
+    align-items: stretch;
+  }
+}
+
+.spotlightCard:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--border-strong);
+}
+
+.spotlightCard:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: -2px;
+}
+
+.spotlightCard:hover .coverImg {
+  transform: scale(1.045);
+}
+
+.spotlightCover {
+  position: relative;
+  aspect-ratio: 800 / 300;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+@media (min-width: 760px) {
+  .spotlightCover {
+    width: 38%;
+    aspect-ratio: auto;
+  }
+}
+
+.spotlightBody {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+  padding: 1.5rem 1.75rem;
+}
+
+.spotlightEyebrow {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--elevate-accent-500);
+}
+
+.spotlightHeadRow {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  flex-wrap: wrap;
+}
+
+.spotlightTitle {
+  font-size: 1.375rem;
+  font-weight: 700;
+  color: var(--text-display);
   margin: 0;
-  line-height: 1.4;
+  line-height: 1.25;
 }
 
-.level {
-  font-size: 0.75rem;
-  color: var(--text-secondary);
-  margin-top: 0.125rem;
-}
-
-.description {
+.spotlightTagline {
   font-size: 0.875rem;
   color: var(--text-secondary);
+  font-style: italic;
+  margin: 0;
+}
+
+.spotlightProgress {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.375rem;
+  max-width: 420px;
+}
+
+.spotlightProgressTop {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+}
+
+.spotlightPct {
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.spotlightCta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  width: fit-content;
+  margin-top: 0.5rem;
+  padding: 0.5rem 1rem;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--text-inverse);
+  background: var(--elevate-accent-500);
+  border-radius: var(--radius-md);
+  transition: background-color var(--dur-fast) var(--ease-default);
+}
+
+.spotlightCard:hover .spotlightCta {
+  background: var(--elevate-accent-600);
+}
+
+.ctaArrow {
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+
+.spotlightCard:hover .ctaArrow,
+.pathCard:hover .ctaArrow,
+.exploreCard:hover .ctaArrow {
+  transform: translateX(3px);
+}
+
+/* ---- Nivel — badge compartido ---- */
+.levelPill {
+  flex-shrink: 0;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  color: var(--text-inverse);
+  background: var(--course-accent, var(--elevate-accent-500));
+  padding: 0.2rem 0.625rem;
+  border-radius: var(--radius-full);
+}
+
+.levelPillSm {
+  flex-shrink: 0;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  color: var(--text-muted);
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-default);
+  padding: 0.1rem 0.5rem;
+  border-radius: var(--radius-full);
+}
+
+/* ================================================================
+   TU CAMINO — cursos matriculados/completados
+   ================================================================ */
+.pathGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 1.25rem;
+}
+
+.pathCard {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  color: inherit;
+  text-decoration: none;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  transition: transform var(--dur-normal) var(--ease-out),
+              box-shadow var(--dur-normal) var(--ease-out),
+              border-color var(--dur-normal) var(--ease-out);
+}
+
+.pathCard:hover {
+  transform: translateY(-3px) scale(1.01);
+  box-shadow: var(--shadow-md);
+  border-color: var(--border-strong);
+}
+
+.pathCard:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: -2px;
+}
+
+.pathCard:hover .coverImg {
+  transform: scale(1.06);
+}
+
+/* Completado: tratamiento premium (borde cálido + sello), nunca
+   apagado/deshabilitado — misma luminosidad que el resto. */
+.pathCard[data-state='completed'] {
+  border-color: var(--success-200);
+}
+
+.pathCover {
+  position: relative;
+  aspect-ratio: 800 / 300;
+  overflow: hidden;
+}
+
+.completedSeal {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  color: var(--success-400);
+  background: rgba(15, 17, 21, 0.72);
+  border: 1px solid var(--success-200);
+  padding: 0.2rem 0.55rem;
+  border-radius: var(--radius-full);
+  animation: sealPop var(--dur-slow) var(--ease-bounce) both;
+}
+
+@keyframes sealPop {
+  from { opacity: 0; transform: scale(0.8); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+.pathBody {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1rem 1.125rem 1.125rem;
+}
+
+.pathTopRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.pathPct {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--elevate-accent-500);
+}
+
+.pathTitle {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-display);
+  margin: 0;
+  line-height: 1.3;
+}
+
+.pathMeta {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+/* ================================================================
+   EXPLORAR — cursos disponibles, tono de descubrimiento
+   ================================================================ */
+.exploreGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 1.25rem;
+}
+
+.exploreCard {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  color: inherit;
+  text-decoration: none;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  transition: transform var(--dur-normal) var(--ease-out),
+              box-shadow var(--dur-normal) var(--ease-out),
+              border-color var(--dur-normal) var(--ease-out);
+}
+
+.exploreCard:hover {
+  transform: translateY(-3px) scale(1.01);
+  box-shadow: var(--shadow-md);
+  border-color: var(--border-strong);
+}
+
+.exploreCard:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: -2px;
+}
+
+.exploreCard:hover .coverImg {
+  transform: scale(1.06);
+}
+
+.exploreCover {
+  position: relative;
+  aspect-ratio: 800 / 300;
+  overflow: hidden;
+}
+
+.exploreBody {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1rem 1.125rem 1.125rem;
+}
+
+.exploreTitle {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-display);
+  margin: 0;
+  line-height: 1.3;
+}
+
+.exploreDescription {
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
   line-height: 1.5;
+  margin: 0;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
 
-/* ---- Footer ---- */
-.meta {
+.exploreCta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  width: fit-content;
+  margin-top: 0.25rem;
   font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--elevate-accent-500);
+}
+
+/* Estado, no acción: comunica "catálogo, sin matrícula" sin sugerir que
+   la card lleva a ningún sitio (la card ya no es un Link). */
+.exploreStatus {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  margin-top: 0.25rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
   color: var(--text-muted);
 }
 
-.arrow {
-  font-size: 0.875rem;
-  color: var(--brand-500);
-  transition: transform 0.15s ease;
+/* ---- Responsive ---- */
+@media (min-width: 640px) and (max-width: 1023px) {
+  .pathGrid,
+  .exploreGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
-.cardLink:hover .arrow {
-  transform: translateX(3px);
-}
-
-/* ---- Badge de estado ---- */
-.status {
-  display: inline-flex;
-  align-items: center;
-  padding: 0.2rem 0.6rem;
-  border-radius: 9999px;
-  font-size: 0.6875rem;
-  font-weight: 600;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-
-.statusDraft {
-  background-color: var(--bg-subtle);
-  color: var(--text-secondary);
-}
-
-.statusPublished {
-  background-color: var(--success-50);
-  color: var(--success-600);
-}
-
-.statusArchived {
-  background-color: #fef3c7;
-  color: #92400e;
+@media (min-width: 1024px) {
+  .pathGrid,
+  .exploreGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
 }

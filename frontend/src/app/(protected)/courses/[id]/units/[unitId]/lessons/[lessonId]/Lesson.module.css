@@ -1,17 +1,27 @@
 /* ============================================================
-   LessonPage — Design System v1.0
+   LessonPage — lenguaje dark Elevate (Design System v2.0)
+   Mismo sistema de tokens que Courses/StudentDashboard/Profile.
    ============================================================ */
 
 .page {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
-  max-width: 800px;
+  gap: 2rem;
+  max-width: 820px;
   margin: 0 auto;
   width: 100%;
 }
 
-/* ── Breadcrumb ── */
+/* ================================================================
+   CABECERA
+   ================================================================ */
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+  animation: fadeSlideUp var(--dur-slow) var(--ease-out) both;
+}
+
 .breadcrumb {
   display: flex;
   align-items: center;
@@ -24,15 +34,13 @@
   font-weight: 500;
   color: var(--text-secondary);
   text-decoration: none;
-  transition: color 120ms ease;
+  transition: color var(--dur-fast) var(--ease-default);
 }
 
-.crumbLink:hover {
-  color: var(--brand-600, #2563eb);
-}
+.crumbLink:hover { color: var(--elevate-accent-500); }
 
 .crumbLink:focus-visible {
-  outline: 2px solid var(--brand-400);
+  outline: 2px solid var(--border-focus);
   outline-offset: 2px;
   border-radius: 2px;
 }
@@ -45,37 +53,29 @@
 .crumbCurrent {
   color: var(--text-muted);
   font-weight: 400;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  max-width: 28ch;
 }
 
-/* ── Progreso ── */
+/* ── Progreso del curso: barra fina, lenguaje de Courses ── */
 .progressRow {
   display: flex;
   align-items: center;
   gap: 0.75rem;
 }
 
+.progressRow > :global(div) { flex: 1; }
+
 .progressPct {
-  font-size: 0.8125rem;
+  font-size: 0.75rem;
   font-weight: 700;
-  color: var(--brand-600, #2563eb);
+  color: var(--elevate-accent-500);
   white-space: nowrap;
 }
 
-/* ── Título ── */
-.titleBlock {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
+/* ── Metadatos ── */
 .titleMeta {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.625rem;
   flex-wrap: wrap;
 }
 
@@ -86,13 +86,17 @@
   border-radius: 9999px;
   font-size: 0.6875rem;
   font-weight: 700;
-  background: var(--brand-50, #eff6ff);
-  color: var(--brand-700, #1d4ed8);
+  background: var(--elevate-accent-500);
+  color: var(--color-ink);
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
 
-.duration {
+.duration,
+.posInUnit {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
   font-size: 0.8125rem;
   color: var(--text-muted);
 }
@@ -100,41 +104,210 @@
 .completedBadge {
   display: inline-flex;
   align-items: center;
+  gap: 0.3rem;
   padding: 0.2rem 0.6rem;
   border-radius: 9999px;
   font-size: 0.6875rem;
   font-weight: 700;
-  background: var(--success-50, #f0fdf4);
-  color: var(--success-700, #15803d);
+  background: var(--success-50);
+  color: var(--success-500);
 }
 
 .lessonTitle {
-  font-size: 1.5rem;
+  font-size: 1.75rem;
   font-weight: 800;
-  color: var(--text-primary);
-  line-height: 1.3;
+  color: var(--text-display);
+  line-height: 1.25;
+  margin: 0.125rem 0 0;
+}
+
+.unitContext {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
   margin: 0;
 }
 
-/* ── Área de contenido ── */
+/* ================================================================
+   CONTENIDO — ancho de lectura cómodo, bloques con ritmo
+   ================================================================ */
 .contentArea {
-  background: var(--bg-surface);
-  border: 1px solid var(--bg-subtle);
-  border-radius: var(--radius-lg, 12px);
-  padding: 1.5rem;
-  min-height: 200px;
+  display: flex;
+  flex-direction: column;
 }
 
-/* Texto / HTML */
+.richContent {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  max-width: 720px;
+}
+
+.leadText {
+  font-size: 1.0625rem;
+  line-height: 1.75;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+/* ── Bloque pedagógico genérico ── */
+.block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem 1.375rem;
+  animation: fadeSlideUp var(--dur-slow) var(--ease-out) both;
+  animation-delay: calc(var(--stagger, 0) * 60ms);
+}
+
+.blockHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--elevate-accent-500);
+}
+
+.blockHeading {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-display);
+  margin: 0;
+}
+
+.bodyText {
+  font-size: 0.9375rem;
+  line-height: 1.75;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.noContent {
+  color: var(--text-muted);
+  font-style: italic;
+  margin: 0;
+}
+
+/* Variantes de acento por tipo de bloque — grafito por defecto, naranja
+   solo en el borde/icono de los que necesitan destacar estructura. */
+.block_vocab    { background: var(--bg-elevated); }
+.block_dialogue { background: var(--bg-elevated); }
+
+.block_warning {
+  border-color: color-mix(in srgb, var(--elevate-accent-500) 35%, var(--border-default));
+  background: var(--warning-50);
+}
+.block_warning .blockHeader { color: var(--warning-500); }
+
+.block_practice {
+  border-color: color-mix(in srgb, var(--elevate-accent-500) 45%, var(--border-default));
+}
+.block_practice .blockHeader { color: var(--elevate-accent-500); }
+
+/* ── Vocabulario: grid compacto término → traducción ── */
+.vocabGrid {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.vocabRow {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  padding: 0.375rem 0;
+  border-bottom: 1px solid var(--border-default);
+  font-size: 0.875rem;
+}
+
+.vocabRow:last-child { border-bottom: none; }
+
+.vocabTerm {
+  font-weight: 700;
+  color: var(--text-display);
+  white-space: nowrap;
+}
+
+.vocabArrow {
+  color: var(--elevate-accent-500);
+  flex-shrink: 0;
+}
+
+.vocabValue {
+  color: var(--text-secondary);
+}
+
+/* ── Frases / ejemplos entre comillas ── */
+.quoteList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.quoteItem {
+  position: relative;
+  padding-left: 1rem;
+  font-size: 0.9375rem;
+  font-style: italic;
+  color: var(--text-primary);
+  border-left: 2px solid var(--elevate-accent-500);
+}
+
+/* ── Correcciones ❌ / ✅ ── */
+.errorLines {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.errorWrong,
+.errorRight {
+  margin: 0;
+  font-size: 0.9375rem;
+  line-height: 1.6;
+}
+
+.errorWrong { color: var(--danger-500); }
+.errorRight { color: var(--success-500); }
+
+/* ── PRACTICA: respuestas ocultas tras <details> nativo ── */
+.answerReveal {
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  padding: 0.625rem 0.875rem;
+}
+
+.answerReveal summary {
+  cursor: pointer;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--elevate-accent-500);
+}
+
+.answerReveal summary:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+.answerReveal[open] summary { margin-bottom: 0.5rem; }
+
+/* Fallback HTML (contenido ya estructurado como HTML) */
 .htmlContent {
   font-size: 0.9375rem;
   line-height: 1.75;
   color: var(--text-primary);
+  max-width: 720px;
 }
 
 .htmlContent p  { margin: 0 0 1rem; }
-.htmlContent h2 { font-size: 1.25rem; font-weight: 700; margin: 1.5rem 0 0.5rem; }
-.htmlContent h3 { font-size: 1.125rem; font-weight: 600; margin: 1.25rem 0 0.5rem; }
+.htmlContent h2 { font-size: 1.25rem; font-weight: 700; margin: 1.5rem 0 0.5rem; color: var(--text-display); }
+.htmlContent h3 { font-size: 1.125rem; font-weight: 600; margin: 1.25rem 0 0.5rem; color: var(--text-display); }
 .htmlContent ul,
 .htmlContent ol { padding-left: 1.5rem; margin: 0 0 1rem; }
 .htmlContent li { margin-bottom: 0.375rem; }
@@ -148,17 +321,20 @@
   border-radius: 4px;
 }
 
-.noContent {
-  color: var(--text-muted);
-  font-style: italic;
-  margin: 0;
-}
-
-/* Vídeo */
+/* ── Vídeo ──
+   El reproductor vive dentro de .block (misma superficie/cabecera que un
+   bloque de texto) en vez de flotar suelto en la página — protagonista
+   visual, no un <video> incrustado a secas. Marco oscuro propio (no el
+   gris de fondo del bloque) para que se lea como una "pantalla", igual
+   que el resto de superficies oscuras de Elevate. */
 .videoWrapper {
   position: relative;
   width: 100%;
   padding-top: 56.25%; /* 16:9 */
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--elevate-surface-brand-primary);
+  border: 1px solid var(--border-default);
 }
 
 .videoFrame,
@@ -168,14 +344,29 @@
   width: 100%;
   height: 100%;
   border: none;
-  border-radius: var(--radius-md, 8px);
 }
 
-/* Quiz */
+/* Estado sin vídeo (videoUrl ausente) o vídeo nativo que falla al cargar
+   (onError) — mismo tratamiento visual que el resto de mensajes vacíos,
+   dentro de la propia superficie del bloque en vez de un aviso genérico. */
+.videoEmpty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 2.5rem 1.5rem;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.videoEmpty .noContent { margin: 0; }
+
+/* ── Quiz ── */
 .quiz {
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
+  max-width: 720px;
 }
 
 .questionList {
@@ -197,7 +388,7 @@
 .questionText {
   font-size: 0.9375rem;
   font-weight: 600;
-  color: var(--text-primary);
+  color: var(--text-display);
   margin: 0;
   counter-increment: question;
 }
@@ -221,63 +412,81 @@
   align-items: center;
   gap: 0.625rem;
   padding: 0.625rem 0.875rem;
-  border: 1px solid var(--bg-subtle);
-  border-radius: var(--radius-md, 8px);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
   font-size: 0.875rem;
   color: var(--text-primary);
   cursor: pointer;
-  transition: border-color 120ms ease, background-color 120ms ease;
+  transition: border-color var(--dur-fast) var(--ease-default), background-color var(--dur-fast) var(--ease-default);
 }
 
 .option:hover {
-  border-color: var(--brand-300, #93c5fd);
-  background: var(--brand-50, #eff6ff);
+  border-color: var(--elevate-accent-500);
+  background: var(--bg-elevated);
 }
 
 .optionRadio {
   flex-shrink: 0;
-  accent-color: var(--brand-500, #3b82f6);
+  accent-color: var(--elevate-accent-500);
 }
 
 .optionSelected {
-  border-color: var(--brand-400, #60a5fa);
-  background: var(--brand-50, #eff6ff);
+  border-color: var(--elevate-accent-500);
+  background: var(--bg-elevated);
 }
 
 .optionCorrect {
-  border-color: var(--success-400, #4ade80);
-  background: var(--success-50, #f0fdf4);
-  color: var(--success-700, #15803d);
+  border-color: var(--success-500);
+  background: var(--success-50);
+  color: var(--success-500);
 }
 
 .optionWrong {
-  border-color: var(--danger-400, #f87171);
-  background: var(--danger-50, #fef2f2);
-  color: var(--danger-700, #b91c1c);
+  border-color: var(--danger-500);
+  background: var(--danger-50);
+  color: var(--danger-500);
 }
 
 .quizScore {
   font-size: 0.9375rem;
   font-weight: 600;
-  color: var(--text-primary);
+  color: var(--text-display);
   margin: 0;
   padding: 0.75rem 1rem;
-  background: var(--bg-subtle);
-  border-radius: var(--radius-md, 8px);
+  background: var(--bg-elevated);
+  border-radius: var(--radius-md);
 }
 
-/* ── Navegación ── */
+/* ================================================================
+   NAVEGACIÓN — footer anterior / completar / siguiente
+   ================================================================ */
 .nav {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  padding-top: 0.5rem;
-  border-top: 1px solid var(--bg-subtle);
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--border-default);
 }
 
-.navPrev {}
-.navActions {}
+.navSide {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+}
+
+.navSide:last-child { justify-content: flex-end; }
+
+.navActions { flex-shrink: 0; }
+
+.navUpNext {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 20ch;
+}
 
 /* ── Estado bloqueado ── */
 .lockedState {
@@ -289,14 +498,12 @@
   text-align: center;
 }
 
-.lockedIcon {
-  font-size: 2.5rem;
-}
+.lockedIcon { color: var(--text-muted); }
 
 .lockedTitle {
   font-size: 1.25rem;
   font-weight: 700;
-  color: var(--text-primary);
+  color: var(--text-display);
   margin: 0;
 }
 
@@ -306,8 +513,27 @@
   margin: 0 0 0.5rem;
 }
 
-@media (max-width: 480px) {
-  .contentArea  { padding: 1rem; }
-  .lessonTitle  { font-size: 1.25rem; }
+/* ================================================================
+   RESPONSIVE
+   ================================================================ */
+@media (max-width: 767px) {
+  .page { gap: 1.5rem; }
+  .lessonTitle { font-size: 1.375rem; }
+  .block { padding: 1rem; }
   .crumbCurrent { max-width: 16ch; }
+
+  .nav {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+  .navSide:last-child { justify-content: flex-start; }
+  .navActions { order: -1; }
+  .navActions :global(button),
+  .navActions :global(a) { width: 100%; justify-content: center; }
+}
+
+@media (max-width: 480px) {
+  .contentArea  { padding: 0; }
+  .lessonTitle  { font-size: 1.25rem; }
 }
