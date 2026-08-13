@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { getCourseVisual } from '@/lib/config/courseVisuals';
-import Card, { CardBody, CardFooter } from '@/components/ui/Card';
+import Card, { CardBody } from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
 import ProgressBar from '@/components/ui/ProgressBar';
 import EmptyState from '@/components/ui/EmptyState';
@@ -47,29 +47,36 @@ export default function ContinueLearningCard({ continueLearning, enrollments }) 
     totalLessons,
   } = continueLearning;
 
-  const visual      = getCourseVisual(courseTitle);
-  const imageSrc    = visual.coverImage || courseImage || null;
+  const visual     = getCourseVisual(courseTitle);
+  const imageSrc   = visual.coverImage || courseImage || null;
   const accentColor = visual.accentColor;
-  const lessonHref  = `/courses/${courseId}/units/${unitId}/lessons/${lessonId}`;
+  const level = enrollments.find(
+    (e) => e.courseId?.toString() === courseId?.toString(),
+  )?.level;
+  const lessonHref = `/courses/${courseId}/units/${unitId}/lessons/${lessonId}`;
 
   return (
-    <Card variant="elevated" noPadding>
-      <div
-        className={styles.imageWrapper}
-        style={{ '--card-accent': accentColor }}
-      >
+    <Card variant="elevated" noPadding className={styles.spotlight}>
+
+      {/* Visual abstracto del curso — no es una foto, es la identidad
+          categórica ya definida por curso (courseVisuals.js) llevada
+          a un panel grande en vez de una franja de color estrecha. */}
+      <div className={styles.visual} style={{ '--card-accent': accentColor }}>
         {imageSrc ? (
-          <img src={imageSrc} alt={courseTitle} className={styles.image} />
+          <img src={imageSrc} alt="" aria-hidden="true" className={styles.visualImage} />
         ) : (
-          <div className={styles.imagePlaceholder} aria-hidden="true" />
+          <div className={styles.visualPlaceholder} aria-hidden="true" />
         )}
+        {level && <span className={styles.levelBadge}>{level}</span>}
         <span className={styles.progressBadge}>{overallProgress}%</span>
       </div>
 
-      <CardBody className={styles.body}>
-        <p className={styles.courseTitle}>{courseTitle}</p>
-
-        <p className={styles.unitLabel}>{unitTitle}</p>
+      <div className={styles.body}>
+        <div className={styles.header}>
+          <span className={styles.eyebrow}>Continuar aprendiendo</span>
+          <p className={styles.courseTitle}>{courseTitle}</p>
+          <p className={styles.unitLabel}>{unitTitle}</p>
+        </div>
 
         {lastLesson && (
           <p className={styles.lastLesson}>
@@ -78,6 +85,11 @@ export default function ContinueLearningCard({ continueLearning, enrollments }) 
           </p>
         )}
 
+        <div className={styles.nextStep}>
+          <span className={styles.nextLabel}>Siguiente paso</span>
+          <p className={styles.nextTitle}>{lessonTitle}</p>
+        </div>
+
         <div className={styles.progressSection}>
           <div className={styles.progressMeta}>
             <span className={styles.lessonsCount}>{completedLessons} / {totalLessons} lecciones</span>
@@ -85,13 +97,11 @@ export default function ContinueLearningCard({ continueLearning, enrollments }) 
           </div>
           <ProgressBar value={overallProgress} ariaLabel={`Progreso de ${courseTitle}`} />
         </div>
-      </CardBody>
 
-      <CardFooter divided align="end">
-        <Button as={Link} href={lessonHref} variant="accent" size="md">
+        <Button as={Link} href={lessonHref} variant="accent" size="md" className={styles.cta}>
           Continuar
         </Button>
-      </CardFooter>
+      </div>
     </Card>
   );
 }

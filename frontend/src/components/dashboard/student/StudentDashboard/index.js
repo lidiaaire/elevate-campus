@@ -3,11 +3,11 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { dashboardService } from '@/lib/services/dashboard.service';
+import { getStudentPhoto } from '@/lib/config/studentPhotos';
 import ErrorState            from '@/components/ui/ErrorState';
 import DashboardSkeleton    from './DashboardSkeleton';
 import EmptyDashboard       from './EmptyDashboard';
 import CompletedDashboard  from './CompletedDashboard';
-import Card, { CardBody }    from '@/components/ui/Card';
 import ProgressBar           from '@/components/ui/ProgressBar';
 import LearningPathCard      from '@/components/dashboard/student/LearningPathCard';
 import AssessmentSummary     from '@/components/dashboard/student/AssessmentSummary';
@@ -18,14 +18,38 @@ import WeeklyGoalsCard         from '@/components/dashboard/student/WeeklyGoalsC
 import TodayActivityCard       from '@/components/dashboard/student/TodayActivityCard';
 import RecommendedCard         from '@/components/dashboard/student/RecommendedCard';
 import Link from 'next/link';
+import Image from 'next/image';
 import Button from '@/components/ui/Button';
 import styles from './StudentDashboard.module.css';
 
+// Misma prioridad que TodayActivityCard: curso en curso primero,
+// evaluación pendiente después. Duplicada intencionalmente (local al
+// hero) para no forzar una dependencia cruzada entre componentes.
+function buildNextAction(continueLearning, pendingAssessments) {
+  if (continueLearning) {
+    return {
+      label: continueLearning.lessonTitle ?? 'Siguiente lección',
+      meta:  continueLearning.courseTitle,
+      href:  `/courses/${continueLearning.courseId}/units/${continueLearning.unitId}/lessons/${continueLearning.lessonId}`,
+    };
+  }
+  if (pendingAssessments?.length > 0) {
+    const pa = pendingAssessments[0];
+    return {
+      label: pa.assessmentTitle || `Evaluación: ${pa.unitTitle}`,
+      meta:  pa.courseTitle,
+      href:  `/courses/${pa.courseId}/units/${pa.unitId}/assessment`,
+    };
+  }
+  return null;
+}
+
 export default function StudentDashboard() {
-  const { token } = useAuth();
+  const { user, token } = useAuth();
   const [data,    setData]    = useState(null);
   const [loading, setLoading] = useState(true);
   const [error,   setError]   = useState(null);
+  const [photoFailed, setPhotoFailed] = useState(false);
 
   useEffect(() => {
     dashboardService.getStudentDashboard(token)
@@ -47,82 +71,126 @@ export default function StudentDashboard() {
     pendingAssessments, recentActivity,
   } = data;
 
+  const nextAction = buildNextAction(continueLearning, pendingAssessments);
+  const photoUrl = getStudentPhoto(user?.email);
+
+  // "Continúa tu camino" no repite el curso que ya protagoniza el bloque
+  // de "Continuar aprendiendo" — evita mostrar la misma información dos veces.
+  const otherEnrollments = enrollments.filter(
+    (e) => !continueLearning || e.courseId?.toString() !== continueLearning.courseId?.toString(),
+  );
+
   return (
     <div className={styles.dashboard}>
 
-      {/* Hero */}
-      <Card variant="elevated" noPadding>
-        <CardBody className={styles.heroBody}>
-          <p className={styles.heroGreeting}>
-            {summary.streakDays > 0
-              ? `Hola, ${profile.firstName}. Llevas ${summary.streakDays} días de racha.`
-              : `Hola, ${profile.firstName}.`}
-          </p>
-          <div className={styles.heroStats}>
-            <div className={styles.heroStat}>
-              <span className={styles.heroStatValue}>{summary.overallProgressAvg}%</span>
-              <span className={styles.heroStatLabel}>Progreso global</span>
+      {/* Hero — bloque editorial de marca: escaparate principal de Sarah.
+          Saludo, progreso global, siguiente acción y CTA viven dentro del
+          mismo bloque oscuro; la fotografía es una columna real, no un
+          fondo, con fundido hacia la superficie de marca. */}
+      <section className={styles.hero}>
+        <div className={styles.heroInner}>
+          <div className={styles.heroContent}>
+            <span className={styles.heroEyebrow}>Aprender · Aplicar · Superarte</span>
+
+            <h1 className={styles.heroGreeting}>
+              {summary.streakDays > 0
+                ? `Hola, ${profile.firstName}. Llevas ${summary.streakDays} días de racha.`
+                : `Hola, ${profile.firstName}.`}
+            </h1>
+
+            <div className={styles.heroProgress}>
+              <div className={styles.heroProgressHeader}>
+                <span className={styles.heroProgressValue}>{summary.overallProgressAvg}%</span>
+                <span className={styles.heroProgressLabel}>Progreso global</span>
+              </div>
+              <ProgressBar value={summary.overallProgressAvg} ariaLabel="Progreso global" variant="accent" />
             </div>
-            {summary.streakDays > 0 && (
-              <div className={styles.heroStat}>
-                <span className={styles.heroStatValue}>{summary.streakDays}</span>
-                <span className={styles.heroStatLabel}>días de racha</span>
+
+            {nextAction ? (
+              <div className={styles.heroNext}>
+                <span className={styles.heroNextLabel}>Siguiente paso</span>
+                <p className={styles.heroNextTitle}>{nextAction.label}</p>
+                {nextAction.meta && <p className={styles.heroNextMeta}>{nextAction.meta}</p>}
+                <Button as={Link} href={nextAction.href} variant="accent" size="lg" className={styles.heroCta}>
+                  Continuar aprendiendo
+                </Button>
+              </div>
+            ) : (
+              <div className={styles.heroNext}>
+                <p className={styles.heroNextTitle}>Estás al día con tu contenido activo.</p>
+                <Button as={Link} href="/courses" variant="accent" size="lg" className={styles.heroCta}>
+                  Explorar cursos
+                </Button>
               </div>
             )}
           </div>
-          <ProgressBar value={summary.overallProgressAvg} ariaLabel="Progreso global" />
-        </CardBody>
-      </Card>
 
-      {/* Continuar aprendiendo */}
-      <section>
-        <h2 className={styles.sectionTitle}>Continuar aprendiendo</h2>
-        <div className={styles.continueLearningWrapper}>
-          <ContinueLearningCard
-            continueLearning={continueLearning}
-            enrollments={enrollments}
-          />
+          <div className={styles.heroPhoto} aria-hidden="true">
+            {photoUrl && !photoFailed ? (
+              <Image
+                src={photoUrl}
+                alt=""
+                fill
+                priority
+                sizes="(max-width: 960px) 100vw, 42vw"
+                className={styles.heroPhotoImg}
+                onError={() => setPhotoFailed(true)}
+              />
+            ) : (
+              <div className={styles.heroPhotoFallback} />
+            )}
+            <div className={styles.heroPhotoFadeSide} />
+            <div className={styles.heroPhotoFadeBottom} />
+          </div>
         </div>
       </section>
 
-      {/* Actividad de hoy */}
-      <TodayActivityCard
-        summary={summary}
-        growth={growth}
-        recentActivity={recentActivity}
-        pendingAssessments={pendingAssessments}
+      {/* Continuar aprendiendo — pieza protagonista, no una card aislada */}
+      <ContinueLearningCard
         continueLearning={continueLearning}
-      />
-
-      {/* Objetivos de la semana */}
-      <WeeklyGoalsCard
-        summary={summary}
-        growth={growth}
-        pendingAssessments={pendingAssessments}
-        continueLearning={continueLearning}
-      />
-
-      {/* Continúa tu camino - Blueprint pos. 6 */}
-      <section>
-        <h2 className={styles.sectionTitle}>Continúa tu camino</h2>
-        <ul className={styles.courseGrid}>
-          {enrollments.map((e) => (
-            <LearningPathCard key={e.enrollmentId} enrollment={e} />
-          ))}
-        </ul>
-      </section>
-
-      {/* Recomendado para ti - Blueprint pos. 7 */}
-      <RecommendedCard
-        continueLearning={continueLearning}
-        pendingAssessments={pendingAssessments}
         enrollments={enrollments}
       />
 
-      {/* Hoy en Elevate - Blueprint pos. 8 */}
-      <TodayInElevateCard upcomingActivities={upcomingActivities} />
+      {/* Actividad de hoy + Objetivos de la semana — compactos, en 2 columnas */}
+      <div className={styles.pairSection}>
+        <TodayActivityCard
+          summary={summary}
+          growth={growth}
+          recentActivity={recentActivity}
+          pendingAssessments={pendingAssessments}
+          continueLearning={continueLearning}
+        />
+        <WeeklyGoalsCard
+          summary={summary}
+          growth={growth}
+          pendingAssessments={pendingAssessments}
+          continueLearning={continueLearning}
+        />
+      </div>
 
-      {/* Mi espacio de aprendizaje - Blueprint pos. 9 */}
+      {/* Continúa tu camino — el resto de cursos, sección secundaria */}
+      {otherEnrollments.length > 0 && (
+        <section>
+          <h2 className={styles.sectionTitle}>Continúa tu camino</h2>
+          <ul className={styles.courseGrid}>
+            {otherEnrollments.map((e) => (
+              <LearningPathCard key={e.enrollmentId} enrollment={e} />
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {/* Recomendado para ti + Hoy en Elevate — en 2 columnas */}
+      <div className={styles.pairSection}>
+        <RecommendedCard
+          continueLearning={continueLearning}
+          pendingAssessments={pendingAssessments}
+          enrollments={enrollments}
+        />
+        <TodayInElevateCard upcomingActivities={upcomingActivities} />
+      </div>
+
+      {/* Mi espacio de aprendizaje */}
       <section>
         <h2 className={styles.sectionTitle}>Mi espacio de aprendizaje</h2>
         <div className={styles.bodyGrid}>

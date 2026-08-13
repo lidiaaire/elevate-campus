@@ -55,12 +55,12 @@
 
 /* Racha activa: valor en color de acento cálido */
 .statStreak .statValue {
-  color: var(--warning-600, #d97706);
+  color: var(--warning-400);
 }
 
 /* Evaluaciones pendientes: valor en rojo si hay alguna */
 .statPending .statValue {
-  color: var(--danger-600, #dc2626);
+  color: var(--danger-400);
 }
 
 /* ---- Lecciones de hoy ---- */

@@ -73,7 +73,8 @@ function buildGoals({ summary, growth, pendingAssessments, continueLearning }) {
     });
   }
 
-  return goals.slice(0, 5);
+  // Máximo 3: card compacta, no una lista interminable de barras.
+  return goals.slice(0, 3);
 }
 
 function GoalItem({ goal }) {

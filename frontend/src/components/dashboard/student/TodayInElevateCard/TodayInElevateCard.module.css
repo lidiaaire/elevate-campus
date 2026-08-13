@@ -47,7 +47,7 @@
 }
 
 .rowLink:focus-visible {
-  outline: 2px solid var(--brand-500);
+  outline: 2px solid var(--color-focus-ring);
   outline-offset: 2px;
 }
 
@@ -80,18 +80,18 @@
 }
 
 .badgeAssessment {
-  background-color: var(--brand-50, #eff6ff);
-  color: var(--brand-700, #1d4ed8);
+  background-color: var(--color-ink-soft);
+  color: var(--color-ink);
 }
 
 .badgeAssignment {
-  background-color: var(--warning-100, #fef3c7);
-  color: var(--warning-700, #b45309);
+  background-color: var(--warning-100);
+  color: var(--warning-400);
 }
 
 .badgeSession {
-  background-color: var(--success-50, #f0fdf4);
-  color: var(--success-700, #15803d);
+  background-color: var(--success-50);
+  color: var(--success-400);
 }
 
 /* ---- Contenido principal ---- */

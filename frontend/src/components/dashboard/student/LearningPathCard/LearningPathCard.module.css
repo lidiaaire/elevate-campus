@@ -72,7 +72,7 @@
 .nextUnit {
   font-size: 0.8125rem;
   font-weight: 600;
-  color: var(--brand-600, var(--brand-500));
+  color: var(--color-ink);
   margin: 0;
   white-space: nowrap;
   overflow: hidden;
@@ -92,7 +92,7 @@
 .completedNote {
   font-size: 0.8125rem;
   font-weight: 500;
-  color: var(--success-600);
+  color: var(--success-400);
   margin: 0;
 }
 
@@ -100,7 +100,7 @@
 .pendingNote {
   font-size: 0.8125rem;
   font-weight: 500;
-  color: var(--warning-600);
+  color: var(--warning-400);
   margin: 0;
 }
 

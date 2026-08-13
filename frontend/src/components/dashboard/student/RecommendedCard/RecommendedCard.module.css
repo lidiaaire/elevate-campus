@@ -38,12 +38,12 @@
 }
 
 .item:hover {
-  border-color: var(--brand-300, #93c5fd);
-  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.08);
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-md);
 }
 
 .item:focus-visible {
-  outline: 2px solid var(--brand-500);
+  outline: 2px solid var(--color-focus-ring);
   outline-offset: 2px;
 }
 
@@ -73,18 +73,18 @@
 }
 
 .badge_continue {
-  background-color: var(--brand-50, #eff6ff);
-  color: var(--brand-700, #1d4ed8);
+  background-color: var(--color-ink-soft);
+  color: var(--color-ink);
 }
 
 .badge_assessment {
-  background-color: var(--danger-50, #fef2f2);
-  color: var(--danger-700, #b91c1c);
+  background-color: var(--danger-50);
+  color: var(--danger-400);
 }
 
 .badge_course {
-  background-color: var(--success-50, #f0fdf4);
-  color: var(--success-700, #15803d);
+  background-color: var(--success-50);
+  color: var(--success-400);
 }
 
 /* ---- Textos ---- */
@@ -123,8 +123,9 @@
   margin-top: 0.25rem;
 }
 
+/* No semántico: progreso de recomendación → naranja de marca */
 .fill {
   height: 100%;
-  background: linear-gradient(90deg, var(--brand-400, #60a5fa), var(--brand-500, #3b82f6));
+  background: linear-gradient(90deg, var(--elevate-accent-400), var(--elevate-accent-500));
   border-radius: 999px;
 }

@@ -28,7 +28,7 @@
 .progressPct {
   font-size: 0.8125rem;
   font-weight: 700;
-  color: var(--brand-600);
+  color: var(--color-ink);
 }
 
 .bar {
@@ -41,7 +41,7 @@
 
 .barFill {
   height: 100%;
-  background: linear-gradient(to right, var(--brand-400), var(--brand-600));
+  background: linear-gradient(to right, var(--color-ink-hover), var(--color-ink));
   border-radius: var(--radius-full);
   transition: width var(--dur-slow) var(--ease-out);
 }

@@ -1,75 +1,128 @@
 /* ============================================================
-   ContinueLearningCard — Design System v1.0
+   ContinueLearningCard — Design System v2.0
+   Pieza protagonista horizontal: visual de curso a la izquierda,
+   contenido completo (título, unidad, última lección, siguiente paso,
+   progreso, CTA) a la derecha. Sustituye a la card vertical pequeña
+   que quedaba aislada bajo un título de sección aparte.
    ============================================================ */
 
-/* ---- Imagen / cabecera ---- */
-.imageWrapper {
+.spotlight {
+  display: flex;
+  flex-direction: column;
+}
+
+@media (min-width: 760px) {
+  .spotlight {
+    flex-direction: row;
+    align-items: stretch;
+  }
+}
+
+/* ---- Visual de curso ---- */
+.visual {
   position: relative;
-  height: 140px;
-  background-color: var(--card-accent, var(--brand-500));
-  border-radius: var(--radius-lg, 12px) var(--radius-lg, 12px) 0 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 160px;
+  flex-shrink: 0;
   overflow: hidden;
-}
-
-.image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-
-.imagePlaceholder {
-  width: 100%;
-  height: 100%;
   background: linear-gradient(
-    135deg,
-    var(--card-accent, var(--brand-500)) 0%,
-    color-mix(in srgb, var(--card-accent, var(--brand-500)) 60%, #000) 100%
+    155deg,
+    var(--card-accent, var(--color-ink)) 0%,
+    color-mix(in srgb, var(--card-accent, var(--color-ink)) 55%, #000) 100%
   );
+}
+
+@media (min-width: 760px) {
+  .visual {
+    width: 34%;
+    min-height: auto;
+  }
+}
+
+.visualImage {
+  width: 58%;
+  height: auto;
+  opacity: 0.95;
+  filter: drop-shadow(0 10px 22px rgba(0, 0, 0, 0.25));
+}
+
+.visualPlaceholder {
+  width: 100%;
+  height: 100%;
+}
+
+.levelBadge {
+  position: absolute;
+  top: 0.75rem;
+  left: 0.75rem;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.32);
+  padding: 0.2rem 0.55rem;
+  border-radius: var(--radius-full);
 }
 
 .progressBadge {
   position: absolute;
-  top: 0.625rem;
+  top: 0.75rem;
   right: 0.75rem;
-  background: rgba(0, 0, 0, 0.45);
-  color: #fff;
   font-size: 0.75rem;
   font-weight: 700;
-  padding: 0.2rem 0.5rem;
-  border-radius: 999px;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.32);
+  padding: 0.2rem 0.55rem;
+  border-radius: var(--radius-full);
   letter-spacing: 0.02em;
 }
 
 /* ---- Cuerpo ---- */
 .body {
+  flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 0.625rem;
+  gap: 1rem;
+  padding: 1.5rem 1.75rem;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.eyebrow {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--elevate-accent-500);
 }
 
 .courseTitle {
-  font-size: 1rem;
+  font-size: 1.375rem;
   font-weight: 700;
   color: var(--text-display);
-  line-height: 1.3;
+  line-height: 1.25;
   margin: 0;
 }
 
 .unitLabel {
-  font-size: 0.8125rem;
+  font-size: 0.875rem;
   font-weight: 500;
-  color: var(--brand-600, var(--brand-500));
+  color: var(--text-secondary);
   margin: 0;
 }
 
 .lastLesson {
-  font-size: 0.8125rem;
+  font-size: 0.875rem;
   color: var(--text-secondary);
   margin: 0;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .lastLessonPrefix {
@@ -77,12 +130,37 @@
   color: var(--text-primary);
 }
 
+/* ---- Siguiente paso — destacado, no es solo otra línea de texto ---- */
+.nextStep {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  padding: 0.75rem 1rem;
+  background: var(--color-ink-soft);
+  border-radius: var(--radius-md);
+}
+
+.nextLabel {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+}
+
+.nextTitle {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--color-ink);
+  margin: 0;
+}
+
 /* ---- Progreso ---- */
 .progressSection {
   display: flex;
   flex-direction: column;
   gap: 0.375rem;
-  margin-top: 0.25rem;
+  margin-top: auto;
 }
 
 .progressMeta {
@@ -100,6 +178,11 @@
   font-size: 0.8125rem;
   font-weight: 700;
   color: var(--text-primary);
+}
+
+.cta {
+  align-self: flex-start;
+  margin-top: 0.25rem;
 }
 
 /* ---- Estado completado ---- */
