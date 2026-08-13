@@ -1,0 +1,93 @@
+/* ============================================================
+   SkillRadarPage — Design System v2.0 (dark Elevate)
+   Aprovecha el ancho tras el sidebar: radar grande protagonista +
+   "Tu perfil actual" como panel lateral, en vez de una columna
+   estrecha centrada con el gráfico pequeño.
+   ============================================================ */
+
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+}
+
+.page > * {
+  animation: fadeSlideUp var(--dur-slow) var(--ease-out) both;
+}
+
+.page > *:nth-child(1) { animation-delay: 0ms; }
+.page > *:nth-child(2) { animation-delay: 90ms; }
+.page > *:nth-child(3) { animation-delay: 140ms; }
+
+/* ── Radar + perfil ── */
+.radarGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+@media (min-width: 960px) {
+  .radarGrid {
+    grid-template-columns: 2fr 1fr;
+  }
+}
+
+.chartWrapper {
+  width: 100%;
+  height: 440px;
+  padding: 1.25rem;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+}
+
+@media (min-width: 960px) {
+  .chartWrapper {
+    height: 610px;
+  }
+}
+
+@media (max-width: 480px) {
+  .chartWrapper {
+    height: 360px;
+    padding: 0.875rem;
+  }
+}
+
+/* ── "¿Cómo se calcula?" — bloque horizontal ── */
+.infoSection {
+  padding: 1.5rem 1.75rem;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+}
+
+.infoTitle {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 0.875rem;
+}
+
+.infoList {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.5rem 2rem;
+  padding-left: 1.25rem;
+  margin: 0 0 1rem;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+
+@media (min-width: 760px) {
+  .infoList {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.infoNote {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  margin: 0;
+}

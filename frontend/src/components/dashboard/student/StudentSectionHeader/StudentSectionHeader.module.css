@@ -1,0 +1,97 @@
+/* ============================================================
+   StudentSectionHeader — Design System v2.0 (dark Elevate)
+   Variante compacta del hero de StudentDashboard: mismo gradiente de
+   marca (negro → granate → naranja), sin columna de foto — pensada
+   para encabezar una página secundaria, no para protagonizarla.
+   ============================================================ */
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding: 1.5rem 1.75rem;
+  background: var(--elevate-surface-brand-primary);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+}
+
+/* Mismo lenguaje que el hero del Dashboard, con un tope de mezcla menor
+   (35% vs 55%) — esta cabecera es compacta, no un escaparate a pantalla
+   completa. */
+@media (min-width: 960px) {
+  .header {
+    padding: 1.75rem 2.25rem;
+    background: linear-gradient(
+      to right,
+      var(--elevate-surface-brand-primary) 0%,
+      var(--elevate-surface-brand-primary) 40%,
+      color-mix(in srgb, var(--elevate-accent-500) 16%, var(--elevate-surface-brand-primary)) 68%,
+      color-mix(in srgb, var(--elevate-accent-500) 32%, var(--elevate-surface-brand-primary)) 100%
+    );
+  }
+}
+
+.top {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+@media (min-width: 760px) {
+  .top {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+.text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.eyebrow {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--elevate-accent-500);
+}
+
+.title {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--elevate-surface-brand-light);
+  letter-spacing: -0.02em;
+  margin: 0;
+  line-height: 1.2;
+}
+
+@media (min-width: 960px) {
+  .title {
+    font-size: 1.75rem;
+  }
+}
+
+.description {
+  font-size: 0.875rem;
+  color: var(--elevate-text-brand-muted);
+  margin: 0;
+}
+
+.actions {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+/* ── Slot de resumen (p. ej. fila de StatCard) ── */
+.summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}

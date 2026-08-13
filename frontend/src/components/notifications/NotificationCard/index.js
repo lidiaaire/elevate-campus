@@ -1,26 +1,65 @@
 'use client';
 
-import styles from '@/styles/Notifications.module.css';
+import { Award, FileCheck, CalendarCheck, Sparkles, Bell } from 'lucide-react';
+import { getNotificationTypeLabel } from '@/lib/config/notificationTypes';
+import styles from '@/app/(protected)/notifications/Notifications.module.css';
 
-export default function NotificationCard({ notification }) {
+// Mismos iconos que ya usa la ficha de alumno para Logros/Certificados
+// (users/[id]/page.js: Award, FileCheck) — coherencia de lenguaje visual,
+// no una elección nueva por pantalla.
+const TYPE_ICON = {
+  ACHIEVEMENT:    Award,
+  CERTIFICATE:    FileCheck,
+  BOOKING:        CalendarCheck,
+  RECOMMENDATION: Sparkles,
+  SYSTEM:         Bell,
+};
+
+function formatDate(value) {
+  if (!value) return '';
+  return new Date(value).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
+}
+
+export default function NotificationCard({ notification, onMarkRead, index = 0 }) {
   // El backend expone createdAtNotification (campo propio del modelo), no el
   // createdAt automático de Mongoose — de ahí que createdAt viniera undefined.
-  const { title, message, type, isRead, createdAtNotification } = notification;
+  const { _id, title, message, type, isRead, createdAtNotification } = notification;
+  const Icon = TYPE_ICON[type] ?? Bell;
+  const typeLabel = getNotificationTypeLabel(type);
 
-  return (
-    <li className={`${styles.card} ${!isRead ? styles.cardUnread : ''}`}>
-      {!isRead && (
-        <span className={styles.unreadDot} aria-hidden="true" />
-      )}
+  const inner = (
+    <>
+      <span className={styles.icon} aria-hidden="true"><Icon size={16} /></span>
       <div className={styles.body}>
-        <p className={styles.title}>{title}</p>
+        <div className={styles.mainRow}>
+          <p className={styles.title}>{title}</p>
+          <span className={styles.date}>{formatDate(createdAtNotification)}</span>
+        </div>
         <p className={styles.message}>{message}</p>
         <div className={styles.meta}>
-          <span className={styles.badge}>{type}</span>
-          <span className={styles.badge}>{isRead ? 'Leída' : 'No leída'}</span>
-          <span>{new Date(createdAtNotification).toLocaleDateString('es-ES')}</span>
+          <span className={styles.typeTag}>{typeLabel}</span>
+          {!isRead && <span className={styles.unreadTag}>Nueva</span>}
         </div>
       </div>
+    </>
+  );
+
+  return (
+    <li
+      className={`${styles.item} ${!isRead ? styles.itemUnread : ''}`}
+      style={{ '--stagger': index }}
+    >
+      {isRead ? (
+        <div className={styles.itemInner}>{inner}</div>
+      ) : (
+        <button
+          type="button"
+          className={styles.itemInner}
+          onClick={() => onMarkRead(_id)}
+        >
+          {inner}
+        </button>
+      )}
     </li>
   );
 }

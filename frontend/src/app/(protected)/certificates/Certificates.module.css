@@ -1,5 +1,7 @@
 /* ============================================================
-   CertificatesPage — Design System v1.0
+   CertificatesPage — Design System v2.0 (dark Elevate)
+   Cabecera editorial (StudentSectionHeader) + grid de documentos
+   premium, con tope de columnas para no diluirse en pantallas anchas.
    ============================================================ */
 
 .page {
@@ -8,42 +10,34 @@
   gap: 1.5rem;
 }
 
-/* ── Resumen ── */
-.summaryRow {
-  display: flex;
-  gap: 1rem;
-  flex-wrap: wrap;
+.page > * {
+  animation: fadeSlideUp var(--dur-slow) var(--ease-out) both;
 }
 
-.summaryItem {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-  padding: 1rem 1.25rem;
-  background: var(--bg-surface);
-  border: 1px solid var(--bg-subtle);
-  border-radius: var(--radius-lg, 12px);
-  min-width: 120px;
-}
-
-.summaryVal {
-  font-size: 1.5rem;
-  font-weight: 800;
-  color: var(--text-primary);
-  line-height: 1;
-}
-
-.summaryLabel {
-  font-size: 0.75rem;
-  color: var(--text-muted);
-  font-weight: 500;
-}
+.page > *:nth-child(1) { animation-delay: 0ms; }
+.page > *:nth-child(2) { animation-delay: 90ms; }
 
 /* ── Grid ── */
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 1rem;
+  gap: 1.25rem;
+}
+
+@media (min-width: 860px) and (max-width: 1279px) {
+  .grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (min-width: 1280px) {
+  .grid { grid-template-columns: repeat(3, 1fr); }
+}
+
+/* Un único certificado: pieza protagonista de ancho mayor en vez de una
+   card diminuta perdida en una esquina. */
+.gridSingle {
+  display: grid;
+  grid-template-columns: 1fr;
+  max-width: 600px;
 }
 
 /* ── Tarjeta ── */
@@ -51,13 +45,25 @@
   display: flex;
   flex-direction: column;
   background: var(--bg-surface);
-  border: 1px solid var(--bg-subtle);
+  border: 1px solid var(--border-default);
   border-radius: var(--radius-lg, 12px);
   overflow: hidden;
+  transition: transform var(--dur-normal) var(--ease-out), box-shadow var(--dur-normal) var(--ease-out);
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
 }
 
 .cardAccent {
   height: 5px;
+}
+
+/* Certificado único: pieza protagonista — accent más grueso, más aire
+   interno y tipografía mayor, misma información, nada inventado. */
+.cardFeatured .cardAccent {
+  height: 8px;
 }
 
 .cardBody {
@@ -67,11 +73,21 @@
   flex: 1;
 }
 
+.cardFeatured .cardBody {
+  gap: 1.5rem;
+  padding: 2rem 2.25rem;
+}
+
 .iconWrap {
   display: flex;
   align-items: flex-start;
   flex-shrink: 0;
   padding-top: 0.125rem;
+}
+
+.cardFeatured .iconWrap svg {
+  width: 48px;
+  height: 48px;
 }
 
 .cardContent {
@@ -88,6 +104,10 @@
   color: var(--text-primary);
   margin: 0;
   line-height: 1.3;
+}
+
+.cardFeatured .courseTitle {
+  font-size: 1.375rem;
 }
 
 .metaRow {
@@ -112,10 +132,18 @@
   color: var(--text-primary);
 }
 
+.cardFeatured .score {
+  font-size: 1.125rem;
+}
+
 .dateText {
   font-size: 0.8125rem;
   color: var(--text-secondary);
   margin: 0;
+}
+
+.cardFeatured .dateText {
+  font-size: 0.9375rem;
 }
 
 .certNumber {
@@ -125,6 +153,10 @@
   margin: 0;
 }
 
+.cardFeatured .certNumber {
+  font-size: 0.8125rem;
+}
+
 /* ── Footer tarjeta ── */
 .cardFooter {
   display: flex;
@@ -132,8 +164,12 @@
   justify-content: flex-end;
   gap: 0.75rem;
   padding: 0.75rem 1.25rem;
-  border-top: 1px solid var(--bg-subtle);
+  border-top: 1px solid var(--border-default);
   background: var(--bg-subtle);
+}
+
+.cardFeatured .cardFooter {
+  padding: 1.125rem 2.25rem;
 }
 
 .pdfPending {
@@ -144,10 +180,10 @@
 
 .dlError {
   font-size: 0.75rem;
-  color: var(--danger-600, #dc2626);
+  color: var(--danger-600);
   flex: 1;
 }
 
 @media (max-width: 480px) {
-  .grid { grid-template-columns: 1fr; }
+  .grid, .gridSingle { grid-template-columns: 1fr; }
 }

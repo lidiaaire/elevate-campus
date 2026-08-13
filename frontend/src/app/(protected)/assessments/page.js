@@ -4,7 +4,8 @@ import Link from 'next/link';
 import { useAuth }           from '@/hooks/useAuth';
 import { useAsyncData }      from '@/hooks/useAsyncData';
 import { dashboardService }  from '@/lib/services/dashboard.service';
-import PageHeader   from '@/components/ui/PageHeader';
+import StudentSectionHeader from '@/components/dashboard/student/StudentSectionHeader';
+import StatCard     from '@/components/ui/StatCard';
 import LoadingState from '@/components/ui/LoadingState';
 import ErrorState   from '@/components/ui/ErrorState';
 import EmptyState   from '@/components/ui/EmptyState';
@@ -15,13 +16,13 @@ function attemptsLeft(a) {
   return a.maxAttempts - a.attemptsUsed;
 }
 
-function AssessmentCard({ assessment }) {
+function AssessmentCard({ assessment, featured = false }) {
   const left  = attemptsLeft(assessment);
   const href  = `/courses/${assessment.courseId}/units/${assessment.unitId}/assessment`;
   const isNew = assessment.attemptsUsed === 0;
 
   return (
-    <div className={styles.card}>
+    <div className={`${styles.card} ${featured ? styles.cardFeatured : ''}`}>
       <div className={styles.cardBody}>
         <div className={styles.cardTop}>
           <div>
@@ -57,7 +58,7 @@ function AssessmentCard({ assessment }) {
         <span className={styles.attemptsLeftText}>
           {left} intento{left !== 1 ? 's' : ''} restante{left !== 1 ? 's' : ''}
         </span>
-        <Button as={Link} href={href} variant="primary" size="sm">
+        <Button as={Link} href={href} variant="primary" size={featured ? 'md' : 'sm'}>
           {isNew ? 'Realizar' : 'Reintentar'} →
         </Button>
       </div>
@@ -83,36 +84,26 @@ export default function AssessmentsPage() {
 
   return (
     <div className={styles.page}>
-      <PageHeader
+      <StudentSectionHeader
+        eyebrow="Evaluación"
         title="Evaluaciones"
         description={`${pending.length} pendiente${pending.length !== 1 ? 's' : ''}`}
-      />
-
-      {/* Resumen */}
-      {total > 0 && (
-        <div className={styles.summaryRow}>
-          <div className={styles.summaryCard}>
-            <span className={styles.summaryVal}>{passed}</span>
-            <span className={styles.summaryLabel}>Superadas</span>
-          </div>
-          <div className={styles.summaryCard}>
-            <span className={styles.summaryVal}>{total}</span>
-            <span className={styles.summaryLabel}>Total</span>
-          </div>
-          {avgScore !== null && avgScore !== undefined && (
-            <div className={styles.summaryCard}>
-              <span className={styles.summaryVal}>{avgScore}%</span>
-              <span className={styles.summaryLabel}>Media mejor nota</span>
-            </div>
-          )}
-          <div className={styles.summaryCard}>
-            <span className={`${styles.summaryVal} ${passed === total ? styles.valSuccess : styles.valPending}`}>
-              {total === 0 ? '—' : `${Math.round((passed / total) * 100)}%`}
-            </span>
-            <span className={styles.summaryLabel}>Tasa de éxito</span>
-          </div>
-        </div>
-      )}
+      >
+        {total > 0 && (
+          <>
+            <StatCard title="Superadas" value={passed} />
+            <StatCard title="Total" value={total} />
+            {avgScore !== null && avgScore !== undefined && (
+              <StatCard title="Media mejor nota" value={`${avgScore}%`} />
+            )}
+            <StatCard
+              variant={passed === total ? 'success' : 'default'}
+              title="Tasa de éxito"
+              value={total === 0 ? '—' : `${Math.round((passed / total) * 100)}%`}
+            />
+          </>
+        )}
+      </StudentSectionHeader>
 
       {/* Lista pendientes */}
       {pending.length === 0 ? (
@@ -123,9 +114,9 @@ export default function AssessmentsPage() {
       ) : (
         <section>
           <h2 className={styles.sectionTitle}>Pendientes</h2>
-          <div className={styles.grid}>
+          <div className={pending.length === 1 ? styles.gridSingle : styles.grid}>
             {pending.map((a) => (
-              <AssessmentCard key={String(a.assessmentId)} assessment={a} />
+              <AssessmentCard key={String(a.assessmentId)} assessment={a} featured={pending.length === 1} />
             ))}
           </div>
         </section>

@@ -7,11 +7,12 @@ import { useAsyncData }         from '@/hooks/useAsyncData';
 import { useToast }             from '@/contexts/ToastContext';
 import { certificateService }   from '@/lib/services/certificate.service';
 import { getCourseVisual }      from '@/lib/config/courseVisuals';
-import PageHeader   from '@/components/ui/PageHeader';
-import LoadingState from '@/components/ui/LoadingState';
-import ErrorState   from '@/components/ui/ErrorState';
-import EmptyState   from '@/components/ui/EmptyState';
-import Button       from '@/components/ui/Button';
+import StudentSectionHeader from '@/components/dashboard/student/StudentSectionHeader';
+import StatCard      from '@/components/ui/StatCard';
+import LoadingState  from '@/components/ui/LoadingState';
+import ErrorState    from '@/components/ui/ErrorState';
+import EmptyState    from '@/components/ui/EmptyState';
+import Button        from '@/components/ui/Button';
 import styles from './Certificates.module.css';
 
 // Paleta categórica intencional (colores fijos por nivel CEFR), no deuda de
@@ -41,7 +42,7 @@ function DownloadIcon() {
   );
 }
 
-function CertificateCard({ certificate, token }) {
+function CertificateCard({ certificate, token, featured = false }) {
   const [downloading, setDownloading] = useState(false);
   const [dlError,     setDlError]     = useState(null);
   const { showSuccess, showError } = useToast();
@@ -68,7 +69,7 @@ function CertificateCard({ certificate, token }) {
   }
 
   return (
-    <div className={styles.card}>
+    <div className={`${styles.card} ${featured ? styles.cardFeatured : ''}`}>
       <div className={styles.cardAccent} style={{ background: accentColor }} />
 
       <div className={styles.cardBody}>
@@ -97,7 +98,7 @@ function CertificateCard({ certificate, token }) {
           <Button
             onClick={handleDownload}
             variant="primary"
-            size="sm"
+            size={featured ? 'md' : 'sm'}
             loading={downloading}
             iconLeft={!downloading ? <DownloadIcon /> : null}
           >
@@ -130,34 +131,21 @@ export default function CertificatesPage() {
 
   return (
     <div className={styles.page}>
-      <PageHeader
+      <StudentSectionHeader
+        eyebrow="Certificados"
         title="Mis certificados"
         description={count > 0
           ? `${count} certificado${count !== 1 ? 's' : ''} obtenido${count !== 1 ? 's' : ''}`
           : 'Completa un curso para obtener tu primer certificado'}
-      />
-
-      {/* Resumen */}
-      {count > 0 && (
-        <div className={styles.summaryRow}>
-          <div className={styles.summaryItem}>
-            <span className={styles.summaryVal}>{count}</span>
-            <span className={styles.summaryLabel}>Certificados</span>
-          </div>
-          {avgScore !== null && (
-            <div className={styles.summaryItem}>
-              <span className={styles.summaryVal}>{avgScore}%</span>
-              <span className={styles.summaryLabel}>Nota media</span>
-            </div>
-          )}
-          <div className={styles.summaryItem}>
-            <span className={styles.summaryVal}>
-              {certificates.filter((c) => c.pdfUrl).length}
-            </span>
-            <span className={styles.summaryLabel}>PDF disponibles</span>
-          </div>
-        </div>
-      )}
+      >
+        {count > 0 && (
+          <>
+            <StatCard title="Certificados" value={count} />
+            {avgScore !== null && <StatCard title="Nota media" value={`${avgScore}%`} />}
+            <StatCard title="PDF disponibles" value={certificates.filter((c) => c.pdfUrl).length} />
+          </>
+        )}
+      </StudentSectionHeader>
 
       {/* Lista */}
       {count === 0 ? (
@@ -173,12 +161,13 @@ export default function CertificatesPage() {
           </div>
         </>
       ) : (
-        <div className={styles.grid}>
+        <div className={count === 1 ? styles.gridSingle : styles.grid}>
           {certificates.map((c) => (
             <CertificateCard
               key={c.certificateNumber}
               certificate={c}
               token={token}
+              featured={count === 1}
             />
           ))}
         </div>

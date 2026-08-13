@@ -5,11 +5,11 @@ import { useAsyncData } from '@/hooks/useAsyncData';
 import { dashboardService } from '@/lib/services/dashboard.service';
 import SkillRadarChart from '@/components/skill-radar/SkillRadarChart';
 import SkillRadarLegend from '@/components/skill-radar/SkillRadarLegend';
-import PageHeader from '@/components/ui/PageHeader';
+import StudentSectionHeader from '@/components/dashboard/student/StudentSectionHeader';
 import LoadingState from '@/components/ui/LoadingState';
 import ErrorState from '@/components/ui/ErrorState';
 import EmptyState from '@/components/ui/EmptyState';
-import styles from '@/styles/SkillRadar.module.css';
+import styles from './SkillRadar.module.css';
 
 export default function SkillRadarPage() {
   const { token } = useAuth();
@@ -26,8 +26,9 @@ export default function SkillRadarPage() {
     .some((key) => skillProgress?.[key] != null);
 
   return (
-    <div className={styles.container}>
-      <PageHeader
+    <div className={styles.page}>
+      <StudentSectionHeader
+        eyebrow="Nivel"
         title="English Skill Radar"
         description={profile ? `${profile.firstName} ${profile.lastName}` : undefined}
       />
@@ -35,12 +36,12 @@ export default function SkillRadarPage() {
       {!hasData ? (
         <EmptyState title="No hay datos de habilidades disponibles." />
       ) : (
-        <>
+        <div className={styles.radarGrid}>
           <div className={styles.chartWrapper}>
             <SkillRadarChart skillProgress={skillProgress} />
           </div>
           <SkillRadarLegend skillProgress={skillProgress} />
-        </>
+        </div>
       )}
 
       <section className={styles.infoSection}>
