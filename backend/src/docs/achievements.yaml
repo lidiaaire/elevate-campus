@@ -83,6 +83,98 @@ paths:
         "401":
           $ref: "#/components/responses/Unauthorized"
 
+  /api/achievements/students/{studentId}:
+    get:
+      tags: [Achievements]
+      summary: Listar los logros desbloqueados de un alumno (staff)
+      description: >
+        Mismo shape y comportamiento que `GET /me`, pero para el alumno
+        indicado por `studentId`. Punto único de scope compartido con `/me`
+        (`getStudentAchievements`): el acceso propio (`isSelf`) siempre está
+        permitido, sea cual sea el rol.
+
+        Fuera de ese caso (consultar a otro alumno):
+
+        - **ADMIN**: sin restricción.
+        - **TEACHER**: solo alumnos de su propia cohorte
+          (`assignedTeacherId === teacherId`, vía `validateTeacherScope`)
+          → 404 `STUDENT_NOT_FOUND` si el alumno no existe, 403
+          `STUDENT_NOT_IN_COHORT` si existe pero no es de su cohorte.
+        Requiere `requireRole('admin', 'teacher')` en la ruta — un STUDENT
+        nunca llega a evaluar `isSelf` para este endpoint, cae directo en
+        403 `INSUFFICIENT_ROLE` (la rama `FORBIDDEN` del Service para
+        STUDENT solo es alcanzable desde `GET /me`, donde `isSelf` siempre
+        es `true` y por tanto nunca se dispara).
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/studentId"
+      responses:
+        "200":
+          description: Logros desbloqueados del alumno indicado.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  achievements:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/UnlockedAchievement"
+              example:
+                achievements:
+                  - name: "First Steps"
+                    slug: "first_lesson_completed"
+                    description: "Completed your first lesson."
+                    icon: "🎯"
+                    category: "LESSON"
+                    points: 10
+                    rarity: "COMMON"
+                    unlockedAt: "2026-06-30T11:30:00.000Z"
+        "400":
+          description: "`studentId` no es un ObjectId de MongoDB válido."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error: "VALIDATION_ERROR"
+                message: "Datos de entrada inválidos"
+                fields:
+                  - field: "studentId"
+                    message: "studentId debe ser un ObjectId de MongoDB válido"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          description: >
+            El rol autenticado no es ADMIN ni TEACHER
+            (`INSUFFICIENT_ROLE`); o es TEACHER y el alumno indicado no
+            pertenece a su cohorte (`STUDENT_NOT_IN_COHORT`).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              examples:
+                insufficientRole:
+                  summary: Rol no es ADMIN ni TEACHER
+                  value:
+                    error: "INSUFFICIENT_ROLE"
+                    message: "No tienes permiso para realizar esta acción"
+                notInCohort:
+                  summary: TEACHER fuera de su cohorte
+                  value:
+                    error: "STUDENT_NOT_IN_COHORT"
+                    message: "Este alumno no pertenece a tu cohorte"
+        "404":
+          description: El alumno indicado no existe (evaluado solo para TEACHER).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error: "STUDENT_NOT_FOUND"
+                message: "Alumno no encontrado"
+
 components:
 
   securitySchemes:
@@ -90,6 +182,16 @@ components:
       type: http
       scheme: bearer
       bearerFormat: JWT
+
+  parameters:
+    studentId:
+      name: studentId
+      in: path
+      required: true
+      description: ObjectId del User (alumno).
+      schema:
+        type: string
+        example: "663e0a1b2c3d4e5f6a7b8c9d"
 
   responses:
     Unauthorized:

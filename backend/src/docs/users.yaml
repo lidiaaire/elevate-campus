@@ -289,10 +289,15 @@ paths:
         Devuelve el documento completo del usuario indicado (sin
         `passwordHash`), incluyendo usuarios inactivos.
 
-        Accesible por ADMIN y TEACHER. **Limitación conocida del MVP:**
-        TEACHER puede consultar cualquier perfil de la plataforma, no solo
-        los alumnos de su cohorte. La restricción relacional está fuera del
-        alcance de esta versión.
+        Accesible por ADMIN y TEACHER. **ADMIN**: sin restricción, cualquier
+        usuario. **TEACHER**: restringido a alumnos de su propia cohorte vía
+        `validateTeacherScope` (`assignedTeacherId === teacherId`) —
+        cualquier target que no sea un alumno asignado a este teacher (otro
+        teacher, un admin, o un alumno ajeno) produce 403
+        `STUDENT_NOT_IN_COHORT`. `validateTeacherScope` resuelve primero el
+        usuario objetivo; como `getUserById` ya lo ha buscado antes con
+        `USER_NOT_FOUND`, en la práctica un `id` inexistente siempre cae en
+        404 antes de llegar a esta comprobación de cohorte.
       security:
         - bearerAuth: []
       parameters:
@@ -312,7 +317,25 @@ paths:
         "401":
           $ref: "#/components/responses/Unauthorized"
         "403":
-          $ref: "#/components/responses/AdminOrTeacherOnly"
+          description: >
+            El rol autenticado no es ADMIN ni TEACHER
+            (`INSUFFICIENT_ROLE`); o es TEACHER y el usuario indicado no es
+            un alumno de su propia cohorte (`STUDENT_NOT_IN_COHORT`).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              examples:
+                insufficientRole:
+                  summary: Rol no es ADMIN ni TEACHER
+                  value:
+                    error: "INSUFFICIENT_ROLE"
+                    message: "No tienes permiso para realizar esta acción"
+                notInCohort:
+                  summary: TEACHER fuera de su cohorte
+                  value:
+                    error: "STUDENT_NOT_IN_COHORT"
+                    message: "Este alumno no pertenece a tu cohorte"
         "404":
           $ref: "#/components/responses/UserNotFound"
 
