@@ -39,7 +39,7 @@ const unlockAchievement = async (userId, achievementSlug, metadata = {}) => {
   await createNotification(
     userId,
     'ACHIEVEMENT',
-    'Achievement unlocked',
+    'Logro desbloqueado',
     achievement.name,
     { achievementId: achievement._id, slug: achievement.slug },
   );

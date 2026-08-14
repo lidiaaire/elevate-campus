@@ -62,8 +62,8 @@ const issueCertificate = async (studentId, courseId, finalScore) => {
   await createNotification(
     studentId,
     'CERTIFICATE',
-    'Certificate issued',
-    `Your certificate for ${course?.title ?? 'the course'} is ready.`,
+    'Certificado emitido',
+    `Tu certificado de ${course?.title ?? 'el curso'} ya está listo.`,
     {
       certificateId:     certificate._id,
       certificateNumber: certificate.certificateNumber,
