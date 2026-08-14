@@ -32,6 +32,8 @@ The project was built module by module, with each API contract verified against 
 
 Demo credentials for all three roles are listed below in [Seed Credentials](#seed-credentials). The backend may take a few seconds to respond on the first request after a period of inactivity.
 
+**Technical Case Study:** [docs/portfolio/CASE_STUDY.md](docs/portfolio/CASE_STUDY.md) — architecture, authorization, Community design, derived learning state, testing strategy and trade-offs.
+
 ---
 
 ## Product Tour
