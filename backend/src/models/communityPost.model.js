@@ -10,14 +10,15 @@
  * Campos:
  *   author          ObjectId  ref: User    requerido
  *   type            String    enum: TYPE ('POST' | 'ANNOUNCEMENT')  default: 'POST'
- *                     — en esta iteración solo se crea 'POST' vía la API;
- *                       el enum ya deja sitio a 'ANNOUNCEMENT' para la
- *                       siguiente fase, sin migración de schema.
+ *                     — POST vía POST /community/posts, ANNOUNCEMENT vía
+ *                       POST /community/announcements (TEACHER/ADMIN).
  *   content         String    requerido  trim  max 2000 chars  texto plano
- *   scopeTeacherId  ObjectId  ref: User    requerido  NUNCA null en esta
- *                     iteración (los announcements globales, que sí usarán
- *                     null, no se crean todavía) — ver community.service.js
- *                     para la resolución exacta por rol.
+ *   scopeTeacherId  ObjectId  ref: User    OPCIONAL — null únicamente en un
+ *                     ANNOUNCEMENT global de ADMIN (visible para toda la
+ *                     academia); en cualquier otro caso (POST, ANNOUNCEMENT
+ *                     de TEACHER) siempre lleva la cohorte resuelta, nunca
+ *                     null — ver community.service.js para la resolución
+ *                     exacta por rol.
  *   commentCount    Number    default: 0  (denormalizado; se incrementará
  *                     al implementar CommunityComment, no se recalcula)
  *   isDeleted       Boolean   default: false  (soft delete; sin endpoint
@@ -53,10 +54,12 @@ const communityPostSchema = new Schema(
       trim:      true,
       maxlength: 2000,
     },
+    // Sin required: null es un valor válido (announcement global de ADMIN),
+    // no la ausencia del campo — el Service es quien garantiza que POST y
+    // el announcement de TEACHER siempre lleven una cohorte resuelta.
     scopeTeacherId: {
-      type:     Types.ObjectId,
-      ref:      'User',
-      required: true,
+      type: Types.ObjectId,
+      ref:  'User',
     },
     commentCount: {
       type:    Number,

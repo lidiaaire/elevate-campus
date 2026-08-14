@@ -3,7 +3,7 @@
 // modules/community/community.validator.js
 // Mismo criterio que course.validator.js/listCoursesSchema para page/limit.
 
-const { query, body } = require('express-validator');
+const { query, body, param } = require('express-validator');
 
 const feedQuerySchema = [
   query('page')
@@ -29,4 +29,31 @@ const createPostSchema = [
     .isLength({ min: 1, max: 2000 }).withMessage('El contenido debe tener entre 1 y 2000 caracteres'),
 ];
 
-module.exports = { feedQuerySchema, createPostSchema };
+const postIdParamSchema = [
+  param('postId')
+    .trim()
+    .isMongoId().withMessage('El postId debe ser un ObjectId de MongoDB válido'),
+];
+
+// Mismos límites que createPostSchema — mismo tipo de contenido (texto
+// plano de usuario), sin razón para un límite distinto en un comentario.
+const createCommentSchema = [
+  body('content')
+    .trim()
+    .notEmpty().withMessage('El contenido es obligatorio')
+    .isLength({ min: 1, max: 2000 }).withMessage('El contenido debe tener entre 1 y 2000 caracteres'),
+];
+
+const commentIdParamSchema = [
+  param('commentId')
+    .trim()
+    .isMongoId().withMessage('El commentId debe ser un ObjectId de MongoDB válido'),
+];
+
+module.exports = {
+  feedQuerySchema,
+  createPostSchema,
+  postIdParamSchema,
+  createCommentSchema,
+  commentIdParamSchema,
+};

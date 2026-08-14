@@ -28,19 +28,49 @@
  *
  *   createPost(actorRole, actorId, { content })
  *     → type se fuerza a CommunityPost.TYPE.POST, el body nunca puede
- *       decidirlo (ANNOUNCEMENT no se crea todavía). scopeTeacherId se
- *       resuelve en backend (resolveScopeTeacherId), nunca desde el cliente.
- *       Restricción de rol (ADMIN excluido) vive en la ruta
- *       (requireRole), no aquí — mismo criterio que el resto del proyecto.
+ *       decidirlo. scopeTeacherId se resuelve en backend
+ *       (resolveScopeTeacherId), nunca desde el cliente. Restricción de rol
+ *       (ADMIN excluido) vive en la ruta (requireRole), no aquí — mismo
+ *       criterio que el resto del proyecto.
+ *
+ *   createAnnouncement(actorRole, actorId, { content })
+ *     → type se fuerza a CommunityPost.TYPE.ANNOUNCEMENT. scopeTeacherId:
+ *       TEACHER → su propio id (cohorte); ADMIN → null (global, visible
+ *       para toda la academia). El cliente nunca decide ninguno de los dos.
+ *       Restricción de rol (solo TEACHER/ADMIN, STUDENT → 403) vive en la
+ *       ruta (requireRole).
+ *
+ *   getComments(actorRole, actorId, postId)
+ *   createComment(actorRole, actorId, postId, { content })
+ *     → Cualquier rol autenticado puede leer/crear comentarios, pero solo
+ *       sobre un post accesible para su scope (_assertPostAccess, mismo
+ *       criterio que _getVisiblePosts: ADMIN sin restricción, STUDENT/
+ *       TEACHER solo su propia cohorte). Post inexistente o soft-deleted
+ *       → 404; post de otra cohorte → 403. createComment incrementa
+ *       commentCount del post de forma atómica ($inc).
+ *
+ *   deletePost(actorRole, actorId, postId)
+ *   deleteComment(actorRole, actorId, postId, commentId)
+ *     → Soft delete (isDeleted = true), nunca borrado físico. Permiso:
+ *       autor siempre; ADMIN siempre; TEACHER solo si el post (o el post
+ *       padre del comentario) pertenece a su propia cohorte
+ *       (scopeTeacherId === su id); STUDENT nunca sobre contenido ajeno.
+ *       Recurso inexistente o ya borrado → 404 (mismo criterio que
+ *       _assertPostAccess: un segundo DELETE no encuentra nada visible y no
+ *       repite efectos). deleteComment decrementa commentCount del post de
+ *       forma atómica y nunca en negativo (filtro commentCount > 0 en el
+ *       propio update).
  */
 
 const UserRepository             = require('../../repositories/user.repository');
 const UserAchievementRepository  = require('../../repositories/userAchievement.repository');
 const CertificateRepository      = require('../../repositories/certificate.repository');
 const CommunityPostRepository    = require('../../repositories/communityPost.repository');
+const CommunityCommentRepository = require('../../repositories/communityComment.repository');
 const CommunityPost              = require('../../models/communityPost.model');
 const pagination                 = require('../../utils/pagination');
 const { ROLES }                  = require('../../config/constants');
+const { NotFoundError, ForbiddenError } = require('../../utils/ApiError');
 
 // Límite defensivo para la resolución de scope (no hay paginación real aquí:
 // necesitamos TODOS los ids del scope antes de poder ordenar/paginar el
@@ -149,9 +179,11 @@ const _certificateToFeedItem = (c) => ({
   },
 });
 
+// type viene del propio documento (POST | ANNOUNCEMENT) — ya no se fuerza
+// a 'POST', CommunityPost persiste ambos tipos.
 const _postToFeedItem = (p) => ({
   id:        p._id,
-  type:      'POST',
+  type:      p.type,
   eventDate: p.createdAt,
   author: {
     _id:       p.author._id,
@@ -168,11 +200,8 @@ const _postToFeedItem = (p) => ({
 
 // ADMIN → todos los posts visibles, sin filtro de scope (igual que
 // resolveScopeStudentIds para achievements/certificates).
-// STUDENT/TEACHER → posts de su propia cohorte + scopeTeacherId:null.
-// Ningún POST tiene hoy scopeTeacherId:null (solo lo tendrán los
-// announcements globales de la siguiente fase) — incluirlo ya en el
-// filtro no expone nada hoy y evita tener que tocar esta query cuando
-// se implementen los announcements.
+// STUDENT/TEACHER → posts/announcements de su propia cohorte +
+// scopeTeacherId:null (announcements globales de ADMIN).
 const _getVisiblePosts = async (actorRole, actorId) => {
   if (actorRole === ROLES.ADMIN) {
     return CommunityPostRepository.findAllVisible();
@@ -218,4 +247,155 @@ const createPost = async (actorRole, actorId, { content }) => {
   });
 };
 
-module.exports = { getFeed, createPost, resolveScopeStudentIds, resolveScopeTeacherId };
+// type se fuerza SIEMPRE a ANNOUNCEMENT — el body nunca decide el type ni
+// el scopeTeacherId. Restricción de rol (solo TEACHER/ADMIN) vive en la
+// ruta (requireRole), no aquí — mismo criterio que createPost.
+// TEACHER → scopeTeacherId = su propio id (announcement de su cohorte).
+// ADMIN    → scopeTeacherId = null (announcement global, visible para toda
+//            la academia — mismo valor que _getVisiblePosts/findByScopes
+//            ya contemplan para el feed).
+const createAnnouncement = async (actorRole, actorId, { content }) => {
+  const scopeTeacherId = actorRole === ROLES.ADMIN ? null : actorId;
+
+  return CommunityPostRepository.create({
+    author: actorId,
+    type:   CommunityPost.TYPE.ANNOUNCEMENT,
+    content,
+    scopeTeacherId,
+  });
+};
+
+// Shape compartido entre getComments y createComment.
+const _commentToDTO = (c) => ({
+  _id:     c._id,
+  content: c.content,
+  author: {
+    _id:       c.author._id,
+    firstName: c.author.firstName,
+    lastName:  c.author.lastName,
+    email:     c.author.email,
+    role:      c.author.role,
+  },
+  createdAt: c.createdAt,
+});
+
+// Resuelve acceso al post padre de un comentario con el mismo criterio que
+// _getVisiblePosts: ADMIN sin restricción; STUDENT/TEACHER solo si el post
+// pertenece a su propia cohorte (scopeTeacherId resuelto). Post inexistente
+// o soft-deleted → 404 (no se distingue de "no existe": un post borrado no
+// es un recurso accesible para nadie fuera de este dato interno). Post
+// existente pero de otra cohorte → 403.
+const _assertPostAccess = async (actorRole, actorId, postId) => {
+  const post = await CommunityPostRepository.findById(postId);
+  if (!post || post.isDeleted) {
+    throw new NotFoundError('POST_NOT_FOUND', 'Publicación no encontrada');
+  }
+
+  if (actorRole === ROLES.ADMIN) return post;
+
+  // scopeTeacherId: null → announcement global de ADMIN, accesible para
+  // cualquier rol autenticado (mismo criterio que el feed).
+  if (post.scopeTeacherId === null) return post;
+
+  const scopeTeacherId = await resolveScopeTeacherId(actorRole, actorId);
+  if (post.scopeTeacherId.toString() !== scopeTeacherId.toString()) {
+    throw new ForbiddenError('POST_FORBIDDEN', 'No tienes acceso a esta publicación');
+  }
+
+  return post;
+};
+
+// Permiso de borrado de un post: autor siempre puede; ADMIN siempre puede;
+// TEACHER solo si el post pertenece a su propia cohorte (scopeTeacherId ===
+// su propio id, mismo valor que resolveScopeTeacherId(TEACHER, actorId)
+// devuelve siempre). STUDENT nunca puede borrar un post ajeno, ni dentro de
+// su propia cohorte. scopeTeacherId?. — un announcement global (null) nunca
+// coincide con el id de un TEACHER, así que cae directo al 403 (solo su
+// propio autor, es decir ADMIN, puede borrarlo).
+const _assertPostDeletePermission = (actorRole, actorId, post) => {
+  if (post.author.toString() === actorId.toString()) return;
+  if (actorRole === ROLES.ADMIN) return;
+  if (actorRole === ROLES.TEACHER && post.scopeTeacherId?.toString() === actorId.toString()) return;
+
+  throw new ForbiddenError('POST_DELETE_FORBIDDEN', 'No tienes permiso para eliminar esta publicación');
+};
+
+// Mismo criterio que _assertPostDeletePermission, pero el scope del
+// comentario es el del post padre (el comentario no lleva su propio
+// scopeTeacherId).
+const _assertCommentDeletePermission = (actorRole, actorId, comment, post) => {
+  if (comment.author.toString() === actorId.toString()) return;
+  if (actorRole === ROLES.ADMIN) return;
+  if (actorRole === ROLES.TEACHER && post.scopeTeacherId?.toString() === actorId.toString()) return;
+
+  throw new ForbiddenError('COMMENT_DELETE_FORBIDDEN', 'No tienes permiso para eliminar este comentario');
+};
+
+// Post inexistente o ya borrado → 404, mismo criterio que _assertPostAccess
+// (un post soft-deleted no es un recurso accesible para nadie). Segundo
+// DELETE sobre el mismo post cae aquí: no vuelve a tocar isDeleted.
+const deletePost = async (actorRole, actorId, postId) => {
+  const post = await CommunityPostRepository.findById(postId);
+  if (!post || post.isDeleted) {
+    throw new NotFoundError('POST_NOT_FOUND', 'Publicación no encontrada');
+  }
+
+  _assertPostDeletePermission(actorRole, actorId, post);
+
+  await CommunityPostRepository.softDelete(postId);
+};
+
+// Comentario inexistente, ya borrado, o que no pertenece al postId de la
+// ruta → 404 (mismo criterio: no se distingue "no existe" de "borrado").
+// El decremento de commentCount solo ocurre aquí, tras el soft delete real
+// — un segundo DELETE sobre el mismo comentario ya no encuentra el
+// comentario visible y no vuelve a decrementar.
+const deleteComment = async (actorRole, actorId, postId, commentId) => {
+  const comment = await CommunityCommentRepository.findById(commentId);
+  if (!comment || comment.isDeleted || comment.post.toString() !== postId) {
+    throw new NotFoundError('COMMENT_NOT_FOUND', 'Comentario no encontrado');
+  }
+
+  const post = await CommunityPostRepository.findById(comment.post);
+  if (!post) {
+    throw new NotFoundError('POST_NOT_FOUND', 'Publicación no encontrada');
+  }
+
+  _assertCommentDeletePermission(actorRole, actorId, comment, post);
+
+  await CommunityCommentRepository.softDelete(commentId);
+  await CommunityPostRepository.decrementCommentCount(post._id);
+};
+
+const getComments = async (actorRole, actorId, postId) => {
+  await _assertPostAccess(actorRole, actorId, postId);
+
+  const comments = await CommunityCommentRepository.findByPost(postId);
+  return comments.map(_commentToDTO);
+};
+
+const createComment = async (actorRole, actorId, postId, { content }) => {
+  await _assertPostAccess(actorRole, actorId, postId);
+
+  const comment = await CommunityCommentRepository.create({
+    post:   postId,
+    author: actorId,
+    content,
+  });
+  await CommunityPostRepository.incrementCommentCount(postId);
+
+  await comment.populate('author', 'firstName lastName email role');
+  return _commentToDTO(comment);
+};
+
+module.exports = {
+  getFeed,
+  createPost,
+  createAnnouncement,
+  deletePost,
+  getComments,
+  createComment,
+  deleteComment,
+  resolveScopeStudentIds,
+  resolveScopeTeacherId,
+};
