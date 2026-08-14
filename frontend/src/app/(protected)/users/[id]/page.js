@@ -282,7 +282,7 @@ export default function StudentProfilePage() {
         <div className={styles.heroGrid}>
           <div className={styles.heroContent}>
             <div className={styles.heroTopRow}>
-              <span className={styles.heroRole}>Alumna</span>
+              <span className={styles.heroRole}>Alumno</span>
               <RiskBadge isAtRisk={isAtRisk} />
               {profile && !isAtRisk && (
                 <span className={profile.isActive ? styles.statusActive : styles.statusInactive}>
@@ -296,7 +296,7 @@ export default function StudentProfilePage() {
             <div className={styles.heroMetaGrid}>
               {profile?.email && <MetaItem icon={Mail}>{profile.email}</MetaItem>}
               {teacherName && <MetaItem icon={GraduationCap}>Profesor: {teacherName}</MetaItem>}
-              {profile?.createdAt && <MetaItem icon={Calendar}>Alumna desde {formatDate(profile.createdAt)}</MetaItem>}
+              {profile?.createdAt && <MetaItem icon={Calendar}>Alumno desde {formatDate(profile.createdAt)}</MetaItem>}
               <MetaItem icon={Clock} warn={isAtRisk === true}>
                 {summary.lastActivityAt ? `Última actividad: ${formatDate(summary.lastActivityAt)}` : 'Sin actividad registrada'}
               </MetaItem>
