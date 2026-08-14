@@ -328,6 +328,279 @@
 }
 
 /* ================================================================
+   COMENTARIOS — sección compacta dentro de PostCard (POST/ANNOUNCEMENT),
+   carga lazy al desplegar. Superficie .bg-elevated para diferenciar cada
+   comentario del fondo de la card, mismo acento naranja de foco/acción que
+   el resto de Community.
+   ================================================================ */
+.postFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem 0.75rem;
+  padding-top: 0.125rem;
+}
+
+.commentsToggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.25rem 0;
+  border: none;
+  background: none;
+  color: var(--text-secondary);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: color var(--dur-fast) var(--ease-default);
+}
+
+.commentsToggle:hover { color: var(--text-display); }
+
+.commentsToggle:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm, 4px);
+}
+
+.commentsSection {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 0.25rem;
+  padding-top: 0.875rem;
+  border-top: 1px solid var(--border-default);
+}
+
+.commentsStatus,
+.commentsEmpty {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.commentsErrorText {
+  font-size: 0.8125rem;
+  color: var(--danger-500);
+  margin: 0;
+}
+
+.commentsList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+}
+
+.commentItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.625rem;
+}
+
+.commentBody {
+  flex: 1;
+  min-width: 0;
+  background: var(--bg-elevated);
+  border-radius: var(--radius-md);
+  padding: 0.5rem 0.75rem;
+}
+
+.commentMeta {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.commentAuthor {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.commentDate {
+  font-size: 0.6875rem;
+  color: var(--community-meta-color);
+}
+
+.commentContent {
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--text-primary);
+  margin: 0.125rem 0 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.commentForm {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.commentInput {
+  flex: 1;
+  min-width: 0;
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border-strong);
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 0.875rem;
+}
+
+.commentInput::placeholder { color: var(--text-muted); }
+
+.commentInput:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+}
+
+.commentFormError {
+  font-size: 0.75rem;
+  color: var(--danger-500);
+  margin: 0;
+}
+
+/* ── Distinción visual de ANNOUNCEMENT — mismo bloque que .postRoleBadge,
+   acento naranja en vez de texto neutro, para que se lea como aviso sin
+   rediseñar toda la card. ── */
+.announcementBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--elevate-accent-500);
+  margin: 0;
+}
+
+/* ── Eliminar/moderar post — acción secundaria, mismo tratamiento visual
+   "texto + icono, sin fondo" que .commentsToggle, pero tiñendo a rojo en
+   hover/foco en vez de acento naranja, para leerse como destructivo sin
+   protagonizar la card. ── */
+.postActions {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.deleteTrigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3125rem;
+  padding: 0.25rem 0;
+  border: none;
+  background: none;
+  color: var(--text-muted);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: color var(--dur-fast) var(--ease-default);
+}
+
+.deleteTrigger:hover { color: var(--danger-500); }
+
+.deleteTrigger:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm, 4px);
+}
+
+.deleteConfirm {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.deleteConfirmText {
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.deleteError {
+  font-size: 0.75rem;
+  color: var(--danger-500);
+  margin: 0.375rem 0 0;
+}
+
+/* ── Eliminar/moderar comentario — mismo criterio que .deleteTrigger pero
+   a la escala de un comentario individual (empujado a la derecha dentro de
+   .commentMeta, que ya es flex). ── */
+.commentDeleteTrigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-left: auto;
+  padding: 0.125rem 0;
+  border: none;
+  background: none;
+  color: var(--text-muted);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: color var(--dur-fast) var(--ease-default);
+}
+
+.commentDeleteTrigger:hover { color: var(--danger-500); }
+
+.commentDeleteTrigger:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm, 4px);
+}
+
+.commentDeleteConfirm {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: auto;
+}
+
+.commentDeleteConfirmBtn,
+.commentDeleteCancelBtn {
+  border: none;
+  background: none;
+  font-family: inherit;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0;
+}
+
+.commentDeleteConfirmBtn { color: var(--danger-500); }
+.commentDeleteCancelBtn  { color: var(--text-muted); }
+
+.commentDeleteConfirmBtn:disabled,
+.commentDeleteCancelBtn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.commentDeleteConfirmBtn:focus-visible,
+.commentDeleteCancelBtn:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+}
+
+.commentDeleteError {
+  font-size: 0.6875rem;
+  color: var(--danger-500);
+  margin: 0.25rem 0 0;
+}
+
+/* ================================================================
    COMPOSITOR — "Comparte algo con tu comunidad…"
    ================================================================ */
 .composer {
@@ -338,6 +611,59 @@
   border: 1px solid var(--border-default);
   border-radius: var(--radius-lg);
   animation: fadeSlideUp var(--dur-slow) var(--ease-out) both;
+}
+
+.composerWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* ── Selector Publicación/Aviso (solo TEACHER) — mismo lenguaje visual que
+   .filterChip/.filterChipActive (píldora, acento naranja en el activo),
+   a escala de segmented control compacto sobre el compositor. ── */
+.composeModeSwitch {
+  display: inline-flex;
+  align-self: flex-start;
+  gap: 0.25rem;
+  padding: 0.1875rem;
+  border-radius: 9999px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-default);
+}
+
+.composeModeOption {
+  padding: 0.375rem 0.875rem;
+  border-radius: 9999px;
+  border: none;
+  background: none;
+  color: var(--text-secondary);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background-color var(--dur-fast) var(--ease-default),
+              color var(--dur-fast) var(--ease-default);
+}
+
+.composeModeOption:hover { color: var(--text-display); }
+
+.composeModeOption:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+}
+
+.composeModeOptionActive {
+  background: var(--elevate-accent-500);
+  color: var(--color-ink);
+}
+
+.composeModeOptionActive:hover { color: var(--color-ink); }
+
+.composerContextLabel {
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+  margin: 0 0 0.375rem;
 }
 
 .composerAvatar { margin-top: 0.125rem; }
@@ -516,4 +842,6 @@
   .composerFooter { flex-direction: column; align-items: stretch; gap: 0.625rem; }
   .composerActions { margin-left: 0; }
   .composerActions > * { flex: 1; }
+
+  .commentBody { padding: 0.5rem 0.625rem; }
 }

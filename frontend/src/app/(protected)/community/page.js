@@ -29,9 +29,8 @@ const EMPTY_FILTER_TITLE = {
   CERTIFICATE: 'No hay certificados recientes.',
 };
 
-// "Publicaciones" agrupa POST y (cuando exista) ANNOUNCEMENT — hoy el
-// backend solo devuelve POST, pero el filtro ya queda listo para esa
-// siguiente fase sin tener que tocarlo.
+// "Publicaciones" agrupa POST y ANNOUNCEMENT — ambos se renderizan como
+// contenido social (PostCard), a diferencia de ACHIEVEMENT/CERTIFICATE.
 function matchesFilter(item, filter) {
   if (filter === 'all') return true;
   if (filter === 'POST') return item.type === 'POST' || item.type === 'ANNOUNCEMENT';
@@ -46,6 +45,27 @@ const ROLE_CONTEXT = {
   admin:   'Actividad de toda la academia',
 };
 
+// Copy del compositor por modo — CommunityComposer no conoce POST vs
+// ANNOUNCEMENT, solo recibe esta copy ya resuelta. Sin jerga técnica
+// ("scope", "ANNOUNCEMENT"...) en ningún texto visible.
+const COMPOSER_COPY = {
+  POST: {
+    placeholder:     'Comparte algo con tu comunidad…',
+    submitLabel:     'Publicar',
+    contextualLabel: null,
+  },
+  ANNOUNCEMENT_TEACHER: {
+    placeholder:     'Escribe un aviso para tus alumnos…',
+    submitLabel:     'Publicar aviso',
+    contextualLabel: 'Este aviso se publicará para los alumnos de tu cohorte.',
+  },
+  ANNOUNCEMENT_ADMIN: {
+    placeholder:     'Escribe un aviso para toda la academia…',
+    submitLabel:     'Publicar aviso',
+    contextualLabel: 'Aviso para toda la academia.',
+  },
+};
+
 export default function CommunityPage() {
   const { user, token } = useAuth();
 
@@ -57,6 +77,10 @@ export default function CommunityPage() {
   const [loadingMore, setLoadingMore] = useState(false);
   const [error,       setError]       = useState(null);
   const [loadMoreError, setLoadMoreError] = useState(null);
+
+  // Solo relevante para TEACHER (único rol con dos modos posibles);
+  // STUDENT y ADMIN tienen cada uno un único modo fijo, resuelto más abajo.
+  const [composeMode, setComposeMode] = useState('POST');
 
   useEffect(() => {
     setLoading(true);
@@ -118,6 +142,45 @@ export default function CommunityPage() {
     setTotal((prev) => prev + 1);
   }
 
+  // Mismo criterio que handleCreatePost: el backend decide type (siempre
+  // ANNOUNCEMENT) y scopeTeacherId (cohorte del teacher, o null si es
+  // admin) — el frontend solo envía `content` y refleja la respuesta real.
+  async function handleCreateAnnouncement(content) {
+    const res  = await communityService.createAnnouncement(token, content);
+    const post = res.post;
+
+    const feedItem = {
+      id:        post._id,
+      type:      'ANNOUNCEMENT',
+      eventDate: post.createdAt,
+      author: {
+        _id:       user.id,
+        firstName: user.firstName,
+        lastName:  user.lastName,
+        email:     user.email,
+        role:      user.role,
+      },
+      context: {
+        content:      post.content,
+        commentCount: post.commentCount ?? 0,
+      },
+    };
+
+    setDocs((prev) => [feedItem, ...prev]);
+    setTotal((prev) => prev + 1);
+  }
+
+  // El backend es la fuente de verdad del borrado (permite/rechaza según
+  // autor/cohorte/rol) — aquí solo se quita el item del feed ya cargado
+  // tras la confirmación real del DELETE, sin refetch completo. El error
+  // se propaga tal cual: lo muestra la propia PostCard (inline, junto al
+  // botón eliminar), no esta página — mismo criterio que handleCreatePost.
+  async function handleDeletePost(postId) {
+    await communityService.deletePost(token, postId);
+    setDocs((prev) => prev.filter((d) => d.id !== postId));
+    setTotal((prev) => Math.max(0, prev - 1));
+  }
+
   // Personas visibles en el feed ya cargado (dedup por author._id) — dato
   // real derivado en frontend, no un endpoint nuevo.
   const people = useMemo(() => {
@@ -134,7 +197,16 @@ export default function CommunityPage() {
   const filteredDocs = docs.filter((d) => matchesFilter(d, filter));
   const hasMore = docs.length < total;
   const contextLine = ROLE_CONTEXT[user?.role] ?? ROLE_CONTEXT.student;
-  const canCompose = user?.role === 'student' || user?.role === 'teacher';
+
+  // STUDENT: siempre POST normal. TEACHER: POST o ANNOUNCEMENT según el
+  // selector (composeMode). ADMIN: siempre ANNOUNCEMENT global — nunca ve
+  // la opción "Publicación", que el backend le rechazaría con 403.
+  const canCompose = ['student', 'teacher', 'admin'].includes(user?.role);
+  const isAnnouncementMode = user?.role === 'admin' || (user?.role === 'teacher' && composeMode === 'ANNOUNCEMENT');
+  const composerCopy = isAnnouncementMode
+    ? (user?.role === 'admin' ? COMPOSER_COPY.ANNOUNCEMENT_ADMIN : COMPOSER_COPY.ANNOUNCEMENT_TEACHER)
+    : COMPOSER_COPY.POST;
+  const composerSubmit = isAnnouncementMode ? handleCreateAnnouncement : handleCreatePost;
 
   return (
     <div className={styles.pageGrid}>
@@ -167,10 +239,45 @@ export default function CommunityPage() {
           )}
         </header>
 
-        {/* Compositor — visible para student/teacher; admin no publica
-            todavía (announcements llegarán en otra fase). */}
+        {/* Compositor — student: publicación normal fija. teacher: elige
+            entre publicación y aviso de cohorte con el selector. admin:
+            aviso global fijo (nunca ve la opción "Publicación", que el
+            backend le rechazaría con 403). key por modo: fuerza a
+            reiniciar el compositor (texto/estado expandido) al cambiar de
+            modo, para no publicar por error un borrador de un modo en el
+            otro. */}
         {canCompose && (
-          <CommunityComposer user={user} onSubmit={handleCreatePost} />
+          <div className={styles.composerWrapper}>
+            {user?.role === 'teacher' && (
+              <div className={styles.composeModeSwitch} role="group" aria-label="Tipo de publicación">
+                <button
+                  type="button"
+                  className={`${styles.composeModeOption} ${composeMode === 'POST' ? styles.composeModeOptionActive : ''}`}
+                  aria-pressed={composeMode === 'POST'}
+                  onClick={() => setComposeMode('POST')}
+                >
+                  Publicación
+                </button>
+                <button
+                  type="button"
+                  className={`${styles.composeModeOption} ${composeMode === 'ANNOUNCEMENT' ? styles.composeModeOptionActive : ''}`}
+                  aria-pressed={composeMode === 'ANNOUNCEMENT'}
+                  onClick={() => setComposeMode('ANNOUNCEMENT')}
+                >
+                  Aviso
+                </button>
+              </div>
+            )}
+
+            <CommunityComposer
+              key={user?.role === 'teacher' ? composeMode : user?.role}
+              user={user}
+              onSubmit={composerSubmit}
+              placeholder={composerCopy.placeholder}
+              submitLabel={composerCopy.submitLabel}
+              contextualLabel={composerCopy.contextualLabel}
+            />
+          </div>
         )}
 
         {docs.length === 0 ? (
@@ -180,8 +287,17 @@ export default function CommunityPage() {
         ) : (
           <ul className={styles.list}>
             {filteredDocs.map((item, i) => (
-              item.type === 'POST'
-                ? <PostCard key={item.id} item={item} index={i} />
+              item.type === 'POST' || item.type === 'ANNOUNCEMENT'
+                ? (
+                  <PostCard
+                    key={item.id}
+                    item={item}
+                    index={i}
+                    token={token}
+                    user={user}
+                    onDeletePost={handleDeletePost}
+                  />
+                )
                 : <CommunityCard key={item.id} item={item} index={i} />
             ))}
           </ul>

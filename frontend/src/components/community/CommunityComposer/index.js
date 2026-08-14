@@ -8,10 +8,19 @@ import styles from '@/styles/Community.module.css';
 
 const MAX_LENGTH = 2000;
 
-// Visible para student/teacher; oculto para admin (page.js decide eso).
+// Compositor genérico de texto plano para Community — CommunityPage decide
+// QUÉ se publica (POST o ANNOUNCEMENT, de cohorte o global) pasando
+// `onSubmit` y una copy explícita (placeholder/submitLabel/contextualLabel);
+// este componente no conoce esa distinción, solo compone y valida texto.
 // El backend sigue siendo la fuente de verdad de la validación — aquí solo
 // se evita una petición inútil (vacío / demasiado largo).
-export default function CommunityComposer({ user, onSubmit }) {
+export default function CommunityComposer({
+  user,
+  onSubmit,
+  placeholder = 'Comparte algo con tu comunidad…',
+  submitLabel = 'Publicar',
+  contextualLabel = null,
+}) {
   const [expanded,   setExpanded]   = useState(false);
   const [content,    setContent]    = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -57,7 +66,7 @@ export default function CommunityComposer({ user, onSubmit }) {
         <Avatar
           firstName={user?.firstName}
           lastName={user?.lastName}
-          role={user?.role === 'teacher' ? 'teacher' : 'student'}
+          role={user?.role}
           size="lg"
           photoUrl={photoUrl}
         />
@@ -66,10 +75,12 @@ export default function CommunityComposer({ user, onSubmit }) {
       <div className={styles.composerBody}>
         {expanded ? (
           <>
+            {contextualLabel && <p className={styles.composerContextLabel}>{contextualLabel}</p>}
+
             <textarea
               ref={textareaRef}
               className={styles.composerTextarea}
-              placeholder="Comparte algo con tu comunidad…"
+              placeholder={placeholder}
               value={content}
               onChange={(e) => setContent(e.target.value)}
               disabled={submitting}
@@ -89,14 +100,14 @@ export default function CommunityComposer({ user, onSubmit }) {
                   Cancelar
                 </Button>
                 <Button variant="accent" size="sm" onClick={handleSubmit} loading={submitting} disabled={!canSubmit}>
-                  Publicar
+                  {submitLabel}
                 </Button>
               </div>
             </div>
           </>
         ) : (
           <button type="button" className={styles.composerTrigger} onClick={handleExpand}>
-            Comparte algo con tu comunidad…
+            {placeholder}
           </button>
         )}
       </div>

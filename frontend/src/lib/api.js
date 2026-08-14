@@ -13,7 +13,10 @@ async function request(endpoint, { method = 'GET', body, token } = {}) {
     body: body !== undefined ? JSON.stringify(body) : undefined,
   });
 
-  const data = await response.json();
+  // 204 No Content (p.ej. DELETE) no trae body — response.json() lanzaría
+  // un SyntaxError al intentar parsear una cadena vacía. Mismo criterio
+  // para cualquier respuesta sin contenido real.
+  const data = response.status === 204 ? null : await response.json();
 
   if (!response.ok) {
     const message = data?.message ?? 'Ha ocurrido un error. Inténtalo de nuevo.';
