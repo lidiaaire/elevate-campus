@@ -107,7 +107,7 @@ Claude debe:
 
 Todo el código debe cumplir:
 
-- TypeScript estricto.
+- JavaScript (sin TypeScript en este proyecto).
 - Componentes reutilizables.
 - CSS Modules.
 - CSS Variables.

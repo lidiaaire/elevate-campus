@@ -402,6 +402,12 @@ Resumen de progreso.
 
 # Community Components
 
+### CommunityComposer
+
+Formulario para crear una publicación o un announcement.
+
+---
+
 ### PostCard
 
 Publicación.
@@ -509,11 +515,11 @@ Ejemplo:
 
 Component/
 
-Component.tsx
+Component.js
 
 Component.module.css
 
-index.ts
+index.js
 
 ---
 

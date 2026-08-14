@@ -80,6 +80,7 @@ Users
 - Perfil
 - Administración
 - Dashboard
+- Ficha de alumno (staff — admin sin restricción, teacher solo su cohorte)
 
 ---
 
@@ -255,6 +256,7 @@ Achievements
 ## Used By
 
 - Mi Progreso
+- Ficha de alumno (staff)
 
 ---
 
@@ -273,6 +275,7 @@ Certificates
 ## Used By
 
 - Certificados
+- Ficha de alumno (staff)
 
 ---
 
@@ -395,6 +398,26 @@ Submissions
 - Entregas del estudiante
 - Estado
 - Correcciones
+
+---
+
+# Community
+
+## Module
+
+Community
+
+## Responsibilities
+
+- Feed de cohorte (posts, logros, certificados, announcements)
+- Crear publicaciones y comentarios
+- Announcements (teacher → su cohorte; admin → toda la academia)
+- Moderación (soft delete): autor siempre, teacher solo su cohorte, admin sin restricción
+- No existe modelo `Cohort` — el scope se resuelve vía `User.assignedTeacherId`, igual que en Achievements/Certificates por alumno
+
+## Used By
+
+- Comunidad
 
 ---
 

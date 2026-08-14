@@ -97,7 +97,7 @@ npm test
 
 Los ficheros de test se encuentran en `tests/` con el patrón `**/*.test.js`. Las variables de entorno necesarias se configuran en `tests/setup/env.js`.
 
-Módulos cubiertos con tests de integración: auth, users, courses, units, lessons, enrollments, progress, bookings, availability, achievements, certificates, recommendations, notifications, live sessions, attendance, assignments, submissions, dashboard y teacher analytics.
+Módulos cubiertos con tests de integración: auth, users, courses, units, lessons, enrollments, progress, bookings, availability, achievements, certificates, recommendations, notifications, live sessions, attendance, assignments, submissions, dashboard, teacher analytics y community (incluyendo su rate limiting de escritura).
 
 ---
 
@@ -129,6 +129,7 @@ backend/
 │   ├── modules/                # Módulos de dominio (routes, controller, service, validator)
 │   ├── repositories/           # Capa de acceso a datos
 │   ├── seeds/                  # Scripts de datos iniciales
+│   ├── scripts/                # Utilidades administrativas puntuales (ver más abajo)
 │   └── utils/                  # Helpers generales (ApiError, asyncHandler, logger…)
 ├── tests/                      # Tests de integración por módulo
 │   └── setup/                  # Configuración del entorno de test
@@ -160,6 +161,20 @@ backend/
 | Submissions | `/api/submissions` | Entregas de tareas |
 | Dashboard | `/api/dashboard` | Resumen del estudiante |
 | Teacher Analytics | `/api/teacher-analytics` | Analíticas para el profesor |
+| Community | `/api/community` | Feed de cohorte, publicaciones, comentarios, announcements y moderación |
+
+---
+
+## Scripts administrativos
+
+`src/scripts/` contiene utilidades puntuales que se ejecutan manualmente contra la base de datos — no forman parte del arranque normal del servidor.
+
+`migrateNotificationStrings.js` corrige notificaciones de `ACHIEVEMENT`/`CERTIFICATE` ya persistidas cuyo `title`/`message` se generaron en inglés (antes de que los servicios correspondientes se corrigieran a español). Es idempotente: una vez migrado un documento, una segunda ejecución no vuelve a tocarlo.
+
+```bash
+node src/scripts/migrateNotificationStrings.js            # dry-run (por defecto, no escribe nada)
+node src/scripts/migrateNotificationStrings.js --apply    # escribe los cambios
+```
 
 ---
 

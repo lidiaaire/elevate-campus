@@ -39,7 +39,7 @@ Toda implementación debe aportar valor al estudiante.
 
 - Next.js 16
 - React 19
-- TypeScript
+- JavaScript
 
 ## Routing
 

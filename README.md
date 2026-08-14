@@ -14,6 +14,7 @@ A full-stack Learning Management System (LMS) built as a portfolio project. It d
 - [Project Structure](#project-structure)
 - [Technical Decisions](#technical-decisions)
 - [How to Run](#how-to-run)
+- [Production](#production)
 - [Seed Credentials](#seed-credentials)
 - [API Reference Summary](#api-reference-summary)
 - [Stack Summary](#stack-summary)
@@ -41,14 +42,22 @@ The project was built module by module, with each API contract verified against 
 - **Achievements** — unlockable badges (10 seeded) by category/rarity.
 - **Notifications** — personal notification feed.
 - **Skill Radar** — radar chart (listening / reading / writing / speaking / assessment score) built with Recharts.
+- **Community** — cohort feed (posts, achievements, certificates, plus global announcements), create posts, comment on posts, delete their own posts/comments. Sees announcements published by their teacher and by admin.
 
 ### Teacher
 
 - **Teacher Analytics** — cohort comparison table, inactivity ranking, per-assessment breakdown (pass rate, average score/attempts), and a per-student weekly trend panel.
+- **Roster & Enrollments** — cohort dashboard with a per-student roster (progress, at-risk flag), and read access to their students' enrollments.
+- **Student Detail** — individual student profile page (`/users/:id`), scoped to their own cohort, including that student's achievements and certificates.
+- **Community** — feed scoped to their own cohort, create posts, comment, publish announcements visible to their cohort, and moderate (delete) any post/comment within their cohort.
 
 ### Admin
 
 - **Users** — list all users, activate/deactivate accounts.
+- **Enrollments** — create enrollments and manage their lifecycle (activate/suspend), academy-wide.
+- **Students at Risk** — academy-wide list of inactive / low-progress students, surfaced on the admin dashboard.
+- **Student Detail** — individual student profile page (`/users/:id`) for any student, including that student's achievements and certificates.
+- **Community** — global feed (no cohort filter), publish global announcements, and moderate (delete) any post/comment academy-wide.
 
 ### Cross-cutting
 
@@ -85,6 +94,7 @@ The following backend modules are implemented and routed (`/api/...`) but are **
 │           certificates · notifications · recommendations      │
 │           bookings · availability · live-sessions             │
 │           attendance · assignments · submissions               │
+│           community                                            │
 └────────────────────┬───────────────────────────────────────┘
                      │  Mongoose ODM
 ┌────────────────────▼───────────────────────────────────────┐
@@ -115,12 +125,15 @@ src/
 │       ├── skill-radar/
 │       ├── teacher-analytics/
 │       ├── enrollments/
+│       ├── community/
 │       └── users/
+│           └── [id]/                    — Student Detail (admin/teacher, cohort-scoped)
 ├── components/
 │   ├── auth/LoginForm/
 │   ├── layout/Sidebar/ · Navbar/ · BottomNav/ · MobileMenu/ · ProtectedLayout/
 │   ├── dashboard/student/                — DashboardSkeleton, LearningPathCard, etc.
 │   ├── teacher-analytics/                — CohortComparisonTable, InactivityRanking, ...
+│   ├── community/                        — CommunityComposer, PostCard
 │   ├── achievements/ · notifications/ · skill-radar/
 │   └── ui/                               — Button, Card, PageHeader, ProgressBar,
 │                                            LoadingState, ErrorState, EmptyState, Toast
@@ -149,7 +162,14 @@ src/
 | View assessments / submit attempt | ✓ (view) | ✓ (view) | ✓ (submit, if lessons completed) |
 | View own progress / dashboard | — | — | ✓ |
 | Teacher Analytics (cohort, inactivity, breakdown) | — | ✓ (own cohort) | — |
-| Certificates, Achievements, Notifications, Skill Radar | — | — | ✓ |
+| Certificates, Achievements, Notifications, Skill Radar (own) | — | — | ✓ |
+| Student Detail page (`/users/:id`) | ✓ (any student) | ✓ (own cohort only) | — |
+| Achievements / Certificates by student (`/students/:studentId`) | ✓ (any student) | ✓ (own cohort only) | — |
+| Community: view feed | ✓ (academy-wide) | ✓ (own cohort) | ✓ (own cohort) |
+| Community: create post | — | ✓ | ✓ |
+| Community: comment on a post | ✓ | ✓ | ✓ |
+| Community: create announcement | ✓ (academy-wide) | ✓ (own cohort) | — |
+| Community: delete/moderate content | ✓ (any post/comment) | ✓ (own cohort's posts/comments only) | ✓ (own posts/comments only) |
 | Sidebar: "Usuarios" link | ✓ | — | — |
 
 Lessons for students are **sequentially locked**: a student cannot access lesson N+1 until lesson N is completed. Unit N+1 requires all of unit N's lessons completed **and**, if the unit has an assessment, that assessment passed.
@@ -168,6 +188,7 @@ RBAC is enforced at two levels:
 
 - **Backend**: middleware (`verifyToken`, `requireRole`, `requireActiveUser`) blocks unauthorized or inactive-user requests before they reach controllers. Teacher-scoped endpoints additionally check `student.assignedTeacherId === teacherId`.
 - **Frontend**: protected routes redirect unauthenticated users to `/login`; the Sidebar conditionally renders role-specific links (`Usuarios` for admin, student-only links for students).
+- **Cohort-scoped authorization**: there is no `Cohort` model — a teacher's cohort is implicit via `User.assignedTeacherId`. The same scoping rule (`validateTeacherScope` / `resolveScopeTeacherId`) is reused across Student Detail, Achievements/Certificates by student, and Community, so a teacher's data access is consistently limited to their own students everywhere, not just in one module.
 
 ### Nested LMS Structure & Sequential Unlock
 
@@ -184,6 +205,10 @@ On 100% course completion, an enrollment is marked completed and a certificate i
 ### Dashboard Aggregation
 
 `GET /api/dashboard/student` aggregates summary stats, 7/30-day growth, per-course enrollments with next-lesson pointers, recent activity, pending assessments, and a skill-progress breakdown — computed server-side via Mongoose aggregation pipelines, avoiding N+1 queries from the frontend.
+
+### Community: Moderation & Rate Limiting
+
+Posts and comments use **soft delete** (`isDeleted: true`, never a physical delete). Deletion permission follows the same rule everywhere: the author always can, admin always can, a teacher only within their own cohort. All three write endpoints (`POST /posts`, `POST /posts/:postId/comments`, `POST /announcements`) share a single rate limiter — **100 requests / 15 min / IP** — mounted after `verifyToken`, so an unauthenticated request never consumes quota.
 
 ### Responsive Navigation & Accessibility
 
@@ -216,10 +241,11 @@ src/modules/
 ├── live-sessions/            — backend-only, out of current LMS scope
 ├── attendance/                — backend-only, out of current LMS scope
 ├── assignments/                — backend-only, out of current LMS scope
-└── submissions/                 — backend-only, out of current LMS scope
+├── submissions/                 — backend-only, out of current LMS scope
+└── community/                    — feed, posts, comments, announcements, cohort moderation
 ```
 
-Each module follows the same structure: `routes → controller → service → repository`.
+Each module follows the same structure: `routes → controller → service → repository`. `src/scripts/` holds standalone maintenance scripts (idempotent, `--apply`-gated) run manually against the database — not part of the request/response path.
 
 ### Frontend services
 
@@ -238,6 +264,7 @@ src/lib/services/
 ├── achievement.service.js
 ├── certificate.service.js
 ├── notification.service.js
+├── community.service.js
 └── recommendation.service.js   — defined, not yet consumed by any page
 ```
 
@@ -325,6 +352,12 @@ npm start       # node (production)
 
 The API will be available at `http://localhost:4000/api`. Swagger docs at `http://localhost:4000/api/docs`.
 
+Run the backend test suite (Jest + Supertest + `mongodb-memory-server`, no real database needed):
+
+```bash
+npm test        # 27 suites / 353 tests
+```
+
 ### 2. Frontend
 
 ```bash
@@ -346,6 +379,13 @@ npm run dev
 
 Open `http://localhost:3000`. The root redirects to `/login`.
 
+Lint and build:
+
+```bash
+npm run lint     # ESLint — 0 errors (some pre-existing warnings)
+npm run build    # next build — production build
+```
+
 ### 3. Docker (backend + MongoDB only)
 
 ```bash
@@ -353,6 +393,27 @@ docker-compose up
 ```
 
 Spins up the Express API (port 4000) and a MongoDB 7 instance with a healthcheck. The frontend is not containerized — run it locally with `npm run dev` against the dockerized API.
+
+---
+
+## Production
+
+| Layer | Provider | URL |
+|---|---|---|
+| Frontend | Vercel | https://elevate-campus-six.vercel.app |
+| Backend API | Render | https://elevate-backend-7ma5.onrender.com/api |
+| Database | MongoDB Atlas | — |
+
+### Configuration
+
+- **Frontend**: a single build-time variable, `NEXT_PUBLIC_API_URL`, set in Vercel's Production environment to the Render API URL above. Any `NEXT_PUBLIC_*` variable is inlined into the Next.js client bundle at build time — it is public by design, never a place for secrets.
+- **Backend**: configured entirely through environment variables, validated at boot (`config/env.js` exits the process if any is missing) — `PORT`, `NODE_ENV`, `MONGODB_URI`, `JWT_SECRET`, `JWT_TTL_ADMIN`, `JWT_TTL_TEACHER`, `JWT_TTL_STUDENT`, `CLIENT_URL`. Values are set directly in Render's dashboard; secrets never live in the frontend or in this repository.
+- **CORS**: the API allows exactly one origin, read from `CLIENT_URL` (`app.use(cors({ origin: env.clientUrl, credentials: true }))`) — in production this is set to the Vercel frontend URL above.
+- **Database**: MongoDB Atlas is used as the production database. Connection string, cluster, and credentials are private and are not documented here.
+
+This repository is hosted on GitHub (`origin`). Whether Render and/or Vercel are configured for automatic deploy-on-push cannot be confirmed from the repository itself — no `render.yaml` or `vercel.json` is committed, and that configuration lives in each provider's dashboard — so it is not asserted here.
+
+The backend can take a few seconds to respond to the first request after a period of inactivity.
 
 ---
 
@@ -378,7 +439,8 @@ Students are split into 3 cohorts (4 each), one per teacher (`assignedTeacherId`
 |---|---|---|---|
 | POST | `/api/auth/login` | — | Obtain JWT |
 | POST | `/api/auth/logout` | Bearer | Invalidate session |
-| GET | `/api/users` | Admin | List all users |
+| GET | `/api/users` | Admin, Teacher (own cohort) | List users |
+| GET | `/api/users/:id` | Admin, Teacher (own cohort) | Student Detail |
 | PATCH | `/api/users/:id/activate` \| `/deactivate` | Admin | Toggle user account |
 | GET | `/api/courses` | Bearer | List courses (students see published/enrolled only) |
 | GET | `/api/courses/:id/units` | Bearer | Units for a course |
@@ -392,11 +454,20 @@ Students are split into 3 cohorts (4 each), one per teacher (`assignedTeacherId`
 | GET | `/api/dashboard/student` \| `/teacher` \| `/admin` | Bearer (per role) | Role-specific dashboard aggregation |
 | GET | `/api/teacher-analytics/*` | Teacher | Cohort, inactivity, breakdown, weekly trend |
 | GET | `/api/achievements/me` | Student | Unlocked achievements |
+| GET | `/api/achievements/students/:studentId` | Admin, Teacher (own cohort) | Achievements for a given student |
 | GET | `/api/certificates/me` | Student | Issued certificates |
 | GET | `/api/certificates/:id/download` | Student | PDF download (binary) |
+| GET | `/api/certificates/students/:studentId` | Admin, Teacher (own cohort) | Certificates for a given student |
 | GET | `/api/notifications/me` | Student | Notification feed |
+| GET | `/api/community/feed` | Bearer (scope per role) | Cohort feed (posts, achievements, certificates, announcements) |
+| POST | `/api/community/posts` | Student, Teacher | Create a post |
+| POST | `/api/community/announcements` | Teacher (own cohort), Admin (global) | Create an announcement |
+| GET | `/api/community/posts/:postId/comments` | Bearer (post must be in scope) | List comments on a post |
+| POST | `/api/community/posts/:postId/comments` | Bearer (post must be in scope) | Comment on a post |
+| DELETE | `/api/community/posts/:postId` | Author, Teacher (own cohort), Admin | Delete a post (soft delete) |
+| DELETE | `/api/community/posts/:postId/comments/:commentId` | Author, Teacher (own cohort), Admin | Delete a comment (soft delete) |
 
-Full interactive reference: `http://localhost:4000/api/docs` (Swagger — currently documents the Progress module in depth; other modules are routed and functional but not yet fully annotated in the Swagger spec).
+Full interactive reference: `http://localhost:4000/api/docs` (Swagger — modular OpenAPI 3.0.3 spec, one YAML file per module, merged at server startup; every module listed above has a spec file, including Community).
 
 ---
 

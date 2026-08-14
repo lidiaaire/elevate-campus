@@ -1,3 +1,5 @@
+> This is the frontend of **Elevate Your English Campus** (Next.js App Router, JavaScript, CSS Modules). For features, roles, architecture, API reference, and production URLs, see the [root README](../README.md). The instructions below are the original `create-next-app` boilerplate and still apply for local setup.
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started

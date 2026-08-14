@@ -45,7 +45,7 @@ Nunca implementar funcionalidades que no hayan sido solicitadas.
 
 - Next.js 16
 - React 19
-- TypeScript
+- JavaScript
 - App Router
 - CSS Modules
 - CSS Variables
@@ -108,6 +108,7 @@ Actualmente existen los siguientes módulos:
 - Submissions
 - Notifications
 - Recommendations
+- Community
 
 Antes de crear nuevas APIs, comprobar si ya existe una.
 
@@ -306,12 +307,11 @@ Nunca sacrificar legibilidad por optimización prematura.
 Estado del proyecto:
 
 - Arquitectura definida
-- Backend estable
-- APIs implementadas
-- Documentación finalizada
-- Auditoría completada
+- Backend y frontend estables (incluye Community: feed, posts, comentarios, announcements, moderación por cohorte)
+- APIs implementadas y desplegadas en producción (Render + Vercel + MongoDB Atlas)
+- Documentación en fase de sincronización final con el estado real del producto
 
-La fase actual consiste en transformar el frontend para alinearlo con el diseño aprobado y conectar progresivamente las vistas con los servicios existentes.
+La fase actual consiste en cerrar la v1.0: verificar que la documentación (README, Swagger, docs internas) describe fielmente lo ya implementado, sin abrir nuevas funcionalidades.
 
 No se deben rediseñar decisiones de producto.
 
