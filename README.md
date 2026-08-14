@@ -7,6 +7,7 @@ A full-stack Learning Management System (LMS) built as a portfolio project. It d
 ## Table of Contents
 
 - [Overview](#overview)
+- [Product Tour](#product-tour)
 - [Features](#features)
 - [Architecture](#architecture)
 - [Roles & Permissions](#roles--permissions)
@@ -23,9 +24,52 @@ A full-stack Learning Management System (LMS) built as a portfolio project. It d
 
 ## Overview
 
-Elevate Your English Campus is a platform for managing English-learning courses. It supports three user roles (admin, teacher, student), a full LMS content hierarchy (courses → units → lessons), an assessment engine per unit with attempt history, certificate issuance on course completion, and role-specific analytics dashboards.
+Elevate Your English Campus is a full-stack LMS for English-language learning — not a CRUD demo, but a product with three genuinely different experiences behind real role-based access control: **Student** (courses, progress, assessments, Community), **Teacher** (cohort management, analytics, moderation), and **Admin** (academy-wide oversight). It ties together a full LMS content hierarchy (courses → units → lessons) with sequential unlock, an assessment engine with attempt tracking, certificate issuance, role-specific analytics, and a Community feed that unifies achievements, certificates, and social posts into one timeline.
 
 The project was built module by module, with each API contract verified against the live backend before implementation — no assumptions, no mocking. The frontend follows a versioned internal Design System (CSS Modules + design tokens), with a dedicated pass on accessibility (semantic HTML, `aria-*` attributes, keyboard navigation, screen-reader-only text).
+
+**Live Demo:** [elevate-campus-six.vercel.app](https://elevate-campus-six.vercel.app) · **API:** [elevate-backend-7ma5.onrender.com/api](https://elevate-backend-7ma5.onrender.com/api) · **Swagger:** [elevate-backend-7ma5.onrender.com/api/docs](https://elevate-backend-7ma5.onrender.com/api/docs)
+
+Demo credentials for all three roles are listed below in [Seed Credentials](#seed-credentials). The backend may take a few seconds to respond on the first request after a period of inactivity.
+
+---
+
+## Product Tour
+
+### 1. Student Dashboard
+Personalized progress at a glance — overall completion, the next lesson to continue, and the active course, computed server-side.
+
+![Student Dashboard](docs/portfolio/screenshots/01-student-dashboard.png)
+
+### 2. Learning Experience
+The Course → Unit → Lesson hierarchy in practice: real pedagogical content, lesson type and duration, and per-lesson progress.
+
+![Learning Experience](docs/portfolio/screenshots/02-learning-experience.png)
+
+### 3. Skill Radar
+A per-skill competency breakdown (listening, reading, writing, speaking, assessment score), rendered with Recharts.
+
+![Skill Radar](docs/portfolio/screenshots/03-skill-radar.png)
+
+### 4. Community
+A cohort feed unifying achievements, certificates, and posts from a student's classmates into a single timeline.
+
+![Community](docs/portfolio/screenshots/04-community.png)
+
+### 5. Teacher Dashboard
+Cohort overview for a teacher: roster, at-risk indicators, and weekly analytics for their own students only.
+
+![Teacher Dashboard](docs/portfolio/screenshots/05-teacher-dashboard.png)
+
+### 6. Student Detail
+A single staff-facing view aggregating a student's profile, progress, and learning trajectory — scoped to the viewer's role.
+
+![Student Detail](docs/portfolio/screenshots/06-student-detail.png)
+
+### 7. Admin Dashboard
+Academy-wide oversight: at-risk students across every cohort and a platform-level summary.
+
+![Admin Dashboard](docs/portfolio/screenshots/07-admin-dashboard.png)
 
 ---
 
@@ -189,6 +233,7 @@ RBAC is enforced at two levels:
 - **Backend**: middleware (`verifyToken`, `requireRole`, `requireActiveUser`) blocks unauthorized or inactive-user requests before they reach controllers. Teacher-scoped endpoints additionally check `student.assignedTeacherId === teacherId`.
 - **Frontend**: protected routes redirect unauthenticated users to `/login`; the Sidebar conditionally renders role-specific links (`Usuarios` for admin, student-only links for students).
 - **Cohort-scoped authorization**: there is no `Cohort` model — a teacher's cohort is implicit via `User.assignedTeacherId`. The same scoping rule (`validateTeacherScope` / `resolveScopeTeacherId`) is reused across Student Detail, Achievements/Certificates by student, and Community, so a teacher's data access is consistently limited to their own students everywhere, not just in one module.
+- **Backend as source of truth**: the frontend only decides whether to *show* an action (e.g. a delete button in Community) — every permission is re-verified server-side, so no client-side state can grant access the API itself wouldn't allow.
 
 ### Nested LMS Structure & Sequential Unlock
 
@@ -206,9 +251,13 @@ On 100% course completion, an enrollment is marked completed and a certificate i
 
 `GET /api/dashboard/student` aggregates summary stats, 7/30-day growth, per-course enrollments with next-lesson pointers, recent activity, pending assessments, and a skill-progress breakdown — computed server-side via Mongoose aggregation pipelines, avoiding N+1 queries from the frontend.
 
-### Community: Moderation & Rate Limiting
+### Community: Unified Feed, Moderation & Rate Limiting
 
-Posts and comments use **soft delete** (`isDeleted: true`, never a physical delete). Deletion permission follows the same rule everywhere: the author always can, admin always can, a teacher only within their own cohort. All three write endpoints (`POST /posts`, `POST /posts/:postId/comments`, `POST /announcements`) share a single rate limiter — **100 requests / 15 min / IP** — mounted after `verifyToken`, so an unauthenticated request never consumes quota.
+The feed unifies three heterogeneous sources — achievements, certificates, and posts/announcements — into a single normalized, paginated timeline, rather than three separate endpoints the frontend would have to merge itself. Posts and comments use **soft delete** (`isDeleted: true`, never a physical delete). Deletion permission follows the same rule everywhere: the author always can, admin always can, a teacher only within their own cohort. All three write endpoints (`POST /posts`, `POST /posts/:postId/comments`, `POST /announcements`) share a single rate limiter — **100 requests / 15 min / IP** — mounted after `verifyToken`, so an unauthenticated request never consumes quota.
+
+### I18N at the Source
+
+Achievement/certificate notifications and the achievement catalog are generated in Spanish directly in the backend, not translated client-side. An idempotent, dry-run-by-default script (`backend/src/scripts/migrateNotificationStrings.js`) backfills any notifications persisted before that change, without ever running automatically.
 
 ### Responsive Navigation & Accessibility
 
