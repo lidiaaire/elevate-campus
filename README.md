@@ -1,6 +1,6 @@
 # Elevate Your English — Campus LMS
 
-A full-stack Learning Management System (LMS) built as a portfolio project. It demonstrates role-based access control (Admin / Teacher / Student), a nested course hierarchy with sequential lesson unlocking, an assessment engine with attempt tracking, certificate generation, and a responsive, accessible frontend built on a custom Design System — all wired to a real REST API with no mocking.
+A full-stack Learning Management System (LMS) with role-based access control (Admin / Teacher / Student), a nested course hierarchy with sequential lesson unlocking, an assessment engine with attempt tracking, certificate generation, and a responsive, accessible frontend built on a custom Design System — all wired to a real REST API with no mocking.
 
 ---
 
