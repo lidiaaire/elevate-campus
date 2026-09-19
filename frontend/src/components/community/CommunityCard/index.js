@@ -6,23 +6,16 @@ import { resolveAuthorPhoto } from '@/lib/utils/resolveAuthorPhoto';
 import styles from '@/styles/Community.module.css';
 
 // Eventos automáticos del feed (ACHIEVEMENT/CERTIFICATE) — PostCard cubre
-// type=POST con un tratamiento visual propio, más protagonista.
+// type=POST/ANNOUNCEMENT con un tratamiento visual propio, más protagonista.
 
 // Mismos iconos que ya usa el resto de Elevate para estos dos tipos
 // (Notifications: TYPE_ICON; users/[id]: tabs Logros/Certificados) —
 // coherencia de identidad, no una elección nueva por pantalla. FileBadge
 // en vez de FileCheck: mismo campo semántico (documento oficial), trazo
-// más "insignia/premium" para diferenciar del círculo de Achievement.
+// más "insignia/premium" para diferenciar del bloque de Achievement.
 const TYPE_ICON = {
   ACHIEVEMENT: Award,
   CERTIFICATE: FileBadge,
-};
-
-const RARITY_LABEL = {
-  COMMON:    'Común',
-  RARE:      'Raro',
-  EPIC:      'Épico',
-  LEGENDARY: 'Legendario',
 };
 
 function formatDate(value) {
@@ -37,38 +30,40 @@ export default function CommunityCard({ item, index = 0 }) {
 
   const photoUrl = resolveAuthorPhoto(author);
 
+  // Comunidad no es un ranking: puntos y rareza son datos de Logros (ver
+  // /achievements), no protagonismo aquí. Certificado sí conserva nivel del
+  // curso — es informativo (qué curso), no una comparación entre alumnos.
   const metaTags = isAchievement
-    ? [
-        context.rarity && RARITY_LABEL[context.rarity] ? RARITY_LABEL[context.rarity] : context.rarity,
-        context.points != null ? `${context.points} pts` : null,
-      ].filter(Boolean)
-    : [
-        context.courseLevel,
-        context.finalScore != null ? `${context.finalScore}%` : null,
-      ].filter(Boolean);
+    ? []
+    : [context.courseLevel].filter(Boolean);
 
   return (
     <li className={`${styles.item} ${styles.itemCompact}`} style={{ '--stagger': index }}>
       <div className={styles.itemInner}>
-        <span className={styles.avatarSlot}>
-          <Avatar
-            firstName={author.firstName}
-            lastName={author.lastName}
-            role="student"
-            size="md"
-            photoUrl={photoUrl}
-          />
+        {/* Bloque de tipo — más pequeño que el de PostCard (.itemCompact en
+            Community.module.css): logro/certificado son actividad
+            secundaria en Comunidad, no el contenido protagonista. Logro y
+            certificado comparten acento naranja, distintos solo en forma
+            (círculo tintado vs. insignia con borde), nunca color. */}
+        <span
+          className={`${styles.typeBlock} ${isAchievement ? '' : styles.typeBlockCertificate}`}
+          aria-hidden="true"
+        >
+          <Icon size={18} />
         </span>
 
         <div className={styles.body}>
-          <p className={styles.actorName}>{author.firstName} {author.lastName}</p>
-
-          <p className={styles.actionText}>
-            <span className={`${styles.typeBadge} ${!isAchievement ? styles.typeBadgeCertificate : ''}`} aria-hidden="true">
-              <Icon size={12} />
-            </span>
-            {isAchievement ? 'ha desbloqueado un logro' : 'ha conseguido un certificado'}
-          </p>
+          <div className={styles.itemHeader}>
+            <Avatar
+              firstName={author.firstName}
+              lastName={author.lastName}
+              role="student"
+              size="sm"
+              photoUrl={photoUrl}
+            />
+            <span className={styles.actorName}>{author.firstName} {author.lastName}</span>
+            <span className={styles.itemDate}>{formatDate(eventDate)}</span>
+          </div>
 
           <p className={styles.protagonist}>
             {isAchievement ? context.name : context.courseTitle}
@@ -78,14 +73,11 @@ export default function CommunityCard({ item, index = 0 }) {
             <p className={styles.description}>{context.description}</p>
           )}
 
-          <div className={styles.metaRow}>
-            {metaTags.length > 0 && (
-              <div className={styles.metaTags}>
-                {metaTags.map((tag, i) => <span key={i} className={styles.metaTag}>{tag}</span>)}
-              </div>
-            )}
-            <span className={styles.date}>{formatDate(eventDate)}</span>
-          </div>
+          {metaTags.length > 0 && (
+            <div className={styles.metaTags}>
+              {metaTags.map((tag, i) => <span key={i} className={styles.metaTag}>{tag}</span>)}
+            </div>
+          )}
         </div>
       </div>
     </li>

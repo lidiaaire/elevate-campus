@@ -3,57 +3,67 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { dashboardService } from '@/lib/services/dashboard.service';
-import { getStudentPhoto } from '@/lib/config/studentPhotos';
+import { achievementService } from '@/lib/services/achievement.service';
+import { certificateService } from '@/lib/services/certificate.service';
+import { DASHBOARD_HERO_IMAGE } from '@/lib/config/studentPhotos';
 import ErrorState            from '@/components/ui/ErrorState';
 import DashboardSkeleton    from './DashboardSkeleton';
 import EmptyDashboard       from './EmptyDashboard';
 import CompletedDashboard  from './CompletedDashboard';
-import ProgressBar           from '@/components/ui/ProgressBar';
+import ContinueLearningCard     from '@/components/dashboard/student/ContinueLearningCard';
+import ProgressOverviewCard     from '@/components/dashboard/student/ProgressOverviewCard';
+import NextGoalCard             from '@/components/dashboard/student/NextGoalCard';
+import RecentActivityCard       from '@/components/dashboard/student/RecentActivityCard';
+import AchievementsCard         from '@/components/dashboard/student/AchievementsCard';
 import LearningPathCard      from '@/components/dashboard/student/LearningPathCard';
 import AssessmentSummary     from '@/components/dashboard/student/AssessmentSummary';
 import SkillProgressList     from '@/components/dashboard/student/SkillProgressList';
-import ContinueLearningCard     from '@/components/dashboard/student/ContinueLearningCard';
-import TodayInElevateCard      from '@/components/dashboard/student/TodayInElevateCard';
-import WeeklyGoalsCard         from '@/components/dashboard/student/WeeklyGoalsCard';
-import TodayActivityCard       from '@/components/dashboard/student/TodayActivityCard';
-import RecommendedCard         from '@/components/dashboard/student/RecommendedCard';
-import Link from 'next/link';
 import Image from 'next/image';
-import Button from '@/components/ui/Button';
 import styles from './StudentDashboard.module.css';
 
-// Misma prioridad que TodayActivityCard: curso en curso primero,
-// evaluación pendiente después. Duplicada intencionalmente (local al
-// hero) para no forzar una dependencia cruzada entre componentes.
-function buildNextAction(continueLearning, pendingAssessments) {
+// Saludo por franja horaria — no hay dato de servidor para esto, es hora
+// local del navegador del alumno, igual que cualquier reloj de UI.
+function getTimeOfDayGreeting() {
+  const hour = new Date().getHours();
+  if (hour < 12) return 'Buenos días';
+  if (hour < 20) return 'Buenas tardes';
+  return 'Buenas noches';
+}
+
+// Titular del hero — variantes basadas en señales reales (racha, si hay
+// curso en curso), nunca en datos inventados.
+function getHeroHeadline({ streakDays, continueLearning }) {
+  if (streakDays > 0) {
+    return {
+      line1: 'Sigue así,',
+      line2: `llevas ${streakDays} día${streakDays !== 1 ? 's' : ''} de racha.`,
+    };
+  }
   if (continueLearning) {
-    return {
-      label: continueLearning.lessonTitle ?? 'Siguiente lección',
-      meta:  continueLearning.courseTitle,
-      href:  `/courses/${continueLearning.courseId}/units/${continueLearning.unitId}/lessons/${continueLearning.lessonId}`,
-    };
+    return { line1: 'Hoy es un buen día', line2: 'para seguir aprendiendo.' };
   }
-  if (pendingAssessments?.length > 0) {
-    const pa = pendingAssessments[0];
-    return {
-      label: pa.assessmentTitle || `Evaluación: ${pa.unitTitle}`,
-      meta:  pa.courseTitle,
-      href:  `/courses/${pa.courseId}/units/${pa.unitId}/assessment`,
-    };
-  }
-  return null;
+  return { line1: 'Bienvenida de nuevo,', line2: 'tu progreso te espera.' };
 }
 
 export default function StudentDashboard() {
-  const { user, token } = useAuth();
-  const [data,    setData]    = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error,   setError]   = useState(null);
-  const [photoFailed, setPhotoFailed] = useState(false);
+  const { token } = useAuth();
+  const [data,         setData]         = useState(null);
+  const [achievements, setAchievements] = useState([]);
+  const [certificates, setCertificates] = useState([]);
+  const [loading,      setLoading]      = useState(true);
+  const [error,        setError]        = useState(null);
 
   useEffect(() => {
-    dashboardService.getStudentDashboard(token)
-      .then((res) => setData(res))
+    Promise.all([
+      dashboardService.getStudentDashboard(token),
+      achievementService.getMyAchievements(token),
+      certificateService.getMyCertificates(token),
+    ])
+      .then(([dashboardRes, achievementsRes, certificatesRes]) => {
+        setData(dashboardRes);
+        setAchievements(achievementsRes?.achievements ?? []);
+        setCertificates(certificatesRes?.certificates ?? []);
+      })
       .catch((err) => setError(err.message ?? 'Error desconocido'))
       .finally(() => setLoading(false));
   }, [token]);
@@ -67,128 +77,86 @@ export default function StudentDashboard() {
 
   const {
     profile, summary, growth, skillProgress,
-    enrollments, continueLearning, upcomingActivities,
-    pendingAssessments, recentActivity,
+    enrollments, continueLearning, pendingAssessments, recentActivity,
   } = data;
 
-  const nextAction = buildNextAction(continueLearning, pendingAssessments);
-  const photoUrl = getStudentPhoto(user?.email);
-
-  // "Continúa tu camino" no repite el curso que ya protagoniza el bloque
-  // de "Continuar aprendiendo" — evita mostrar la misma información dos veces.
+  // "Continúa tu camino" no repite el curso que ya protagoniza "Continuar
+  // aprendiendo" — evita mostrar la misma información dos veces.
   const otherEnrollments = enrollments.filter(
     (e) => !continueLearning || e.courseId?.toString() !== continueLearning.courseId?.toString(),
   );
 
+  const headline = getHeroHeadline({ streakDays: summary.streakDays, continueLearning });
+
   return (
     <div className={styles.dashboard}>
 
-      {/* Hero — bloque editorial de marca: escaparate principal de Sarah.
-          Saludo, progreso global, siguiente acción y CTA viven dentro del
-          mismo bloque oscuro; la fotografía es una columna real, no un
-          fondo, con fundido hacia la superficie de marca. */}
+      {/* Hero — banda compacta de bienvenida: saludo por franja horaria +
+          titular motivacional + una línea de contexto. Sin CTA ni datos de
+          curso aquí — eso vive en "Continuar aprendiendo", justo debajo. */}
       <section className={styles.hero}>
         <div className={styles.heroInner}>
           <div className={styles.heroContent}>
-            <span className={styles.heroEyebrow}>Aprender · Aplicar · Superarte</span>
-
-            <h1 className={styles.heroGreeting}>
-              {summary.streakDays > 0
-                ? `Hola, ${profile.firstName}. Llevas ${summary.streakDays} días de racha.`
-                : `Hola, ${profile.firstName}.`}
+            <span className={styles.heroEyebrow}>
+              {getTimeOfDayGreeting()}, {profile.firstName}
+            </span>
+            <h1 className={styles.heroHeadline}>
+              {headline.line1}<br />
+              <span className={styles.heroHeadlineAccent}>{headline.line2}</span>
             </h1>
-
-            <div className={styles.heroProgress}>
-              <div className={styles.heroProgressHeader}>
-                <span className={styles.heroProgressValue}>{summary.overallProgressAvg}%</span>
-                <span className={styles.heroProgressLabel}>Progreso global</span>
-              </div>
-              <ProgressBar value={summary.overallProgressAvg} ariaLabel="Progreso global" variant="accent" />
-            </div>
-
-            {nextAction ? (
-              <div className={styles.heroNext}>
-                <span className={styles.heroNextLabel}>Siguiente paso</span>
-                <p className={styles.heroNextTitle}>{nextAction.label}</p>
-                {nextAction.meta && <p className={styles.heroNextMeta}>{nextAction.meta}</p>}
-                <Button as={Link} href={nextAction.href} variant="accent" size="lg" className={styles.heroCta}>
-                  Continuar aprendiendo
-                </Button>
-              </div>
-            ) : (
-              <div className={styles.heroNext}>
-                <p className={styles.heroNextTitle}>Estás al día con tu contenido activo.</p>
-                <Button as={Link} href="/courses" variant="accent" size="lg" className={styles.heroCta}>
-                  Explorar cursos
-                </Button>
-              </div>
-            )}
+            <p className={styles.heroSubtitle}>
+              Cada lección que completas te acerca a tu siguiente nivel de inglés.
+            </p>
           </div>
 
-          <div className={styles.heroPhoto} aria-hidden="true">
-            {photoUrl && !photoFailed ? (
-              <Image
-                src={photoUrl}
-                alt=""
-                fill
-                priority
-                sizes="(max-width: 960px) 100vw, 42vw"
-                className={styles.heroPhotoImg}
-                onError={() => setPhotoFailed(true)}
-              />
-            ) : (
-              <div className={styles.heroPhotoFallback} />
-            )}
-            <div className={styles.heroPhotoFadeSide} />
-            <div className={styles.heroPhotoFadeBottom} />
+          {/* Escena educativa — asset panorámico definitivo (DASHBOARD_HERO_IMAGE),
+              igual para cualquier alumno. En desktop se muestra a sangre
+              completa detrás de .heroContent (ver StudentDashboard.module.css). */}
+          <div className={styles.heroScene} aria-hidden="true">
+            <Image
+              src={DASHBOARD_HERO_IMAGE}
+              alt=""
+              fill
+              priority
+              sizes="100vw"
+              className={styles.heroSceneImg}
+            />
+            <div className={styles.heroSceneFade} />
           </div>
         </div>
       </section>
 
-      {/* Continuar aprendiendo — pieza protagonista, no una card aislada */}
-      <ContinueLearningCard
-        continueLearning={continueLearning}
-        enrollments={enrollments}
-      />
-
-      {/* Actividad de hoy + Objetivos de la semana — compactos, en 2 columnas */}
-      <div className={styles.pairSection}>
-        <TodayActivityCard
-          summary={summary}
-          growth={growth}
-          recentActivity={recentActivity}
-          pendingAssessments={pendingAssessments}
+      {/* Continuar aprendiendo (2/3) + Tu progreso (1/3) */}
+      <div className={styles.mainRow}>
+        <ContinueLearningCard
           continueLearning={continueLearning}
+          enrollments={enrollments}
         />
-        <WeeklyGoalsCard
+        <ProgressOverviewCard
           summary={summary}
-          growth={growth}
-          pendingAssessments={pendingAssessments}
-          continueLearning={continueLearning}
+          achievementsCount={achievements.length}
+          certificatesCount={certificates.length}
         />
       </div>
 
-      {/* Continúa tu camino — el resto de cursos, sección secundaria */}
+      {/* Próximo objetivo · Actividad reciente · Últimos logros */}
+      <div className={styles.tripleRow}>
+        <NextGoalCard pendingAssessments={pendingAssessments} />
+        <RecentActivityCard recentActivity={recentActivity} />
+        <AchievementsCard achievements={achievements} />
+      </div>
+
+      {/* Continúa tu camino — el resto de cursos, cards compactas */}
       {otherEnrollments.length > 0 && (
         <section>
           <h2 className={styles.sectionTitle}>Continúa tu camino</h2>
-          <ul className={styles.courseGrid}>
+          <ul className={styles.exploreGrid}>
             {otherEnrollments.map((e) => (
               <LearningPathCard key={e.enrollmentId} enrollment={e} />
             ))}
           </ul>
         </section>
       )}
-
-      {/* Recomendado para ti + Hoy en Elevate — en 2 columnas */}
-      <div className={styles.pairSection}>
-        <RecommendedCard
-          continueLearning={continueLearning}
-          pendingAssessments={pendingAssessments}
-          enrollments={enrollments}
-        />
-        <TodayInElevateCard upcomingActivities={upcomingActivities} />
-      </div>
 
       {/* Mi espacio de aprendizaje */}
       <section>
@@ -201,11 +169,6 @@ export default function StudentDashboard() {
             progressGained7d={growth.progressGained7d}
             streakDays={summary.streakDays}
           />
-        </div>
-        <div className={styles.progressCta}>
-          <Button as={Link} href="/progress" variant="secondary" size="sm">
-            Ver mi progreso completo
-          </Button>
         </div>
       </section>
     </div>

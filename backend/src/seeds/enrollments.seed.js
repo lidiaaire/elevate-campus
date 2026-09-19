@@ -40,6 +40,7 @@ const AssessmentRepository         = require('../repositories/assessment.reposit
 const AssessmentAttemptRepository  = require('../repositories/assessmentAttempt.repository');
 const EnrollmentRepository         = require('../repositories/enrollment.repository');
 const LessonProgressRepository     = require('../repositories/lessonProgress.repository');
+const UserAchievementRepository    = require('../repositories/userAchievement.repository');
 
 const ProgressService   = require('../modules/progress/progress.service');
 const AssessmentService = require('../modules/assessments/assessment.service');
@@ -65,6 +66,34 @@ const makeDateCursor = (startDaysAgo, endDaysAgo) => {
     current = Math.max(current - step, endDaysAgo);
     return date;
   };
+};
+
+// achievementService.unlockAchievement() crea el UserAchievement con
+// unlockedAt = Date.now() (momento real del seed) — coherente en producción,
+// pero en el seed hace que TODOS los logros de TODOS los alumnos caigan en
+// el mismo instante, por delante de cualquier publicación de Comunidad con
+// fecha backdateada. Igual que ya se hace con LessonProgress.completedAt y
+// AssessmentAttempt.submittedAt: se deja que la lógica real (achievement.service)
+// decida QUÉ logro conceder, y aquí solo se corrige, después del hecho, CUÁNDO
+// se concedió — a la misma fecha ya usada para la lección/evaluación que lo
+// disparó, así que sigue siendo coherente con la acción real que lo generó.
+// seenAchievementsByStudent persiste durante todo el proceso del seed (no por
+// llamada a progressThroughCourse) para no volver a tocar, en un segundo curso
+// del mismo alumno, un logro ya backdateado correctamente en el primero.
+const seenAchievementsByStudent = new Map();
+
+const backdateNewAchievements = async (studentId, date) => {
+  const key = studentId.toString();
+  if (!seenAchievementsByStudent.has(key)) seenAchievementsByStudent.set(key, new Set());
+  const seen = seenAchievementsByStudent.get(key);
+
+  const current = await UserAchievementRepository.model.find({ user: studentId }).select('_id');
+  for (const ua of current) {
+    const id = ua._id.toString();
+    if (seen.has(id)) continue;
+    seen.add(id);
+    await UserAchievementRepository.updateById(ua._id, { unlockedAt: date });
+  }
 };
 
 // ── Matrícula ──────────────────────────────────────────────────────────────
@@ -96,6 +125,10 @@ const submitAndBackdate = async (studentId, courseId, unitId, answers, submitted
     { _id: attempt._id },
     { $set: { submittedAt } },
   );
+  // Si este intento disparó algún logro (p. ej. 'perfect_assessment'), queda
+  // backdateado a la misma fecha del intento — un intento fallido no concede
+  // ninguno, así que aquí no hay nada nuevo que tocar en ese caso.
+  await backdateNewAchievements(studentId, submittedAt);
   return attempt;
 };
 
@@ -155,8 +188,13 @@ const progressThroughCourse = async (
       }
 
       await ProgressService.completeLesson(studentId, lesson._id);
+      const lessonDate = nextDate();
       const progress = await LessonProgressRepository.findByStudentAndLesson(studentId, lesson._id);
-      await LessonProgressRepository.updateById(progress._id, { completedAt: nextDate() });
+      await LessonProgressRepository.updateById(progress._id, { completedAt: lessonDate });
+      // Cualquier logro concedido dentro de completeLesson() (primera lección,
+      // 5/10 lecciones, unidad completa, racha...) queda backdateado a la
+      // fecha de ESTA lección, coherente con la acción que lo generó.
+      await backdateNewAchievements(studentId, lessonDate);
       completed += 1;
     }
 

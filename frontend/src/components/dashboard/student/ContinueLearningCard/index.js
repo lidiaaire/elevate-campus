@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { PlayCircle } from 'lucide-react';
 import { getCourseVisual } from '@/lib/config/courseVisuals';
 import Card, { CardBody } from '@/components/ui/Card';
 import Button from '@/components/ui/Button';
@@ -11,21 +12,28 @@ import styles from './ContinueLearningCard.module.css';
 export default function ContinueLearningCard({ continueLearning, enrollments }) {
   if (!enrollments || enrollments.length === 0) {
     return (
-      <EmptyState title="Aún no tienes cursos activos." />
+      <Card variant="default" className={styles.card}>
+        <CardBody>
+          <EmptyState title="Aún no tienes cursos activos." />
+        </CardBody>
+      </Card>
     );
   }
 
   if (!continueLearning) {
     const firstCourseId = enrollments[0]?.courseId;
+    const allCompleted = enrollments.every((enrollment) => enrollment.enrollmentStatus === 'completed');
     return (
-      <Card variant="elevated">
+      <Card variant="default" className={styles.card}>
         <CardBody className={styles.completedBody}>
           <p className={styles.completedText}>
-            Has completado todos tus cursos disponibles. ¡Enhorabuena!
+            {allCompleted
+              ? 'Has completado todos tus cursos disponibles. ¡Enhorabuena!'
+              : 'No tienes lecciones disponibles para continuar. Revisa tus evaluaciones.'}
           </p>
           {firstCourseId && (
-            <Button as={Link} href={`/courses/${firstCourseId}`} variant="secondary" size="sm">
-              Ver resumen del curso
+            <Button as={Link} href={allCompleted ? `/courses/${firstCourseId}` : '/assessments'} variant="secondary" size="sm">
+              {allCompleted ? 'Ver resumen del curso' : 'Ver evaluaciones'}
             </Button>
           )}
         </CardBody>
@@ -37,70 +45,59 @@ export default function ContinueLearningCard({ continueLearning, enrollments }) 
     courseId,
     courseTitle,
     courseImage,
-    unitId,
     unitTitle,
     lessonId,
+    unitId,
     lessonTitle,
-    lastLesson,
     overallProgress,
     completedLessons,
     totalLessons,
   } = continueLearning;
 
-  const visual     = getCourseVisual(courseTitle);
-  const imageSrc   = visual.coverImage || courseImage || null;
-  const accentColor = visual.accentColor;
+  const visual   = getCourseVisual(courseTitle);
+  const imageSrc = visual.coverImage || courseImage || null;
   const level = enrollments.find(
     (e) => e.courseId?.toString() === courseId?.toString(),
   )?.level;
   const lessonHref = `/courses/${courseId}/units/${unitId}/lessons/${lessonId}`;
 
   return (
-    <Card variant="elevated" noPadding className={styles.spotlight}>
-
-      {/* Visual abstracto del curso — no es una foto, es la identidad
-          categórica ya definida por curso (courseVisuals.js) llevada
-          a un panel grande en vez de una franja de color estrecha. */}
-      <div className={styles.visual} style={{ '--card-accent': accentColor }}>
-        {imageSrc ? (
-          <img src={imageSrc} alt="" aria-hidden="true" className={styles.visualImage} />
-        ) : (
-          <div className={styles.visualPlaceholder} aria-hidden="true" />
-        )}
-        {level && <span className={styles.levelBadge}>{level}</span>}
-        <span className={styles.progressBadge}>{overallProgress}%</span>
+    <Card variant="default" noPadding className={styles.card}>
+      <div className={styles.header}>
+        <PlayCircle size={16} className={styles.headerIcon} aria-hidden="true" />
+        <h2 className={styles.headerTitle}>Continuar aprendiendo</h2>
+        <Link href="/courses" className={styles.headerLink}>Ir a mis cursos →</Link>
       </div>
 
-      <div className={styles.body}>
-        <div className={styles.header}>
-          <span className={styles.eyebrow}>Continuar aprendiendo</span>
+      <div className={styles.row}>
+        {/* Portada compacta — miniatura, no una franja a sangre completa
+            ocupando media tarjeta. */}
+        <div className={styles.thumb}>
+          {imageSrc ? (
+            <img src={imageSrc} alt="" aria-hidden="true" className={styles.thumbImg} />
+          ) : (
+            <div className={styles.thumbPlaceholder} aria-hidden="true" />
+          )}
+          {level && <span className={styles.levelBadge}>{level}</span>}
+        </div>
+
+        <div className={styles.details}>
           <p className={styles.courseTitle}>{courseTitle}</p>
           <p className={styles.unitLabel}>{unitTitle}</p>
-        </div>
+          <p className={styles.nextLesson}>{lessonTitle}</p>
 
-        {lastLesson && (
-          <p className={styles.lastLesson}>
-            <span className={styles.lastLessonPrefix}>Última lección:&nbsp;</span>
-            {lastLesson.lessonTitle}
-          </p>
-        )}
-
-        <div className={styles.nextStep}>
-          <span className={styles.nextLabel}>Siguiente paso</span>
-          <p className={styles.nextTitle}>{lessonTitle}</p>
-        </div>
-
-        <div className={styles.progressSection}>
-          <div className={styles.progressMeta}>
-            <span className={styles.lessonsCount}>{completedLessons} / {totalLessons} lecciones</span>
-            <span className={styles.progressPct}>{overallProgress}%</span>
+          <div className={styles.progressSection}>
+            <ProgressBar value={overallProgress} ariaLabel={`Progreso de ${courseTitle}`} variant="accent" />
+            <div className={styles.progressMeta}>
+              <span>{completedLessons} / {totalLessons} lecciones</span>
+              <span>{overallProgress}%</span>
+            </div>
           </div>
-          <ProgressBar value={overallProgress} ariaLabel={`Progreso de ${courseTitle}`} />
-        </div>
 
-        <Button as={Link} href={lessonHref} variant="accent" size="md" className={styles.cta}>
-          Continuar
-        </Button>
+          <Button as={Link} href={lessonHref} variant="accent" size="sm" className={styles.cta}>
+            Continuar aprendiendo
+          </Button>
+        </div>
       </div>
     </Card>
   );

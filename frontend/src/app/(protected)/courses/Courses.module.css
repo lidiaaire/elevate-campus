@@ -2,10 +2,10 @@
    CoursesPage (Student) — Design System v2.0
    "Explorar y avanzar en tu aprendizaje", no un listado de registros.
    Ritmo: cabecera + resumen → spotlight → camino → explorar.
-   Covers reales de courseVisuals.js recortados (aspect-ratio) para
-   mostrar solo la parte gráfica (gradiente/formas/nivel), nunca el
-   título/tagline horneados en el propio SVG — el texto real siempre
-   se pinta en HTML, nunca duplicado.
+   Covers reales de courseVisuals.js (fotografías 1672×941, ratio
+   ~16:9). El aspect-ratio de cada tipo de tarjeta se ajusta a esa
+   proporción nativa para que "cover" no tenga que recortar de forma
+   agresiva — la persona y el entorno de la foto deben verse enteros.
    ============================================================ */
 
 .page {
@@ -125,9 +125,9 @@
 
 /* ================================================================
    COVER — recorte compartido por spotlight/camino/explorar.
-   aspect-ratio 800/300 muestra solo el ~66% superior del SVG
-   (gradiente + formas + badge de nivel decorativo), recortando el
-   título/tagline horneados para que nunca choquen con el HTML real.
+   object-position: center porque, con el aspect-ratio ya ajustado al
+   ~16:9 nativo de la foto, el recorte de "cover" es mínimo en
+   cualquier eje — no hace falta sesgar hacia arriba ni hacia abajo.
    ================================================================ */
 .coverImg {
   position: absolute;
@@ -135,7 +135,7 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: top;
+  object-position: center;
   transition: transform var(--dur-slow) var(--ease-out);
 }
 
@@ -187,7 +187,7 @@
 
 .spotlightCover {
   position: relative;
-  aspect-ratio: 800 / 300;
+  aspect-ratio: 16 / 9;
   overflow: hidden;
   flex-shrink: 0;
 }
@@ -316,7 +316,8 @@
    ================================================================ */
 .pathGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(240px, 300px));
+  justify-content: start;
   gap: 1.25rem;
 }
 
@@ -358,7 +359,7 @@
 
 .pathCover {
   position: relative;
-  aspect-ratio: 800 / 300;
+  aspect-ratio: 16 / 9;
   overflow: hidden;
 }
 
@@ -422,7 +423,8 @@
    ================================================================ */
 .exploreGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(240px, 300px));
+  justify-content: start;
   gap: 1.25rem;
 }
 
@@ -458,7 +460,7 @@
 
 .exploreCover {
   position: relative;
-  aspect-ratio: 800 / 300;
+  aspect-ratio: 16 / 9;
   overflow: hidden;
 }
 
@@ -511,17 +513,8 @@
   color: var(--text-muted);
 }
 
-/* ---- Responsive ---- */
-@media (min-width: 640px) and (max-width: 1023px) {
-  .pathGrid,
-  .exploreGrid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (min-width: 1024px) {
-  .pathGrid,
-  .exploreGrid {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
+/* ---- Responsive ----
+   pathGrid/exploreGrid ya se resuelven solos con auto-fit: el número
+   de columnas depende del ancho disponible y del número real de
+   cursos, sin dejar tracks vacíos ni forzar una tarjeta solitaria a
+   ocupar media fila. */

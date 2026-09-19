@@ -106,9 +106,19 @@ export default function CommunityComposer({
             </div>
           </>
         ) : (
-          <button type="button" className={styles.composerTrigger} onClick={handleExpand}>
-            {placeholder}
-          </button>
+          <div className={styles.composerCollapsedRow}>
+            <button type="button" className={styles.composerTrigger} onClick={handleExpand}>
+              {placeholder}
+            </button>
+            <Button
+              variant="accent"
+              size="sm"
+              className={styles.composerCollapsedCta}
+              onClick={handleExpand}
+            >
+              {submitLabel}
+            </Button>
+          </div>
         )}
       </div>
     </div>

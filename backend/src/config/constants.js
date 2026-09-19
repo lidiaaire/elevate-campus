@@ -15,6 +15,7 @@
  *   CEFR_LEVELS    → { A1, A2, B1, B2, C1, C2 }
  *   ENROLLMENT_STATUS → { ACTIVE, SUSPENDED, COMPLETED }
  *   PROGRESS_STATUS   → { NOT_STARTED, COMPLETED }
+ *   CONTENT_BLOCK_TYPES → { OBJECTIVES, CONTEXT, RULE, PATTERNS, PRACTICE, SUMMARY }
  */
 
 // TODO: Implementar en Phase 0
@@ -79,6 +80,18 @@ const GROWTH_WINDOWS = Object.freeze({
 
 const ACTIVITY_FEED_MAX_DAYS = 90;
 
+// Tipos de bloque pedagógico soportados por Lesson.contentBlocks.
+// Lista cerrada — extenderla implica añadir también el componente de
+// render correspondiente en frontend (ver blocks/BlockRenderer.js).
+const CONTENT_BLOCK_TYPES = Object.freeze({
+  OBJECTIVES: 'objectives',
+  CONTEXT:    'context',
+  RULE:       'rule',
+  PATTERNS:   'patterns',
+  PRACTICE:   'practice',
+  SUMMARY:    'summary',
+});
+
 module.exports = {
   ROLES,
   COURSE_STATUS,
@@ -92,4 +105,5 @@ module.exports = {
   SKILL_RADAR_SOURCE,
   GROWTH_WINDOWS,
   ACTIVITY_FEED_MAX_DAYS,
+  CONTENT_BLOCK_TYPES,
 };

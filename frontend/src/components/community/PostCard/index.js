@@ -31,10 +31,11 @@ function formatCommentDate(value) {
 }
 
 // Publicación real de un student/teacher, o ANNOUNCEMENT (student/teacher
-// de una cohorte, o admin global) — mismo tratamiento visual protagonista;
-// el ANNOUNCEMENT solo añade una etiqueta "Aviso" en vez de la línea de rol,
-// sin rediseñar la card. Los comentarios se cargan de forma perezosa: nada
-// se pide al backend hasta que el usuario despliega el bloque.
+// de una cohorte, o admin global) — mismo tratamiento visual protagonista
+// que el resto del feed (card + bloque de tipo grande a la izquierda); el
+// ANNOUNCEMENT solo cambia el icono/acento del bloque y añade la etiqueta
+// "Aviso" junto al nombre. Los comentarios se cargan de forma perezosa:
+// nada se pide al backend hasta que el usuario despliega el bloque.
 //
 // Eliminar (post y comentarios): el backend es la autoridad final de
 // permisos (autor / teacher de la cohorte / admin) — el frontend solo
@@ -170,185 +171,187 @@ export default function PostCard({ item, token, user, onDeletePost, index = 0 })
   return (
     <li className={`${styles.item} ${styles.itemPost}`} style={{ '--stagger': index }}>
       <div className={styles.postInner}>
-        <div className={styles.postHeader}>
-          <span className={styles.avatarSlot}>
+        <span
+          className={`${styles.typeBlock} ${isAnnouncement ? styles.typeBlockAnnouncement : styles.typeBlockPost}`}
+          aria-hidden="true"
+        >
+          {isAnnouncement ? <Megaphone size={24} /> : <MessageCircle size={24} />}
+        </span>
+
+        <div className={`${styles.body} ${styles.postBody}`}>
+          <div className={styles.itemHeader}>
             <Avatar
               firstName={author.firstName}
               lastName={author.lastName}
               role={author.role}
-              size="lg"
+              size="md"
               photoUrl={photoUrl}
             />
-          </span>
-
-          <div className={styles.postAuthorBlock}>
-            <div className={styles.postAuthorRow}>
-              <p className={styles.postAuthorName}>{author.firstName} {author.lastName}</p>
-              <span className={styles.postDate}>{formatDate(eventDate)}</span>
-            </div>
+            <span className={styles.actorName}>{author.firstName} {author.lastName}</span>
             {isAnnouncement ? (
-              <p className={styles.announcementBadge}>
+              <span className={styles.announcementBadge}>
                 <Megaphone size={12} aria-hidden="true" />
                 Aviso
-              </p>
+              </span>
             ) : (
-              roleLabel && <p className={styles.postRoleBadge}>{roleLabel}</p>
+              roleLabel && <span className={styles.postRoleBadge}>{roleLabel}</span>
+            )}
+            <span className={styles.itemDate}>{formatDate(eventDate)}</span>
+          </div>
+
+          <p className={styles.postContent}>{context.content}</p>
+
+          <div className={styles.postFooter}>
+            <button
+              type="button"
+              className={styles.commentsToggle}
+              aria-expanded={showComments}
+              onClick={handleToggleComments}
+            >
+              <MessageCircle size={14} aria-hidden="true" />
+              {commentCount > 0 ? `${commentCount} comentario${commentCount !== 1 ? 's' : ''}` : 'Comentar'}
+              {showComments ? <ChevronUp size={14} aria-hidden="true" /> : <ChevronDown size={14} aria-hidden="true" />}
+            </button>
+
+            {canModeratePost && (
+              <div className={styles.postActions}>
+                {!confirmingDelete ? (
+                  <button
+                    type="button"
+                    className={styles.deleteTrigger}
+                    onClick={() => setConfirmingDelete(true)}
+                    aria-label={isAnnouncement ? 'Eliminar aviso' : 'Eliminar publicación'}
+                  >
+                    <Trash2 size={14} aria-hidden="true" />
+                    Eliminar
+                  </button>
+                ) : (
+                  <div className={styles.deleteConfirm} role="group" aria-label="Confirmar eliminación">
+                    <span className={styles.deleteConfirmText}>¿Eliminar?</span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setConfirmingDelete(false)}
+                      disabled={deletingPost}
+                    >
+                      Cancelar
+                    </Button>
+                    <Button
+                      variant="danger"
+                      size="sm"
+                      loading={deletingPost}
+                      onClick={handleConfirmDeletePost}
+                    >
+                      Eliminar
+                    </Button>
+                  </div>
+                )}
+              </div>
             )}
           </div>
-        </div>
 
-        <p className={styles.postContent}>{context.content}</p>
+          {deletePostError && <p className={styles.deleteError}>{deletePostError}</p>}
 
-        <div className={styles.postFooter}>
-          <button
-            type="button"
-            className={styles.commentsToggle}
-            aria-expanded={showComments}
-            onClick={handleToggleComments}
-          >
-            <MessageCircle size={14} aria-hidden="true" />
-            {commentCount > 0 ? `${commentCount} comentario${commentCount !== 1 ? 's' : ''}` : 'Comentar'}
-            {showComments ? <ChevronUp size={14} aria-hidden="true" /> : <ChevronDown size={14} aria-hidden="true" />}
-          </button>
-
-          {canModeratePost && (
-            <div className={styles.postActions}>
-              {!confirmingDelete ? (
-                <button
-                  type="button"
-                  className={styles.deleteTrigger}
-                  onClick={() => setConfirmingDelete(true)}
-                  aria-label={isAnnouncement ? 'Eliminar aviso' : 'Eliminar publicación'}
-                >
-                  <Trash2 size={14} aria-hidden="true" />
-                  Eliminar
-                </button>
-              ) : (
-                <div className={styles.deleteConfirm} role="group" aria-label="Confirmar eliminación">
-                  <span className={styles.deleteConfirmText}>¿Eliminar?</span>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setConfirmingDelete(false)}
-                    disabled={deletingPost}
-                  >
-                    Cancelar
-                  </Button>
-                  <Button
-                    variant="danger"
-                    size="sm"
-                    loading={deletingPost}
-                    onClick={handleConfirmDeletePost}
-                  >
-                    Eliminar
-                  </Button>
-                </div>
+          {showComments && (
+            <div className={styles.commentsSection}>
+              {commentsLoading && (
+                <p className={styles.commentsStatus}>Cargando comentarios…</p>
               )}
+
+              {!commentsLoading && commentsError && (
+                <p className={styles.commentsErrorText}>{commentsError}</p>
+              )}
+
+              {!commentsLoading && !commentsError && comments !== null && comments.length === 0 && (
+                <p className={styles.commentsEmpty}>Sé el primero en comentar.</p>
+              )}
+
+              {!commentsLoading && comments && comments.length > 0 && (
+                <ul className={styles.commentsList}>
+                  {comments.map((c) => (
+                    <li key={c._id} className={styles.commentItem}>
+                      <span className={styles.avatarSlot}>
+                        <Avatar
+                          firstName={c.author.firstName}
+                          lastName={c.author.lastName}
+                          role={c.author.role}
+                          size="sm"
+                          photoUrl={resolveAuthorPhoto(c.author)}
+                        />
+                      </span>
+                      <div className={styles.commentBody}>
+                        <div className={styles.commentMeta}>
+                          <span className={styles.commentAuthor}>{c.author.firstName} {c.author.lastName}</span>
+                          <span className={styles.commentDate}>{formatCommentDate(c.createdAt)}</span>
+
+                          {canModerateComment(c) && (
+                            commentDeleteId === c._id ? (
+                              <span className={styles.commentDeleteConfirm}>
+                                <button
+                                  type="button"
+                                  className={styles.commentDeleteConfirmBtn}
+                                  onClick={() => handleConfirmDeleteComment(c._id)}
+                                  disabled={commentDeleteLoading}
+                                >
+                                  {commentDeleteLoading ? 'Eliminando…' : 'Confirmar'}
+                                </button>
+                                <button
+                                  type="button"
+                                  className={styles.commentDeleteCancelBtn}
+                                  onClick={() => setCommentDeleteId(null)}
+                                  disabled={commentDeleteLoading}
+                                >
+                                  Cancelar
+                                </button>
+                              </span>
+                            ) : (
+                              <button
+                                type="button"
+                                className={styles.commentDeleteTrigger}
+                                onClick={() => setCommentDeleteId(c._id)}
+                                aria-label="Eliminar comentario"
+                              >
+                                <Trash2 size={12} aria-hidden="true" />
+                                Eliminar
+                              </button>
+                            )
+                          )}
+                        </div>
+                        <p className={styles.commentContent}>{c.content}</p>
+                        {commentDeleteId === c._id && commentDeleteError && (
+                          <p className={styles.commentDeleteError}>{commentDeleteError}</p>
+                        )}
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
+
+              <form className={styles.commentForm} onSubmit={handleSubmitComment}>
+                <input
+                  type="text"
+                  className={styles.commentInput}
+                  placeholder="Escribe un comentario…"
+                  value={newComment}
+                  onChange={(e) => setNewComment(e.target.value)}
+                  disabled={submittingComment}
+                  maxLength={COMMENT_MAX_LENGTH + 200}
+                  aria-label="Escribe un comentario"
+                />
+                <Button
+                  type="submit"
+                  variant="accent"
+                  size="sm"
+                  loading={submittingComment}
+                  disabled={!canSubmitComment}
+                >
+                  Enviar
+                </Button>
+              </form>
+              {commentError && <p className={styles.commentFormError}>{commentError}</p>}
             </div>
           )}
         </div>
-
-        {deletePostError && <p className={styles.deleteError}>{deletePostError}</p>}
-
-        {showComments && (
-          <div className={styles.commentsSection}>
-            {commentsLoading && (
-              <p className={styles.commentsStatus}>Cargando comentarios…</p>
-            )}
-
-            {!commentsLoading && commentsError && (
-              <p className={styles.commentsErrorText}>{commentsError}</p>
-            )}
-
-            {!commentsLoading && !commentsError && comments !== null && comments.length === 0 && (
-              <p className={styles.commentsEmpty}>Sé el primero en comentar.</p>
-            )}
-
-            {!commentsLoading && comments && comments.length > 0 && (
-              <ul className={styles.commentsList}>
-                {comments.map((c) => (
-                  <li key={c._id} className={styles.commentItem}>
-                    <span className={styles.avatarSlot}>
-                      <Avatar
-                        firstName={c.author.firstName}
-                        lastName={c.author.lastName}
-                        role={c.author.role}
-                        size="sm"
-                        photoUrl={resolveAuthorPhoto(c.author)}
-                      />
-                    </span>
-                    <div className={styles.commentBody}>
-                      <div className={styles.commentMeta}>
-                        <span className={styles.commentAuthor}>{c.author.firstName} {c.author.lastName}</span>
-                        <span className={styles.commentDate}>{formatCommentDate(c.createdAt)}</span>
-
-                        {canModerateComment(c) && (
-                          commentDeleteId === c._id ? (
-                            <span className={styles.commentDeleteConfirm}>
-                              <button
-                                type="button"
-                                className={styles.commentDeleteConfirmBtn}
-                                onClick={() => handleConfirmDeleteComment(c._id)}
-                                disabled={commentDeleteLoading}
-                              >
-                                {commentDeleteLoading ? 'Eliminando…' : 'Confirmar'}
-                              </button>
-                              <button
-                                type="button"
-                                className={styles.commentDeleteCancelBtn}
-                                onClick={() => setCommentDeleteId(null)}
-                                disabled={commentDeleteLoading}
-                              >
-                                Cancelar
-                              </button>
-                            </span>
-                          ) : (
-                            <button
-                              type="button"
-                              className={styles.commentDeleteTrigger}
-                              onClick={() => setCommentDeleteId(c._id)}
-                              aria-label="Eliminar comentario"
-                            >
-                              <Trash2 size={12} aria-hidden="true" />
-                              Eliminar
-                            </button>
-                          )
-                        )}
-                      </div>
-                      <p className={styles.commentContent}>{c.content}</p>
-                      {commentDeleteId === c._id && commentDeleteError && (
-                        <p className={styles.commentDeleteError}>{commentDeleteError}</p>
-                      )}
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            )}
-
-            <form className={styles.commentForm} onSubmit={handleSubmitComment}>
-              <input
-                type="text"
-                className={styles.commentInput}
-                placeholder="Escribe un comentario…"
-                value={newComment}
-                onChange={(e) => setNewComment(e.target.value)}
-                disabled={submittingComment}
-                maxLength={COMMENT_MAX_LENGTH + 200}
-                aria-label="Escribe un comentario"
-              />
-              <Button
-                type="submit"
-                variant="accent"
-                size="sm"
-                loading={submittingComment}
-                disabled={!canSubmitComment}
-              >
-                Enviar
-              </Button>
-            </form>
-            {commentError && <p className={styles.commentFormError}>{commentError}</p>}
-          </div>
-        )}
       </div>
     </li>
   );

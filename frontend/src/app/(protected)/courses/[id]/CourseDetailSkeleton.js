@@ -17,7 +17,7 @@ function LessonRowSkeleton() {
     <div className={styles.lessonRow}>
       <Bone className={styles.lessonIcon} />
       <Bone className={styles.lessonTitle} />
-      <Bone className={styles.lessonType} />
+      <Bone className={styles.lessonMeta} />
     </div>
   );
 }
@@ -29,9 +29,8 @@ function UnitCardSkeleton({ lessons = 3 }) {
         <Bone className={styles.unitOrder} />
         <div className={styles.unitInfo}>
           <Bone className={styles.unitTitle} />
-          <Bone className={styles.unitDescription} />
+          <Bone className={styles.unitProgressLine} />
         </div>
-        <Bone className={styles.unitPct} />
       </div>
       <div className={styles.lessonList}>
         {Array.from({ length: lessons }).map((_, i) => (
@@ -45,38 +44,24 @@ function UnitCardSkeleton({ lessons = 3 }) {
 export default function CourseDetailSkeleton() {
   return (
     <div className={styles.page} aria-busy="true" aria-label="Cargando curso">
-      {/* Page Header */}
-      <div className={styles.header}>
-        <div className={styles.headerText}>
-          <Bone className={styles.headerTitle} />
-          <Bone className={styles.headerDescription} />
+      <Bone className={styles.breadcrumb} />
+
+      {/* Hero */}
+      <div className={styles.hero}>
+        <div className={styles.heroContent}>
+          <Bone className={styles.levelBadge} />
+          <Bone className={styles.heroTitle} />
+          <Bone className={styles.heroDescription} />
+          <Bone className={styles.heroProgress} />
         </div>
-        <Bone className={styles.headerAction} />
+        <Bone className={styles.heroImage} />
       </div>
 
-      {/* Metadata Card */}
-      <div className={styles.metaCard}>
-        <div className={styles.metaRow}>
-          {Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className={styles.metaItem}>
-              <Bone className={styles.metaLabel} />
-              <Bone className={styles.metaValue} />
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Progress Card */}
-      <div className={styles.progressCard}>
-        <div className={styles.progressTop}>
-          <Bone className={styles.progressPct} />
-          <Bone className={styles.progressMeta} />
-        </div>
-        <Bone className={styles.progressBar} />
-        <div className={styles.ctaRow}>
-          <Bone className={styles.ctaHint} />
-          <Bone className={styles.ctaButton} />
-        </div>
+      {/* Continuar aprendiendo */}
+      <div className={styles.continueCard}>
+        <Bone className={styles.continueHeader} />
+        <Bone className={styles.continueTitle} />
+        <Bone className={styles.continueUnit} />
       </div>
 
       {/* Unidades */}

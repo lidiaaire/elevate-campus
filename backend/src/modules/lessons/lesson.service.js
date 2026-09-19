@@ -66,8 +66,11 @@ const assertCourseAccessible = (actorRole, course) => {
 };
 
 const assertStudentEnrolled = async (actorId, courseId) => {
-  const enrollment = await EnrollmentRepository.findOne({ studentId: actorId, courseId, status: ENROLLMENT_STATUS.ACTIVE });
-  if (!enrollment) throw new ForbiddenError('NOT_ENROLLED', 'No tienes matrícula activa en este curso');
+  const enrollment = await EnrollmentRepository.findOne({
+    studentId: actorId, courseId,
+    status: { $in: [ENROLLMENT_STATUS.ACTIVE, ENROLLMENT_STATUS.COMPLETED] },
+  });
+  if (!enrollment) throw new ForbiddenError('NOT_ENROLLED', 'No tienes matrícula activa o completada en este curso');
   return enrollment;
 };
 

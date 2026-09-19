@@ -17,6 +17,9 @@ export const certificateService = {
   },
 
   async downloadCertificate(id, certificateNumber, token) {
+    if (typeof id !== 'string' || !/^[a-f\d]{24}$/i.test(id)) {
+      throw new Error('El certificado no tiene un identificador válido.');
+    }
     const res = await fetch(`${BASE_URL}/certificates/${id}/download`, {
       headers: { Authorization: `Bearer ${token}` },
     });

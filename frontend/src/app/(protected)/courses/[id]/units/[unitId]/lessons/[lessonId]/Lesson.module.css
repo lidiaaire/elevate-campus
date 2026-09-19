@@ -12,6 +12,12 @@
   width: 100%;
 }
 
+/* Lecciones con contentBlocks aprovechan más horizontalidad (grids de
+   objetivos/patrones comparables) que el texto plano en columna única. */
+.pageWide {
+  max-width: 1040px;
+}
+
 /* ================================================================
    CABECERA
    ================================================================ */
@@ -297,6 +303,286 @@
 
 .answerReveal[open] summary { margin-bottom: 0.5rem; }
 
+/* ================================================================
+   CONTENTBLOCKS — bloques pedagógicos tipados (piloto Regular Verbs)
+   Reutilizan .block/.blockHeader/.blockHeading ya definidos arriba;
+   aquí solo el contenido interno propio de cada tipo de bloque.
+   ================================================================ */
+.blocksStack {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  max-width: 100%;
+}
+
+.blockTitle {
+  font-size: 1.1875rem;
+  font-weight: 700;
+  color: var(--text-display);
+  line-height: 1.35;
+  margin: 0;
+}
+
+.blockSubtitle {
+  font-size: 0.9375rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* ── Objectives / Summary: grid de ítems breves con icono ── */
+.objectivesGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.25rem;
+}
+
+.objectiveItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.objectiveIconWrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  flex-shrink: 0;
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--elevate-accent-500) 16%, var(--bg-elevated));
+  color: var(--elevate-accent-500);
+}
+
+.objectiveTitle {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: var(--text-display);
+  margin: 0;
+}
+
+.objectiveDesc {
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+  margin: 0.125rem 0 0;
+}
+
+/* ── Context: ejemplos con icono + frase destacada ── */
+.exampleList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+}
+
+.exampleRow {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.exampleIconWrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  flex-shrink: 0;
+  border-radius: var(--radius-md);
+  background: var(--bg-elevated);
+  color: var(--text-secondary);
+}
+
+.exampleText {
+  margin: 0;
+  font-size: 0.9375rem;
+  color: var(--text-primary);
+}
+
+.exampleHighlight {
+  background: none;
+  color: var(--elevate-accent-500);
+  font-weight: 700;
+}
+
+.contextCallout {
+  align-self: flex-start;
+  max-width: 320px;
+  padding: 0.625rem 1rem;
+  border-radius: var(--radius-lg);
+  background: color-mix(in srgb, var(--elevate-accent-500) 14%, var(--bg-elevated));
+  border: 1px solid color-mix(in srgb, var(--elevate-accent-500) 35%, var(--border-default));
+  color: var(--text-primary);
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+/* ── Rule: transformaciones infinitivo → pasado ── */
+.transformGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.transformItem {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 0.5rem;
+  border-radius: var(--radius-md);
+  background: var(--bg-elevated);
+  font-size: 0.9375rem;
+}
+
+.transformFrom { color: var(--text-secondary); }
+.transformArrow { color: var(--elevate-accent-500); }
+.transformTo { font-weight: 700; color: var(--text-display); }
+
+.noteBox {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.625rem;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-md);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-default);
+}
+
+.noteBox p {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.noteIcon {
+  color: var(--elevate-accent-500);
+  flex-shrink: 0;
+  margin-top: 0.125rem;
+}
+
+/* ── Patterns: cards comparables ── */
+.patternGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.patternCard {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1rem;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  background: var(--bg-elevated);
+}
+
+.patternNumber {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 9999px;
+  background: var(--elevate-accent-500);
+  color: var(--color-ink);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.patternDesc {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+}
+
+.patternHint {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+/* Grupo de varios pares dentro de un mismo card (p. ej. varios verbos
+   irregulares con el mismo patrón) — alternativa a un único .example. */
+.patternExamplesList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.transformItemCompact {
+  justify-content: flex-start;
+  padding: 0.25rem 0;
+  background: none;
+  font-size: 0.875rem;
+}
+
+/* ── Practice: microactividad de selección con feedback inmediato ── */
+.practiceSentence {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-display);
+  background: var(--bg-elevated);
+  border-radius: var(--radius-md);
+  padding: 0.75rem 1rem;
+  margin: 0;
+}
+
+.practiceOption {
+  font: inherit;
+  text-align: left;
+  width: 100%;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.practiceFeedback {
+  margin: 0;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+.practiceFeedbackCorrect {
+  background: var(--success-50);
+  color: var(--success-500);
+}
+
+.practiceFeedbackIncorrect {
+  background: var(--danger-50);
+  color: var(--danger-500);
+}
+
+/* ── Summary: capacidades adquiridas ── */
+.summaryList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+}
+
+.summaryItem {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  font-size: 0.9375rem;
+  color: var(--text-primary);
+}
+
+.summaryCheck {
+  color: var(--success-500);
+  flex-shrink: 0;
+}
+
 /* Fallback HTML (contenido ya estructurado como HTML) */
 .htmlContent {
   font-size: 0.9375rem;
@@ -479,13 +765,29 @@
 
 .navActions { flex-shrink: 0; }
 
+/* Botón "lección anterior": título real de longitud variable — sin esto,
+   un título largo desborda .navSide en vez de truncarse (min-width:0 en
+   el contenedor no fuerza a un hijo inline-flex sin ancho propio a ceder). */
+.navPrevButton {
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.navBtnLabel {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
 .navUpNext {
   font-size: 0.75rem;
   color: var(--text-muted);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  max-width: 20ch;
+  max-width: min(32ch, 40vw);
 }
 
 /* ── Estado bloqueado ── */
@@ -516,11 +818,22 @@
 /* ================================================================
    RESPONSIVE
    ================================================================ */
+@media (max-width: 1023px) {
+  .objectivesGrid,
+  .transformGrid,
+  .patternGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
 @media (max-width: 767px) {
   .page { gap: 1.5rem; }
   .lessonTitle { font-size: 1.375rem; }
   .block { padding: 1rem; }
   .crumbCurrent { max-width: 16ch; }
+  .blocksStack { gap: 1.5rem; }
+
+  .objectivesGrid,
+  .transformGrid,
+  .patternGrid { grid-template-columns: 1fr; }
 
   .nav {
     flex-direction: column;

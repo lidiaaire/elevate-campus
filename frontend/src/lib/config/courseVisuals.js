@@ -19,7 +19,7 @@ export const COURSE_VISUALS = {
     title:       'English Survival Kit',
     level:       'A1',
     tagline:     'Your first words open every door.',
-    coverImage:  '/assets/courses/english-survival-kit/cover.svg',
+    coverImage:  '/images/courses/A1-course.png',
     accentColor: '#38bdf8',   /* sky-400   — horizonte, primeras posibilidades */
     emotion:     'Descubrimiento',
     scene:       'Aeropuerto internacional. Primer viaje. La confianza de orientarse solo.',
@@ -30,7 +30,7 @@ export const COURSE_VISUALS = {
     title:       'English Every Day',
     level:       'A2',
     tagline:     'English becomes part of who you are.',
-    coverImage:  '/assets/courses/english-every-day/cover.svg',
+    coverImage:  '/images/courses/A2-course.png',
     accentColor: '#34d399',   /* emerald-400 — crecimiento natural, rutina positiva */
     emotion:     'Confianza',
     scene:       'Cafetería moderna. Portátil abierto. Conversaciones que ya salen solas.',
@@ -41,7 +41,7 @@ export const COURSE_VISUALS = {
     title:       'English Unplugged',
     level:       'B1',
     tagline:     'Stop translating. Start connecting.',
-    coverImage:  '/assets/courses/english-unplugged/cover.svg',
+    coverImage:  '/images/courses/B1-course.png',
     accentColor: '#818cf8',   /* indigo-400 — colaboración, flow, pensamiento fluido */
     emotion:     'Colaboración',
     scene:       'Reunión informal entre personas de distintas nacionalidades. Ideas sin fricción.',
@@ -52,7 +52,7 @@ export const COURSE_VISUALS = {
     title:       'English in Depth',
     level:       'B2',
     tagline:     'Lead the conversation. Own the room.',
-    coverImage:  '/assets/courses/english-in-depth/cover.svg',
+    coverImage:  '/images/courses/B2-course.png',
     accentColor: '#fbbf24',   /* amber-400 — liderazgo, excelencia, oro */
     emotion:     'Ambición',
     scene:       'Presentación profesional. Liderazgo visible. Equipo internacional.',

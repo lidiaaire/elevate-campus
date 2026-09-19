@@ -19,6 +19,8 @@ const COLLECTIONS = [
   'userachievements',
   'certificates',
   'notifications',
+  'communityposts',
+  'communitycomments',
 ];
 
 const run = async () => {
@@ -54,6 +56,9 @@ const run = async () => {
 
   await require('./enrollments.seed')();
   logger.info('[seed] Matrículas, progreso y evaluaciones demo creados');
+
+  await require('./community.seed')();
+  logger.info('[seed] Comunidad — publicaciones y respuestas demo creadas');
 
   await mongoose.disconnect();
   process.exit(0);

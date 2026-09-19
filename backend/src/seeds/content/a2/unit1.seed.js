@@ -158,6 +158,107 @@ Escribe la forma correcta del Past Simple:
 
 Respuestas: 1. studied  2. stopped  3. arrived  4. played  5. tried`;
 
+// contentBlocks piloto de L1.1 — misma información que CONTENT_L11 (objetivos,
+// ejemplos de apertura, regla básica, excepciones de ortografía y una
+// microactividad de práctica), reorganizada como bloques pedagógicos tipados
+// en vez de texto plano con separadores. CONTENT_L11 se mantiene intacto como
+// fallback: si contentBlocks desapareciera, la lección se sigue viendo igual
+// que antes vía parseLessonContent.
+const CONTENT_BLOCKS_L11 = [
+  {
+    type: 'objectives',
+    heading: 'En esta lección aprenderás a…',
+    items: [
+      { icon: 'book', title: 'Recognise', description: 'regular verbs with -ed' },
+      { icon: 'chat', title: 'Build',     description: 'past sentences' },
+      { icon: 'bolt', title: 'Use it',    description: 'in real contexts' },
+    ],
+  },
+  {
+    type: 'context',
+    heading: "Let's start",
+    title: 'Yesterday was a busy day',
+    body: '¿Qué tienen en común los verbos de estas frases?',
+    examples: [
+      { icon: 'clock', text: 'I worked until 7 PM.',           highlight: ['worked'] },
+      { icon: 'tv',    text: 'I watched a great film.',        highlight: ['watched'] },
+      { icon: 'pin',   text: 'I walked to the supermarket.',   highlight: ['walked'] },
+    ],
+    callout: { icon: 'sparkles', text: '¿Misma terminación? -ed en los tres.' },
+  },
+  {
+    type: 'rule',
+    heading: 'The rule',
+    title: 'La mayoría de los verbos regulares forman el pasado añadiendo -ed.',
+    transformations: [
+      { from: 'work',  to: 'worked' },
+      { from: 'play',  to: 'played' },
+      { from: 'watch', to: 'watched' },
+      { from: 'visit', to: 'visited' },
+      { from: 'talk',  to: 'talked' },
+      { from: 'walk',  to: 'walked' },
+    ],
+    note: {
+      icon: 'lightbulb',
+      text: 'Funciona para la mayoría de los verbos: añadimos -ed para mostrar que la acción ocurrió en el pasado.',
+    },
+  },
+  {
+    type: 'patterns',
+    heading: 'Spelling patterns',
+    title: 'Algunos cambios ortográficos a recordar',
+    body: 'Antes de añadir -ed, algunos verbos cambian ligeramente. Estos son los patrones más comunes:',
+    cards: [
+      {
+        number: 1,
+        title: 'Verbos terminados en -e',
+        description: 'Solo añades -d',
+        example: { from: 'live', to: 'lived' },
+        hint: 'La -e ya está ahí',
+      },
+      {
+        number: 2,
+        title: 'Consonante + vocal + consonante',
+        description: 'Doblas la consonante final',
+        example: { from: 'stop', to: 'stopped' },
+        hint: 'Consonante final doblada',
+      },
+      {
+        number: 3,
+        title: 'Consonante + y',
+        description: 'Cambias la y por i y añades -ed',
+        example: { from: 'study', to: 'studied' },
+        hint: 'y → i + ed',
+      },
+    ],
+  },
+  {
+    type: 'practice',
+    heading: 'Your turn',
+    title: 'Complete the sentence',
+    practiceQuestion: {
+      prompt: 'Elige la forma correcta del verbo.',
+      sentenceTemplate: 'Yesterday I ___ (work) from home.',
+      options: [
+        { text: 'work',    isCorrect: false },
+        { text: 'worked',  isCorrect: true },
+        { text: 'working', isCorrect: false },
+      ],
+      feedbackCorrect: '¡Exacto! "Yesterday" indica que la acción ocurrió en el pasado, así que usamos worked.',
+      feedbackIncorrect: 'Casi. "Yesterday" indica pasado — necesitas la forma en -ed: worked.',
+    },
+  },
+  {
+    type: 'summary',
+    heading: 'You can now…',
+    items: [
+      { title: 'Recognise regular past verbs' },
+      { title: 'Form verbs with -ed' },
+      { title: 'Talk about yesterday' },
+    ],
+  },
+];
+
 // ─────────────────────────────────────────────────────────────────────────────
 // L1.3 — Irregular Verbs — The Essential List
 // ─────────────────────────────────────────────────────────────────────────────
@@ -267,6 +368,145 @@ Escribe el pasado correcto:
 5. They _______ (meet) at university twenty years ago.
 
 Respuestas: 1. went  2. had  3. ate  4. bought  5. met`;
+
+// contentBlocks piloto #2 de L1.3 — a diferencia de Regular Verbs (una regla
+// única con excepciones), aquí el reto es memorización: ~28 verbos sin una
+// única regla. En vez de la tabla vertical de 20+ filas de CONTENT_L13, se
+// agrupan visualmente por los patrones YA presentes en el texto original
+// (GRUPOS POR PATRÓN) usando el mismo bloque 'patterns' de Regular Verbs,
+// extendido con 'examples' (array) para caber varios pares por grupo en vez
+// de un único ejemplo por card. El grupo "Other common irregular verbs" es
+// una selección curada de los más frecuentes de CONTENT_L13 (no la lista
+// completa) — el resto sigue disponible íntegro en CONTENT_L13 como fallback.
+// CONTENT_L13 se mantiene intacto.
+const CONTENT_BLOCKS_L13 = [
+  {
+    type: 'objectives',
+    heading: 'En esta lección aprenderás a…',
+    items: [
+      { icon: 'book', title: 'Recognise', description: 'the most common irregular verbs' },
+      { icon: 'chat', title: 'Group',     description: 'verbs by shared patterns' },
+      { icon: 'bolt', title: 'Use',       description: 'them in real sentences' },
+    ],
+  },
+  {
+    type: 'context',
+    heading: 'Why irregular verbs?',
+    title: 'Not every verb follows the -ed rule.',
+    body: 'La mayoría de los verbos más usados en inglés son irregulares: no siguen la regla de -ed, tienen una forma de pasado propia. La buena noticia es que muchos comparten patrones que hacen mucho más fácil recordarlos.',
+  },
+  {
+    type: 'patterns',
+    heading: 'Patterns, not a list',
+    title: 'Agrupa estos verbos por patrón — mucho más fácil que memorizarlos uno a uno.',
+    cards: [
+      {
+        number: 1,
+        title: 'No change at all',
+        description: 'Misma forma en presente y pasado.',
+        examples: [
+          { from: 'cut', to: 'cut' },
+          { from: 'put', to: 'put' },
+          { from: 'hit', to: 'hit' },
+          { from: 'let', to: 'let' },
+          { from: 'set', to: 'set' },
+        ],
+        hint: 'Se ven idénticos — el contexto indica que es pasado.',
+      },
+      {
+        number: 2,
+        title: 'Vowel change: i → o',
+        description: 'La vocal central cambia de i a o.',
+        examples: [
+          { from: 'drive', to: 'drove' },
+          { from: 'ride',  to: 'rode' },
+          { from: 'write', to: 'wrote' },
+          { from: 'rise',  to: 'rose' },
+        ],
+        hint: 'Dilos en voz alta — el patrón de sonido se repite.',
+      },
+      {
+        number: 3,
+        title: 'Vowel change: i → a',
+        description: 'La vocal central cambia de i a a.',
+        examples: [
+          { from: 'drink', to: 'drank' },
+          { from: 'sing',  to: 'sang' },
+          { from: 'swim',  to: 'swam' },
+          { from: 'ring',  to: 'rang' },
+          { from: 'begin', to: 'began' },
+          { from: 'run',   to: 'ran' },
+        ],
+        hint: 'Mismo cambio, seis verbos muy frecuentes.',
+      },
+      {
+        number: 4,
+        title: 'Ending in -ought / -aught',
+        description: 'Ortografía distinta, mismo sonido /ɔːt/.',
+        examples: [
+          { from: 'buy',   to: 'bought' },
+          { from: 'bring', to: 'brought' },
+          { from: 'teach', to: 'taught' },
+          { from: 'think', to: 'thought' },
+          { from: 'catch', to: 'caught' },
+        ],
+        hint: 'Escucha el sonido, no la ortografía.',
+      },
+      {
+        number: 5,
+        title: 'Other common irregular verbs',
+        description: 'Sin patrón compartido — solo alta frecuencia de uso.',
+        examples: [
+          { from: 'be',   to: 'was / were' },
+          { from: 'have', to: 'had' },
+          { from: 'do',   to: 'did' },
+          { from: 'go',   to: 'went' },
+          { from: 'get',  to: 'got' },
+          { from: 'see',  to: 'saw' },
+          { from: 'say',  to: 'said' },
+          { from: 'make', to: 'made' },
+        ],
+        hint: 'Si solo aprendes ocho, que sean estos.',
+      },
+    ],
+  },
+  {
+    type: 'context',
+    heading: 'In a real sentence',
+    title: 'Cada verbo irregular tiene su propia forma — sin -ed.',
+    examples: [
+      { text: 'Last night I ate at a new restaurant.',            highlight: ['ate'] },
+      { text: 'She went to Paris and saw the Eiffel Tower.',      highlight: ['went', 'saw'] },
+      { text: 'I found my keys in my jacket pocket.',             highlight: ['found'] },
+      { text: 'They bought a new car last week.',                 highlight: ['bought'] },
+    ],
+  },
+  {
+    type: 'practice',
+    heading: 'Your turn',
+    title: 'Choose the correct past form',
+    practiceQuestion: {
+      prompt: 'Elige la forma correcta del verbo.',
+      sentenceTemplate: 'Yesterday I ___ (go) to the market early.',
+      options: [
+        { text: 'go',   isCorrect: false },
+        { text: 'goed', isCorrect: false },
+        { text: 'went', isCorrect: true },
+      ],
+      feedbackCorrect: '¡Exacto! "go" es irregular — su pasado es "went", no "goed".',
+      feedbackIncorrect: 'Casi. "go" es irregular: su pasado es "went" (no existe "goed").',
+    },
+  },
+  {
+    type: 'summary',
+    heading: 'You can now…',
+    items: [
+      { title: 'Recognise common irregular verbs' },
+      { title: 'Group them by pattern' },
+      { title: 'Use them in real sentences' },
+    ],
+  },
+];
 
 // ─────────────────────────────────────────────────────────────────────────────
 // L1.4 — Questions & Negatives — Did and Didn't
@@ -569,6 +809,7 @@ module.exports = async (courseId) => {
       title:    'Regular Verbs — The -ed Rule',
       type:     LESSON_TYPES.TEXT,
       content:  CONTENT_L11,
+      contentBlocks: CONTENT_BLOCKS_L11,
       duration: 15,
       order:    1,
     }),
@@ -594,6 +835,7 @@ module.exports = async (courseId) => {
       title:    'Irregular Verbs — The Essential List',
       type:     LESSON_TYPES.TEXT,
       content:  CONTENT_L13,
+      contentBlocks: CONTENT_BLOCKS_L13,
       duration: 20,
       order:    3,
     }),

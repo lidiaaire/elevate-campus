@@ -45,6 +45,7 @@ const LessonProgressRepository    = require('../../repositories/lessonProgress.r
 const EnrollmentRepository        = require('../../repositories/enrollment.repository');
 const { ROLES, COURSE_STATUS, PROGRESS_STATUS, ENROLLMENT_STATUS } = require('../../config/constants');
 const achievementService = require('../achievements/achievement.service');
+const progressService = require('../progress/progress.service');
 const {
   NotFoundError,
   ForbiddenError,
@@ -83,9 +84,13 @@ const assertAllLessonsCompleted = async (studentId, unitId) => {
   }
 };
 
-const assertActiveEnrollment = async (studentId, courseId) => {
-  const enrollment = await EnrollmentRepository.findOne({ studentId, courseId, status: ENROLLMENT_STATUS.ACTIVE });
-  if (!enrollment) throw new ForbiddenError('NOT_ENROLLED', 'No tienes matrícula activa en este curso');
+// Solo para lectura: una matrícula completada conserva evaluación e historial.
+const assertReadableEnrollment = async (studentId, courseId) => {
+  const enrollment = await EnrollmentRepository.findOne({
+    studentId, courseId,
+    status: { $in: [ENROLLMENT_STATUS.ACTIVE, ENROLLMENT_STATUS.COMPLETED] },
+  });
+  if (!enrollment) throw new ForbiddenError('NOT_ENROLLED', 'No tienes matrícula activa o completada en este curso');
   return enrollment;
 };
 
@@ -97,7 +102,7 @@ const getAssessment = async (actorRole, actorId, courseId, unitId) => {
   await getUnitOrThrow(courseId, unitId);
 
   if (actorRole === ROLES.STUDENT) {
-    await assertActiveEnrollment(actorId, courseId);
+    await assertReadableEnrollment(actorId, courseId);
     await assertAllLessonsCompleted(actorId, unitId);
   }
 
@@ -182,6 +187,10 @@ const submitAttempt = async (studentId, courseId, unitId, answers) => {
     await achievementService.unlockAchievement(studentId, 'perfect_assessment');
   }
 
+  if (passed) {
+    await progressService.completeCourseIfEligible(studentId, courseId);
+  }
+
   return attempt;
 };
 
@@ -190,7 +199,7 @@ const listAttempts = async (actorRole, actorId, courseId, unitId) => {
   const assessment = await getAssessmentOrThrow(unitId);
 
   if (actorRole === ROLES.STUDENT) {
-    await assertActiveEnrollment(actorId, courseId);
+    await assertReadableEnrollment(actorId, courseId);
     return AssessmentAttemptRepository.findByStudentAndAssessment(actorId, assessment._id);
   }
   return AssessmentAttemptRepository.findAll({ assessmentId: assessment._id });

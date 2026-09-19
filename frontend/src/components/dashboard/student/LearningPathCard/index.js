@@ -1,9 +1,9 @@
 'use client';
 
 import Link from 'next/link';
+import { ArrowRight } from 'lucide-react';
 import { getCourseVisual } from '@/lib/config/courseVisuals';
-import Card, { CardBody, CardFooter } from '@/components/ui/Card';
-import Button from '@/components/ui/Button';
+import Card from '@/components/ui/Card';
 import ProgressBar from '@/components/ui/ProgressBar';
 import styles from './LearningPathCard.module.css';
 
@@ -11,15 +11,15 @@ export default function LearningPathCard({ enrollment }) {
   const {
     courseId,
     courseTitle,
+    courseImage,
     level,
     overallProgress,
-    completedLessons,
-    totalLessons,
     nextLesson,
     enrollmentStatus,
   } = enrollment;
 
-  const { accentColor } = getCourseVisual(courseTitle);
+  const visual   = getCourseVisual(courseTitle);
+  const imageSrc = visual.coverImage || courseImage || null;
 
   const isCompleted        = enrollmentStatus === 'completed' || overallProgress === 100;
   const isPendingAssessment = !nextLesson && !isCompleted;
@@ -29,49 +29,38 @@ export default function LearningPathCard({ enrollment }) {
     : `/courses/${courseId}`;
 
   return (
-    <Card as="li" variant="elevated" noPadding>
-
-      <div className={styles.header} style={{ '--card-accent': accentColor }}>
-        <span className={styles.levelBadge}>{level}</span>
-        <span className={styles.progressBadge}>{overallProgress}%</span>
-      </div>
-
-      <CardBody className={styles.body}>
-        <p className={styles.courseTitle}>{courseTitle}</p>
-
-        {nextLesson && (
-          <div className={styles.nextStep}>
-            <p className={styles.nextLabel}>Siguiente</p>
-            <p className={styles.nextUnit}>{nextLesson.unitTitle}</p>
-            <p className={styles.nextLesson}>{nextLesson.lessonTitle}</p>
-          </div>
-        )}
-        {isCompleted && (
-          <p className={styles.completedNote}>Curso completado ✓</p>
-        )}
-        {isPendingAssessment && (
-          <p className={styles.pendingNote}>Evaluación pendiente para continuar</p>
-        )}
-
-        <div className={styles.progressSection}>
-          <ProgressBar value={overallProgress} ariaLabel={`Progreso de ${courseTitle}`} />
-          <p className={styles.lessonsCount}>
-            {completedLessons} / {totalLessons} lecciones completadas
-          </p>
+    <Card as="li" variant="default" noPadding clickable className={styles.card}>
+      <Link href={continueHref} className={styles.link}>
+        <div className={styles.thumb}>
+          {imageSrc ? (
+            <img src={imageSrc} alt="" aria-hidden="true" className={styles.thumbImg} />
+          ) : (
+            <div className={styles.thumbPlaceholder} aria-hidden="true" />
+          )}
+          <span className={styles.levelBadge}>{level}</span>
         </div>
-      </CardBody>
 
-      <CardFooter divided align="end">
-        <Button
-          as={Link}
-          href={continueHref}
-          variant={nextLesson ? 'primary' : 'secondary'}
-          size="sm"
-        >
-          {nextLesson ? 'Continuar' : 'Ver curso'}
-        </Button>
-      </CardFooter>
+        <div className={styles.body}>
+          <p className={styles.courseTitle}>{courseTitle}</p>
+          <p className={styles.status}>
+            {isCompleted
+              ? 'Curso completado ✓'
+              : isPendingAssessment
+                ? 'Evaluación pendiente'
+                : (nextLesson?.lessonTitle ?? 'Continuar curso')}
+          </p>
 
+          <div className={styles.footer}>
+            <div className={styles.progressWrap}>
+              <ProgressBar value={overallProgress} ariaLabel={`Progreso de ${courseTitle}`} />
+            </div>
+            <span className={styles.pct}>{overallProgress}%</span>
+            <span className={styles.arrow} aria-hidden="true">
+              <ArrowRight size={14} />
+            </span>
+          </div>
+        </div>
+      </Link>
     </Card>
   );
 }

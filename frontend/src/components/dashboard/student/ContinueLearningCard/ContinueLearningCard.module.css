@@ -1,191 +1,159 @@
 /* ============================================================
-   ContinueLearningCard — Design System v2.0
-   Pieza protagonista horizontal: visual de curso a la izquierda,
-   contenido completo (título, unidad, última lección, siguiente paso,
-   progreso, CTA) a la derecha. Sustituye a la card vertical pequeña
-   que quedaba aislada bajo un título de sección aparte.
+   ContinueLearningCard — "Continuar aprendiendo" (Sprint 1A.3)
+   Compacta: miniatura pequeña de portada + contenido, no una portada a
+   sangre completa ocupando media tarjeta.
    ============================================================ */
 
-.spotlight {
+.card {
+  height: 100%;
   display: flex;
   flex-direction: column;
 }
 
-@media (min-width: 760px) {
-  .spotlight {
-    flex-direction: row;
-    align-items: stretch;
-  }
-}
-
-/* ---- Visual de curso ---- */
-.visual {
-  position: relative;
+.header {
   display: flex;
   align-items: center;
-  justify-content: center;
-  min-height: 160px;
-  flex-shrink: 0;
-  overflow: hidden;
-  background: linear-gradient(
-    155deg,
-    var(--card-accent, var(--color-ink)) 0%,
-    color-mix(in srgb, var(--card-accent, var(--color-ink)) 55%, #000) 100%
-  );
+  gap: 0.5rem;
+  padding: 0.875rem 1.25rem;
+  border-bottom: 1px solid var(--border-default);
 }
 
-@media (min-width: 760px) {
-  .visual {
-    width: 34%;
-    min-height: auto;
+.headerIcon {
+  color: var(--elevate-accent-500);
+}
+
+.headerTitle {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+  flex: 1;
+}
+
+.headerLink {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--elevate-accent-500);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.headerLink:hover {
+  text-decoration: underline;
+}
+
+.row {
+  display: flex;
+  gap: 1.125rem;
+  padding: 1.125rem 1.25rem;
+  flex: 1;
+}
+
+@media (max-width: 480px) {
+  .row {
+    flex-direction: column;
   }
 }
 
-.visualImage {
-  width: 58%;
-  height: auto;
-  opacity: 0.95;
-  filter: drop-shadow(0 10px 22px rgba(0, 0, 0, 0.25));
+/* ---- Miniatura de portada ---- */
+.thumb {
+  position: relative;
+  width: 104px;
+  height: 104px;
+  flex-shrink: 0;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: color-mix(in srgb, var(--elevate-accent-500) 30%, var(--bg-subtle));
 }
 
-.visualPlaceholder {
+@media (max-width: 480px) {
+  .thumb {
+    width: 100%;
+    height: 88px;
+  }
+}
+
+.thumbImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.thumbPlaceholder {
   width: 100%;
   height: 100%;
 }
 
 .levelBadge {
   position: absolute;
-  top: 0.75rem;
-  left: 0.75rem;
-  font-size: 0.6875rem;
+  top: 0.375rem;
+  left: 0.375rem;
+  font-size: 0.625rem;
   font-weight: 700;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
   color: #fff;
-  background: rgba(0, 0, 0, 0.32);
-  padding: 0.2rem 0.55rem;
+  background: rgba(0, 0, 0, 0.4);
+  padding: 0.125rem 0.4rem;
   border-radius: var(--radius-full);
 }
 
-.progressBadge {
-  position: absolute;
-  top: 0.75rem;
-  right: 0.75rem;
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: #fff;
-  background: rgba(0, 0, 0, 0.32);
-  padding: 0.2rem 0.55rem;
-  border-radius: var(--radius-full);
-  letter-spacing: 0.02em;
-}
-
-/* ---- Cuerpo ---- */
-.body {
+/* ---- Contenido ---- */
+.details {
   flex: 1;
   min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  padding: 1.5rem 1.75rem;
-}
-
-.header {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
 }
 
-.eyebrow {
-  font-size: 0.6875rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--elevate-accent-500);
-}
-
 .courseTitle {
-  font-size: 1.375rem;
+  font-size: 0.9375rem;
   font-weight: 700;
   color: var(--text-display);
-  line-height: 1.25;
   margin: 0;
+  line-height: 1.25;
 }
 
 .unitLabel {
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: var(--text-secondary);
-  margin: 0;
-}
-
-.lastLesson {
-  font-size: 0.875rem;
-  color: var(--text-secondary);
-  margin: 0;
-}
-
-.lastLessonPrefix {
-  font-weight: 600;
-  color: var(--text-primary);
-}
-
-/* ---- Siguiente paso — destacado, no es solo otra línea de texto ---- */
-.nextStep {
-  display: flex;
-  flex-direction: column;
-  gap: 0.125rem;
-  padding: 0.75rem 1rem;
-  background: var(--color-ink-soft);
-  border-radius: var(--radius-md);
-}
-
-.nextLabel {
-  font-size: 0.6875rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
+  font-size: 0.75rem;
   color: var(--text-muted);
-}
-
-.nextTitle {
-  font-size: 0.9375rem;
-  font-weight: 600;
-  color: var(--color-ink);
   margin: 0;
 }
 
-/* ---- Progreso ---- */
+.nextLesson {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin: 0.125rem 0 0;
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
 .progressSection {
   display: flex;
   flex-direction: column;
-  gap: 0.375rem;
-  margin-top: auto;
+  gap: 0.25rem;
+  margin-top: 0.5rem;
 }
 
 .progressMeta {
   display: flex;
   justify-content: space-between;
-  align-items: baseline;
-}
-
-.lessonsCount {
-  font-size: 0.75rem;
+  font-size: 0.6875rem;
   color: var(--text-muted);
-}
-
-.progressPct {
-  font-size: 0.8125rem;
-  font-weight: 700;
-  color: var(--text-primary);
 }
 
 .cta {
   align-self: flex-start;
-  margin-top: 0.25rem;
+  margin-top: 0.625rem;
 }
 
-/* ---- Estado completado ---- */
+/* ---- Estado completado / sin siguiente lección ---- */
 .completedBody {
   display: flex;
   flex-direction: column;

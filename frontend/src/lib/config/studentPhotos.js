@@ -31,3 +31,16 @@ export function getStudentPhoto(email) {
   if (!email) return null;
   return STUDENT_PHOTOS[email.toLowerCase()] ?? null;
 }
+
+/**
+ * DASHBOARD_HERO_IMAGE — asset panorámico definitivo del hero del Dashboard
+ * Student. Se muestra igual para cualquier alumno autenticado (no depende
+ * de email, a diferencia de STUDENT_PHOTOS). Composición: zona oscura a la
+ * izquierda pensada para alojar el texto del hero, estudiante visible a la
+ * derecha — ver StudentDashboard.module.css (.heroScene) para el tratamiento
+ * a sangre completa que respeta ese encuadre.
+ *
+ * Punto de sustitución único: para cambiar la imagen del hero, actualizar
+ * solo este valor — ningún componente necesita tocarse.
+ */
+export const DASHBOARD_HERO_IMAGE = '/images/courses/dashboard-students.png';

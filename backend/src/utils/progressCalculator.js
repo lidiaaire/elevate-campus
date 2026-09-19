@@ -43,10 +43,17 @@ const calcUnitProgress = (docs, unitId) => {
 };
 
 // progressMap: Map<lessonId_string, LessonProgress>
-// lessonOrderMap: Map<lessonId_string, order_number> — necesario porque LessonProgress no almacena order
+// lessonOrderMap: Map<lessonId_string, { order, unitId }> — necesario porque
+// LessonProgress no almacena order/unitId. 'order' es un entero 1..N que se
+// reinicia en cada unidad, así que la búsqueda de "la lección anterior" debe
+// filtrar también por unitId — de lo contrario puede emparejar con una
+// lección de OTRA unidad que casualmente tenga order = lesson.order - 1.
 const isLessonLocked = (lesson, progressMap, unit, lessonOrderMap) => {
   if (!unit?.sequentialUnlock || lesson.order === 1) return false;
-  const prevEntry = [...lessonOrderMap.entries()].find(([, order]) => order === lesson.order - 1);
+  const lessonUnitId = lesson.unitId.toString();
+  const prevEntry = [...lessonOrderMap.entries()].find(
+    ([, meta]) => meta.unitId === lessonUnitId && meta.order === lesson.order - 1
+  );
   if (!prevEntry) return false;
   const prevProgress = progressMap.get(prevEntry[0]);
   return !prevProgress || prevProgress.status !== PROGRESS_STATUS.COMPLETED;

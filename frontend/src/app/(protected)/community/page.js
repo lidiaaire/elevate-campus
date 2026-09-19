@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
+import { Users } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { communityService } from '@/lib/services/community.service';
 import { resolveAuthorPhoto } from '@/lib/utils/resolveAuthorPhoto';
@@ -35,6 +36,86 @@ function matchesFilter(item, filter) {
   if (filter === 'all') return true;
   if (filter === 'POST') return item.type === 'POST' || item.type === 'ANNOUNCEMENT';
   return item.type === filter;
+}
+
+// Agrupación temporal del feed (Hoy / Esta semana / Anterior) — basada en
+// eventDate, dato real presente en los tres tipos de item (post.createdAt,
+// achievement.unlockedAt, certificate.issueDate vía el backend). "Esta
+// semana" = últimos 7 días sin contar hoy; el resto cae en "Anterior". Sin
+// fechas inventadas: si un item no trae eventDate válido, se trata como
+// "Anterior" en vez de romper el agrupado.
+const GROUP_LABEL = { today: 'Hoy', week: 'Esta semana', earlier: 'Anterior' };
+
+function getRecencyGroup(eventDate) {
+  const date = new Date(eventDate);
+  if (Number.isNaN(date.getTime())) return 'earlier';
+
+  const now = new Date();
+  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const startOfWeek = new Date(startOfToday);
+  startOfWeek.setDate(startOfWeek.getDate() - 6);
+
+  if (date >= startOfToday) return 'today';
+  if (date >= startOfWeek) return 'week';
+  return 'earlier';
+}
+
+// docs ya llega ordenado por eventDate desc desde el backend (y las
+// páginas siguientes de "Ver más" continúan ese mismo orden) — agrupar es
+// solo partir la lista en tramos contiguos, sin reordenar nada.
+function groupByRecency(items) {
+  const groups = [];
+  let current = null;
+
+  for (const item of items) {
+    const key = getRecencyGroup(item.eventDate);
+    if (!current || current.key !== key) {
+      current = { key, label: GROUP_LABEL[key], items: [] };
+      groups.push(current);
+    }
+    current.items.push(item);
+  }
+
+  return groups;
+}
+
+// En el filtro "Todo", el grupo "Anterior" tiende a acumular muchos eventos
+// automáticos (logros/certificados) consecutivos que sepultan las
+// publicaciones al hacer scroll. Se limita SOLO ahí: se conservan TODAS las
+// publicaciones del grupo y, como mucho, los MAX_OLD_AUTOMATIC_ITEMS eventos
+// automáticos más recientes dentro de ese mismo grupo — el orden cronológico
+// no cambia, solo se recorta la cola una vez alcanzado el límite. El resto
+// sigue disponible sin recortar en el propio filtro "Logros" (matchesFilter
+// no cambia), así que no se pierde ningún dato, solo se difiere su acceso.
+const MAX_OLD_AUTOMATIC_ITEMS = 3;
+
+const isAutomaticEvent = (item) => item.type === 'ACHIEVEMENT' || item.type === 'CERTIFICATE';
+
+function capOldAutomaticEvents(groups, filter) {
+  if (filter !== 'all') return groups;
+
+  return groups.map((group) => {
+    if (group.key !== 'earlier') return group;
+
+    let automaticCount = 0;
+    let hiddenAutomaticCount = 0;
+    const items = [];
+
+    for (const item of group.items) {
+      if (!isAutomaticEvent(item)) {
+        items.push(item);
+        continue;
+      }
+      if (automaticCount < MAX_OLD_AUTOMATIC_ITEMS) {
+        items.push(item);
+        automaticCount += 1;
+      } else {
+        hiddenAutomaticCount += 1;
+      }
+    }
+
+    return { ...group, items, hiddenAutomaticCount };
+  });
 }
 
 // Texto de contexto estático por rol — no depende de ningún dato nuevo,
@@ -210,11 +291,13 @@ export default function CommunityPage() {
 
   return (
     <div className={styles.pageGrid}>
-      <div className={styles.main}>
-        {/* Cabecera editorial — mismo tratamiento de gradiente de marca que
-            el hero del Dashboard (color-mix sobre el negro oficial), pero
-            compacta y sin fotografía protagonista. */}
-        <header className={styles.headerBand}>
+      {/* Hero — banda editorial ancha, con zona reservada a la derecha para
+          una futura imagen de comunidad (community-hero.png). Mientras ese
+          asset no exista, el degradado de .heroVisual sostiene la
+          composición por sí solo (heroVisualImg se oculta vía onError). */}
+      <header className={styles.headerBand}>
+        <div className={styles.heroContent}>
+          <p className={styles.headerEyebrow}>Juntos aprendemos más</p>
           <h1 className={styles.headerTitle}>Comunidad</h1>
           <p className={styles.headerTagline}>Lo que está pasando en tu academia.</p>
 
@@ -234,11 +317,56 @@ export default function CommunityPage() {
 
           {total > 0 && (
             <p className={styles.headerCount}>
-              {total} actividad{total !== 1 ? 'es' : ''} reciente{total !== 1 ? 's' : ''}
+              {total} {total === 1 ? 'novedad' : 'novedades'} en tu comunidad
             </p>
           )}
-        </header>
+        </div>
 
+        <div className={styles.heroVisual} aria-hidden="true">
+          <img
+            src="/images/community/community-hero.png"
+            alt=""
+            className={styles.heroVisualImg}
+            onError={(e) => { e.currentTarget.style.display = 'none'; }}
+          />
+        </div>
+      </header>
+
+      {/* Columna lateral — solo información derivada de los datos ya
+          cargados en frontend, sin endpoint nuevo. Misma fila que el hero
+          (grid-row:1 en Community.module.css), altura coherente con él. */}
+      {people.length > 0 && (
+        <aside className={styles.sidebar}>
+          <div className={styles.sidebarHeader}>
+            <span className={styles.sidebarIcon} aria-hidden="true"><Users size={18} /></span>
+            <h2 className={styles.sidebarTitle}>Tu comunidad</h2>
+          </div>
+
+          <p className={styles.sidebarCount}>
+            {people.length} persona{people.length !== 1 ? 's' : ''} visible{people.length !== 1 ? 's' : ''} en el feed
+          </p>
+
+          <div className={styles.avatarMosaic}>
+            {people.slice(0, 8).map((p) => (
+              <Avatar
+                key={p._id}
+                firstName={p.firstName}
+                lastName={p.lastName}
+                role={p.role === 'teacher' ? 'teacher' : 'student'}
+                size="md"
+                photoUrl={resolveAuthorPhoto(p)}
+                className={styles.mosaicAvatar}
+              />
+            ))}
+          </div>
+
+          <hr className={styles.sidebarDivider} />
+
+          <p className={styles.sidebarContext}>{contextLine}</p>
+        </aside>
+      )}
+
+      <div className={styles.main}>
         {/* Compositor — student: publicación normal fija. teacher: elige
             entre publicación y aviso de cohorte con el selector. admin:
             aviso global fijo (nunca ve la opción "Publicación", que el
@@ -285,22 +413,37 @@ export default function CommunityPage() {
         ) : filteredDocs.length === 0 ? (
           <EmptyState title={EMPTY_FILTER_TITLE[filter] ?? 'Sin resultados para este filtro.'} />
         ) : (
-          <ul className={styles.list}>
-            {filteredDocs.map((item, i) => (
-              item.type === 'POST' || item.type === 'ANNOUNCEMENT'
-                ? (
-                  <PostCard
-                    key={item.id}
-                    item={item}
-                    index={i}
-                    token={token}
-                    user={user}
-                    onDeletePost={handleDeletePost}
-                  />
-                )
-                : <CommunityCard key={item.id} item={item} index={i} />
-            ))}
-          </ul>
+          capOldAutomaticEvents(groupByRecency(filteredDocs), filter).map((group, groupIndex) => (
+            <section key={group.key + groupIndex} className={styles.group}>
+              <h2 className={styles.groupHeading}>{group.label}</h2>
+              <ul className={styles.list}>
+                {group.items.map((item, i) => (
+                  item.type === 'POST' || item.type === 'ANNOUNCEMENT'
+                    ? (
+                      <PostCard
+                        key={item.id}
+                        item={item}
+                        index={i}
+                        token={token}
+                        user={user}
+                        onDeletePost={handleDeletePost}
+                      />
+                    )
+                    : <CommunityCard key={item.id} item={item} index={i} />
+                ))}
+              </ul>
+
+              {group.hiddenAutomaticCount > 0 && (
+                <button
+                  type="button"
+                  className={styles.groupMoreLink}
+                  onClick={() => setFilter('ACHIEVEMENT')}
+                >
+                  Ver todos los logros →
+                </button>
+              )}
+            </section>
+          ))
         )}
 
         {hasMore && (
@@ -312,33 +455,6 @@ export default function CommunityPage() {
           </div>
         )}
       </div>
-
-      {/* Columna lateral — solo información derivada de los datos ya
-          cargados en frontend, sin endpoint nuevo. */}
-      {people.length > 0 && (
-        <aside className={styles.sidebar}>
-          <h2 className={styles.sidebarTitle}>Tu comunidad</h2>
-          <p className={styles.sidebarCount}>
-            {people.length} persona{people.length !== 1 ? 's' : ''} visible{people.length !== 1 ? 's' : ''} en el feed
-          </p>
-
-          <div className={styles.avatarMosaic}>
-            {people.slice(0, 12).map((p) => (
-              <Avatar
-                key={p._id}
-                firstName={p.firstName}
-                lastName={p.lastName}
-                role={p.role === 'teacher' ? 'teacher' : 'student'}
-                size="sm"
-                photoUrl={resolveAuthorPhoto(p)}
-                className={styles.mosaicAvatar}
-              />
-            ))}
-          </div>
-
-          <p className={styles.sidebarContext}>{contextLine}</p>
-        </aside>
-      )}
     </div>
   );
 }

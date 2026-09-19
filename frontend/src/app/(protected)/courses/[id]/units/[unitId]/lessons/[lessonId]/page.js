@@ -17,6 +17,7 @@ import LoadingState from '@/components/ui/LoadingState';
 import ErrorState   from '@/components/ui/ErrorState';
 import Button        from '@/components/ui/Button';
 import ProgressBar   from '@/components/ui/ProgressBar';
+import BlockRenderer from './blocks/BlockRenderer';
 import styles from './Lesson.module.css';
 
 const TYPE_LABEL = { video: 'Vídeo', text: 'Texto', quiz: 'Test' };
@@ -148,6 +149,11 @@ function toEmbedUrl(url) {
   try {
     const u = new URL(url);
     if (u.hostname.includes('youtube.com')) {
+      // Ya viene en formato /embed/<id> (así están guardados todos los
+      // videoUrl del seed) — usar tal cual, no es una URL de vídeo nativo.
+      if (u.pathname.startsWith('/embed/')) {
+        return { type: 'iframe', src: url };
+      }
       const v = u.searchParams.get('v');
       if (v) return { type: 'iframe', src: `https://www.youtube.com/embed/${v}` };
     }
@@ -202,6 +208,7 @@ function VideoContent({ videoUrl }) {
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
             allowFullScreen
             className={styles.videoFrame}
+            onError={() => setVideoFailed(true)}
           />
         </div>
       ) : (
@@ -309,6 +316,11 @@ function LessonContent({ lesson, onQuizAnswered }) {
   if (lesson.type === 'quiz') {
     return <QuizContent content={lesson.content} onAllAnswered={onQuizAnswered} />;
   }
+  // contentBlocks es opcional y solo existe en lecciones migradas al nuevo
+  // sistema de bloques; el resto sigue el pipeline de texto plano de siempre.
+  if (lesson.contentBlocks?.length > 0) {
+    return <BlockRenderer blocks={lesson.contentBlocks} />;
+  }
   return <RichLessonText content={lesson.content} />;
 }
 
@@ -375,6 +387,9 @@ export default function LessonPage() {
   const isCompleted = current?.completed ?? false;
   const isQuiz      = lesson.type === 'quiz';
   const hasStructuredQuiz = isQuiz && parseQuiz(lesson.content) !== null;
+  const hasContentBlocks  = lesson.contentBlocks?.length > 0;
+
+  const pageClass = [styles.page, hasContentBlocks ? styles.pageWide : ''].filter(Boolean).join(' ');
 
   function lessonHref(l) {
     return `/courses/${courseId}/units/${l.unitId}/lessons/${l.lessonId}`;
@@ -411,7 +426,7 @@ export default function LessonPage() {
   }
 
   return (
-    <div className={styles.page}>
+    <div className={pageClass}>
 
       {/* Cabecera — breadcrumb, progreso, metadatos y título protagonista.
           Todo con datos reales; nada se muestra si no existe. */}
@@ -467,8 +482,16 @@ export default function LessonPage() {
       <footer className={styles.nav}>
         <div className={styles.navSide}>
           {prev && !prev.locked ? (
-            <Button as={Link} href={lessonHref(prev)} variant="ghost" size="sm" iconLeft={<ArrowLeft size={15} />}>
-              {prev.title}
+            <Button
+              as={Link}
+              href={lessonHref(prev)}
+              variant="ghost"
+              size="sm"
+              iconLeft={<ArrowLeft size={15} />}
+              className={styles.navPrevButton}
+              title={prev.title}
+            >
+              <span className={styles.navBtnLabel}>{prev.title}</span>
             </Button>
           ) : <span />}
         </div>
@@ -488,7 +511,7 @@ export default function LessonPage() {
               </Button>
             ) : (
               <Button as={Link} href={`/courses/${courseId}`} variant="accent" size="md">
-                Finalizar curso
+                Volver al curso
               </Button>
             )
           ) : (
@@ -506,7 +529,7 @@ export default function LessonPage() {
 
         <div className={styles.navSide}>
           {isCompleted && next && (
-            <span className={styles.navUpNext}>{next.title}</span>
+            <span className={styles.navUpNext} title={next.title}>{next.title}</span>
           )}
         </div>
       </footer>

@@ -1,28 +1,29 @@
 /* ============================================================
-   Community — Design System v2.1 (dark Elevate, 2ª pasada visual)
-   Mismo lenguaje que Notifications (superficie grafito continua,
-   naranja solo como acento) pero con más aire, jerarquía y contraste
-   local — sin tocar tokens globales.
+   Community — Design System v3.0
+   Escala y densidad equivalentes a /progress: hero con presencia
+   real, panel lateral y compositor como cards genuinas, feed con
+   bloque de icono grande por tipo (logro, certificado, publicación,
+   aviso) en vez de filas de tabla.
    ============================================================ */
 
 /* ================================================================
-   LAYOUT — feed + columna lateral
+   LAYOUT — hero + sidebar como primera fila del grid; compositor y
+   feed (dentro de .main) alineados con la columna principal debajo.
    ================================================================ */
 .pageGrid {
   /* Contraste local: --text-muted global (rgba 0.42) queda demasiado
      apagado sobre --bg-surface para metadata que sí debe leerse (fecha,
      rareza, puntos, nivel, nota). Mismo blanco de marca, alpha más alta,
-     sin introducir un color nuevo ni tocar el token global. Declarado
-     aquí (ancestro común de .main y .sidebar) para que ambos lo hereden. */
+     sin introducir un color nuevo ni tocar el token global. */
   --community-meta-color: rgba(244, 245, 247, 0.7);
 
-  max-width: 1120px;
+  max-width: 1360px;
   margin: 0 auto;
-  padding: 2rem 1.25rem 3rem;
+  padding: 2rem 1.5rem 3rem;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 280px;
-  gap: 1.75rem;
-  align-items: start;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  gap: 1.5rem 1.75rem;
+  align-items: stretch;
 }
 
 @media (max-width: 900px) {
@@ -33,22 +34,25 @@
 }
 
 .main {
+  grid-column: 1;
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: 1.5rem;
   min-width: 0;
 }
 
 /* ================================================================
-   CABECERA — banda editorial, mismo lenguaje que el hero del Dashboard
-   (gradiente de marca muy sutil sobre negro oficial), pero compacta y
-   sin fotografía protagonista.
+   HERO — banda editorial ancha, con zona reservada a la derecha
+   (~42%) para una futura imagen de comunidad. Sin ese asset, un
+   degradado oscuro→naranja muy sutil sostiene la composición.
    ================================================================ */
 .headerBand {
+  grid-column: 1;
   display: flex;
-  flex-direction: column;
-  gap: 0.625rem;
-  padding: 1.75rem 1.75rem 1.5rem;
+  align-items: stretch;
+  gap: 1.5rem;
+  min-height: 280px;
+  overflow: hidden;
   border-radius: var(--radius-lg);
   background: linear-gradient(
     135deg,
@@ -56,25 +60,48 @@
     color-mix(in srgb, var(--elevate-accent-500) 14%, var(--elevate-surface-brand-primary)) 100%
   );
   border: 1px solid var(--border-default);
+  box-shadow: var(--shadow-sm);
   animation: fadeSlideUp var(--dur-slow) var(--ease-out) both;
 }
 
+.heroContent {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.875rem;
+  padding: 2.5rem 2.5rem 2.25rem;
+}
+
+.headerEyebrow {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--elevate-accent-500);
+  margin: 0;
+}
+
 .headerTitle {
-  font-size: 1.75rem;
+  font-size: 2.75rem;
   font-weight: 800;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
   color: var(--text-display);
   margin: 0;
 }
 
 .headerTagline {
-  font-size: 0.9375rem;
+  font-size: 1.0625rem;
   color: var(--text-secondary);
   margin: 0;
 }
 
 .headerCount {
-  font-size: 0.8125rem;
+  font-size: 0.875rem;
   font-weight: 600;
   color: var(--elevate-accent-500);
   margin: 0.25rem 0 0;
@@ -83,13 +110,13 @@
 /* ── Chips de filtro ── */
 .filters {
   display: flex;
-  gap: 0.5rem;
+  gap: 0.625rem;
   flex-wrap: wrap;
-  margin-top: 0.5rem;
+  margin-top: 0.75rem;
 }
 
 .filterChip {
-  padding: 0.5rem 1rem;
+  padding: 0.5625rem 1.125rem;
   border-radius: 9999px;
   border: 1px solid var(--border-strong);
   background: color-mix(in srgb, var(--bg-elevated) 60%, transparent);
@@ -122,55 +149,444 @@
   color: var(--color-ink);
 }
 
+/* ── Zona visual — ~42% del hero, lista para
+   /images/community/community-hero.png. Si el archivo no existe,
+   heroVisualImg se oculta desde el JS (onError) y el degradado
+   sostiene la composición por sí solo. ── */
+.heroVisual {
+  position: relative;
+  flex: 0 0 42%;
+  min-width: 0;
+  background:
+    radial-gradient(circle at 30% 25%, color-mix(in srgb, var(--elevate-accent-500) 32%, transparent) 0%, transparent 55%),
+    linear-gradient(200deg, color-mix(in srgb, var(--elevate-accent-500) 22%, transparent) 0%, transparent 65%);
+}
+
+.heroVisual::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(90deg, var(--elevate-surface-brand-primary) 0%, transparent 45%);
+}
+
+.heroVisualImg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+@media (max-width: 900px) {
+  .heroVisual { display: none; }
+  .headerBand { min-height: 0; }
+  .heroContent { padding: 2rem 1.75rem 1.75rem; }
+}
+
 /* ================================================================
-   FEED — superficie única continua
+   PANEL "TU COMUNIDAD" — misma altura que el hero (fila 1 del
+   grid), avatares solapados, divisor sutil.
    ================================================================ */
+.sidebar {
+  grid-column: 2;
+  grid-row: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+  padding: 1.75rem;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  animation: fadeSlideUp var(--dur-slow) var(--ease-out) both;
+  animation-delay: 80ms;
+}
+
+.sidebarHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+}
+
+.sidebarIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--elevate-accent-500) 18%, var(--bg-elevated));
+  color: var(--elevate-accent-500);
+}
+
+.sidebarTitle {
+  font-size: 1.0625rem;
+  font-weight: 700;
+  color: var(--text-display);
+  margin: 0;
+}
+
+.sidebarCount {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.avatarMosaic {
+  display: flex;
+  flex-wrap: wrap;
+  row-gap: 0.5rem;
+  margin-top: 0.25rem;
+}
+
+.mosaicAvatar {
+  box-shadow: 0 0 0 3px var(--bg-surface);
+  margin-left: -0.625rem;
+}
+
+.mosaicAvatar:first-child {
+  margin-left: 0;
+}
+
+/* margin-top:auto empuja el divisor (y el texto de contexto que le sigue)
+   al fondo de la card cuando el grid la estira para igualar la altura del
+   hero — evita que quede un hueco vacío bajo los avatares. */
+.sidebarDivider {
+  border: none;
+  border-top: 1px solid var(--border-default);
+  margin: auto 0 0;
+  width: 100%;
+}
+
+.sidebarContext {
+  font-size: 0.875rem;
+  color: var(--community-meta-color);
+  margin: 0;
+}
+
+@media (max-width: 900px) {
+  .sidebar { grid-column: 1; grid-row: auto; animation-delay: 0ms; }
+}
+
+/* ================================================================
+   COMPOSITOR — card real: avatar + campo + CTA visibles siempre,
+   ancho de la columna del feed (no incluye el sidebar).
+   ================================================================ */
+.composerWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+}
+
+.composer {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  min-height: 76px;
+  padding: 1rem 1.5rem;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  animation: fadeSlideUp var(--dur-slow) var(--ease-out) both;
+}
+
+/* ── Selector Publicación/Aviso (solo TEACHER) — mismo lenguaje
+   visual que .filterChip/.filterChipActive. ── */
+.composeModeSwitch {
+  display: inline-flex;
+  align-self: flex-start;
+  gap: 0.25rem;
+  padding: 0.1875rem;
+  border-radius: 9999px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-default);
+}
+
+.composeModeOption {
+  padding: 0.375rem 0.875rem;
+  border-radius: 9999px;
+  border: none;
+  background: none;
+  color: var(--text-secondary);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background-color var(--dur-fast) var(--ease-default),
+              color var(--dur-fast) var(--ease-default);
+}
+
+.composeModeOption:hover { color: var(--text-display); }
+
+.composeModeOption:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+}
+
+.composeModeOptionActive {
+  background: var(--elevate-accent-500);
+  color: var(--color-ink);
+}
+
+.composeModeOptionActive:hover { color: var(--color-ink); }
+
+.composerContextLabel {
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+  margin: 0 0 0.375rem;
+}
+
+.composerAvatar { flex-shrink: 0; }
+
+.composerBody {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+  justify-content: center;
+}
+
+.composerCollapsedRow {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.composerTrigger {
+  flex: 1;
+  min-width: 0;
+  width: 100%;
+  text-align: left;
+  padding: 0.875rem 1.125rem;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border-default);
+  background: var(--bg-elevated);
+  color: var(--text-muted);
+  font-size: 0.9375rem;
+  font-family: inherit;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+  transition: border-color var(--dur-fast) var(--ease-default);
+}
+
+.composerTrigger:hover { border-color: var(--border-strong); }
+
+.composerTrigger:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+}
+
+.composerCollapsedCta {
+  flex-shrink: 0;
+}
+
+.composerTextarea {
+  width: 100%;
+  min-height: 92px;
+  resize: vertical;
+  padding: 0.75rem 0.875rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-strong);
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 0.9375rem;
+  line-height: 1.55;
+}
+
+.composerTextarea::placeholder { color: var(--text-muted); }
+
+.composerTextarea:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+}
+
+.composerFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.composerCount {
+  font-size: 0.75rem;
+  color: var(--community-meta-color);
+}
+
+.composerCountOver { color: var(--danger-500); }
+
+.composerActions {
+  display: flex;
+  gap: 0.5rem;
+  margin-left: auto;
+}
+
+.composerError {
+  font-size: 0.8125rem;
+  color: var(--danger-500);
+  margin: 0;
+}
+
+/* ================================================================
+   FEED — cards independientes agrupadas por fecha (Hoy / Esta
+   semana / Anterior). Bloque de tipo grande y reconocible a la
+   izquierda de cada card.
+   ================================================================ */
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.groupHeading {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: var(--text-display);
+  margin: 0;
+  padding: 0 0.125rem;
+}
+
+/* Acción discreta al final de "Anterior" cuando el filtro "Todo" recorta
+   eventos automáticos antiguos (ver capOldAutomaticEvents en page.js) —
+   mismo lenguaje "texto sin fondo, acento naranja" que el resto de acciones
+   secundarias de Community. */
+.groupMoreLink {
+  align-self: flex-start;
+  margin-top: 0.125rem;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--elevate-accent-500);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.groupMoreLink:hover { text-decoration: underline; }
+
+.groupMoreLink:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm, 4px);
+}
+
 .list {
   list-style: none;
   margin: 0;
   padding: 0;
-  background: var(--bg-surface);
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-lg);
-  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 
 .item {
-  border-bottom: 1px solid var(--border-default);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
   animation: fadeSlideUp var(--dur-slow) var(--ease-out) both;
   animation-delay: calc(var(--stagger, 0) * 45ms);
-  transition: background-color var(--dur-fast) var(--ease-default);
+  transition: border-color var(--dur-fast) var(--ease-default),
+              box-shadow var(--dur-fast) var(--ease-default);
 }
 
-.item:last-child { border-bottom: none; }
-
 .item:hover {
-  background: color-mix(in srgb, var(--bg-elevated) 55%, transparent);
+  border-color: var(--border-strong);
+}
+
+/* Publicación humana = contenido protagonista del feed: borde con un
+   matiz cálido muy sutil (no un color nuevo, solo más presencia que un
+   evento automático) y la sombra base de .item ya le basta. */
+.itemPost {
+  border-color: color-mix(in srgb, var(--elevate-accent-500) 20%, var(--border-default));
 }
 
 .itemInner {
   display: flex;
   align-items: flex-start;
-  gap: 0.875rem;
-  padding: 1.25rem 1.375rem;
+  gap: 1.125rem;
+  padding: 1.375rem 1.5rem;
 }
 
-/* Eventos automáticos (Achievement/Certificate) — deliberadamente más
-   compactos que un POST: menos padding, avatar más pequeño (md, 36px vs
-   lg, 48px del post). El contenido real no se recorta, solo respira menos,
-   para que cuando haya publicaciones humanas no compitan con ellas. */
+/* Logro/certificado = actividad secundaria en Comunidad (el contenido
+   principal son las publicaciones): card más compacta y sin sombra
+   propia, para que no compita visualmente con un POST. */
+.itemCompact {
+  box-shadow: none;
+}
+
 .itemCompact .itemInner {
   padding: 0.875rem 1.375rem;
+  gap: 0.875rem;
 }
 
 .avatarSlot { flex-shrink: 0; }
+
+/* ── Bloque de tipo — grande, reconocible, mismo lenguaje naranja
+   para logro/aviso, insignia con borde para certificado, tono
+   neutro para publicación. Nunca multicolor. ── */
+.typeBlock {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  flex-shrink: 0;
+  border-radius: var(--radius-md);
+  color: var(--elevate-accent-500);
+  background: color-mix(in srgb, var(--elevate-accent-500) 16%, transparent);
+}
+
+.typeBlockCertificate {
+  border: 1px solid color-mix(in srgb, var(--elevate-accent-500) 45%, var(--border-default));
+  background: color-mix(in srgb, var(--elevate-accent-500) 10%, transparent);
+}
+
+.typeBlockPost {
+  color: var(--text-secondary);
+  background: var(--bg-elevated);
+}
+
+.typeBlockAnnouncement {
+  background: color-mix(in srgb, var(--elevate-accent-500) 20%, transparent);
+}
+
+/* Bloque de tipo secundario (logro/certificado) — más pequeño que el de
+   un POST, coherente con el resto del tratamiento "compacto". */
+.itemCompact .typeBlock {
+  width: 40px;
+  height: 40px;
+}
+
+@media (max-width: 480px) {
+  .typeBlock { width: 44px; height: 44px; }
+  .itemCompact .typeBlock { width: 36px; height: 36px; }
+}
 
 .body {
   flex: 1;
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: 0.375rem;
+}
+
+.postBody { gap: 0.75rem; }
+
+.itemHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  flex-wrap: wrap;
 }
 
 .actorName {
@@ -181,64 +597,43 @@
   line-height: 1.3;
 }
 
-.actionText {
-  display: flex;
-  align-items: center;
-  gap: 0.375rem;
+.itemDate {
   font-size: 0.8125rem;
-  color: var(--text-secondary);
-  margin: 0;
+  color: var(--community-meta-color);
+  white-space: nowrap;
 }
 
-/* ── Identidad por tipo: círculo tintado para Achievement, insignia con
-   borde para Certificate — misma paleta naranja, forma distinta en vez
-   de color distinto. ── */
-.typeBadge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 20px;
-  height: 20px;
-  flex-shrink: 0;
-  border-radius: 50%;
-  background: color-mix(in srgb, var(--elevate-accent-500) 16%, transparent);
-  color: var(--elevate-accent-500);
-}
-
-.typeBadgeCertificate {
-  border-radius: var(--radius-sm, 4px);
-  border: 1px solid color-mix(in srgb, var(--elevate-accent-500) 45%, var(--border-default));
-  background: color-mix(in srgb, var(--elevate-accent-500) 10%, transparent);
-}
-
-/* Elemento protagonista: nombre del logro o título del curso — el
-   contenido principal del item, no el nombre del alumno. */
+/* Elemento protagonista: nombre del logro, título del curso, o
+   contenido principal del item — no el nombre del alumno. */
 .protagonist {
-  font-size: 1.0625rem;
+  font-size: 1.1875rem;
   font-weight: 700;
   color: var(--text-display);
-  margin: 0.25rem 0 0;
-  line-height: 1.35;
+  margin: 0.125rem 0 0;
+  line-height: 1.3;
 }
 
 .description {
-  font-size: 0.875rem;
+  font-size: 0.9375rem;
   line-height: 1.55;
   color: var(--text-secondary);
-  margin: 0.125rem 0 0;
+  margin: 0;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
 
-.metaRow {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  flex-wrap: wrap;
-  margin-top: 0.5rem;
+/* Card secundaria (logro/certificado): título/nombre a menor escala que
+   una publicación — refuerza que no es el contenido protagonista. */
+.itemCompact .protagonist {
+  font-size: 1rem;
+  margin-top: 0;
+}
+
+.itemCompact .description {
+  font-size: 0.8125rem;
+  -webkit-line-clamp: 1;
 }
 
 .metaTags {
@@ -246,10 +641,11 @@
   align-items: center;
   gap: 0.5rem;
   flex-wrap: wrap;
+  margin-top: 0.125rem;
 }
 
 .metaTag {
-  padding: 0.125rem 0.5rem;
+  padding: 0.1875rem 0.625rem;
   border-radius: 9999px;
   background: var(--bg-elevated);
   font-size: 0.75rem;
@@ -257,59 +653,15 @@
   color: var(--community-meta-color);
 }
 
-.date {
-  flex-shrink: 0;
-  margin-left: auto;
-  font-size: 0.75rem;
-  color: var(--community-meta-color);
-  white-space: nowrap;
-}
-
 /* ================================================================
-   POST — pieza social real, protagonista sobre los eventos automáticos:
-   más padding, texto más grande, sin badges de logro/rareza/puntos.
+   POST — pieza social real (POST/ANNOUNCEMENT), mismo tratamiento
+   de card que el resto del feed, con su propio bloque de tipo.
    ================================================================ */
 .postInner {
   display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  padding: 1.5rem;
-}
-
-.postHeader {
-  display: flex;
   align-items: flex-start;
-  gap: 0.875rem;
-}
-
-.postAuthorBlock {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 0.0625rem;
-}
-
-.postAuthorRow {
-  display: flex;
-  align-items: baseline;
-  gap: 0.625rem;
-  flex-wrap: wrap;
-}
-
-.postAuthorName {
-  font-size: 0.9375rem;
-  font-weight: 700;
-  color: var(--text-primary);
-  margin: 0;
-}
-
-.postDate {
-  flex-shrink: 0;
-  margin-left: auto;
-  font-size: 0.75rem;
-  color: var(--community-meta-color);
-  white-space: nowrap;
+  gap: 1.125rem;
+  padding: 1.5rem 1.75rem;
 }
 
 .postRoleBadge {
@@ -319,19 +671,16 @@
 }
 
 .postContent {
-  font-size: 1rem;
+  font-size: 1.0625rem;
   line-height: 1.65;
   color: var(--text-primary);
-  margin: 0.125rem 0 0;
+  margin: 0;
   white-space: pre-wrap;
   word-break: break-word;
 }
 
 /* ================================================================
-   COMENTARIOS — sección compacta dentro de PostCard (POST/ANNOUNCEMENT),
-   carga lazy al desplegar. Superficie .bg-elevated para diferenciar cada
-   comentario del fondo de la card, mismo acento naranja de foco/acción que
-   el resto de Community.
+   COMENTARIOS — sección compacta dentro de PostCard, carga lazy.
    ================================================================ */
 .postFooter {
   display: flex;
@@ -339,7 +688,6 @@
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 0.5rem 0.75rem;
-  padding-top: 0.125rem;
 }
 
 .commentsToggle {
@@ -369,7 +717,6 @@
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
-  margin-top: 0.25rem;
   padding-top: 0.875rem;
   border-top: 1px solid var(--border-default);
 }
@@ -468,9 +815,7 @@
   margin: 0;
 }
 
-/* ── Distinción visual de ANNOUNCEMENT — mismo bloque que .postRoleBadge,
-   acento naranja en vez de texto neutro, para que se lea como aviso sin
-   rediseñar toda la card. ── */
+/* ── Distinción visual de ANNOUNCEMENT ── */
 .announcementBadge {
   display: inline-flex;
   align-items: center;
@@ -481,14 +826,12 @@
   margin: 0;
 }
 
-/* ── Eliminar/moderar post — acción secundaria, mismo tratamiento visual
-   "texto + icono, sin fondo" que .commentsToggle, pero tiñendo a rojo en
-   hover/foco en vez de acento naranja, para leerse como destructivo sin
-   protagonizar la card. ── */
+/* ── Eliminar/moderar post ── */
 .postActions {
   display: flex;
   align-items: center;
   flex-shrink: 0;
+  margin-left: auto;
 }
 
 .deleteTrigger {
@@ -534,9 +877,6 @@
   margin: 0.375rem 0 0;
 }
 
-/* ── Eliminar/moderar comentario — mismo criterio que .deleteTrigger pero
-   a la escala de un comentario individual (empujado a la derecha dentro de
-   .commentMeta, que ya es flex). ── */
 .commentDeleteTrigger {
   display: inline-flex;
   align-items: center;
@@ -600,151 +940,6 @@
   margin: 0.25rem 0 0;
 }
 
-/* ================================================================
-   COMPOSITOR — "Comparte algo con tu comunidad…"
-   ================================================================ */
-.composer {
-  display: flex;
-  gap: 0.875rem;
-  padding: 1.25rem 1.375rem;
-  background: var(--bg-surface);
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-lg);
-  animation: fadeSlideUp var(--dur-slow) var(--ease-out) both;
-}
-
-.composerWrapper {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-/* ── Selector Publicación/Aviso (solo TEACHER) — mismo lenguaje visual que
-   .filterChip/.filterChipActive (píldora, acento naranja en el activo),
-   a escala de segmented control compacto sobre el compositor. ── */
-.composeModeSwitch {
-  display: inline-flex;
-  align-self: flex-start;
-  gap: 0.25rem;
-  padding: 0.1875rem;
-  border-radius: 9999px;
-  background: var(--bg-elevated);
-  border: 1px solid var(--border-default);
-}
-
-.composeModeOption {
-  padding: 0.375rem 0.875rem;
-  border-radius: 9999px;
-  border: none;
-  background: none;
-  color: var(--text-secondary);
-  font-size: 0.8125rem;
-  font-weight: 600;
-  font-family: inherit;
-  cursor: pointer;
-  transition: background-color var(--dur-fast) var(--ease-default),
-              color var(--dur-fast) var(--ease-default);
-}
-
-.composeModeOption:hover { color: var(--text-display); }
-
-.composeModeOption:focus-visible {
-  outline: 2px solid var(--border-focus);
-  outline-offset: 2px;
-}
-
-.composeModeOptionActive {
-  background: var(--elevate-accent-500);
-  color: var(--color-ink);
-}
-
-.composeModeOptionActive:hover { color: var(--color-ink); }
-
-.composerContextLabel {
-  font-size: 0.8125rem;
-  color: var(--text-secondary);
-  margin: 0 0 0.375rem;
-}
-
-.composerAvatar { margin-top: 0.125rem; }
-
-.composerBody {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 0.625rem;
-}
-
-.composerTrigger {
-  width: 100%;
-  text-align: left;
-  padding: 0.75rem 1rem;
-  border-radius: var(--radius-full);
-  border: 1px solid var(--border-default);
-  background: var(--bg-elevated);
-  color: var(--text-muted);
-  font-size: 0.9375rem;
-  font-family: inherit;
-  cursor: pointer;
-  transition: border-color var(--dur-fast) var(--ease-default);
-}
-
-.composerTrigger:hover { border-color: var(--border-strong); }
-
-.composerTrigger:focus-visible {
-  outline: 2px solid var(--border-focus);
-  outline-offset: 2px;
-}
-
-.composerTextarea {
-  width: 100%;
-  min-height: 92px;
-  resize: vertical;
-  padding: 0.75rem 0.875rem;
-  border-radius: var(--radius-md);
-  border: 1px solid var(--border-strong);
-  background: var(--bg-elevated);
-  color: var(--text-primary);
-  font: inherit;
-  font-size: 0.9375rem;
-  line-height: 1.55;
-}
-
-.composerTextarea::placeholder { color: var(--text-muted); }
-
-.composerTextarea:focus-visible {
-  outline: 2px solid var(--border-focus);
-  outline-offset: 2px;
-}
-
-.composerFooter {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  flex-wrap: wrap;
-}
-
-.composerCount {
-  font-size: 0.75rem;
-  color: var(--community-meta-color);
-}
-
-.composerCountOver { color: var(--danger-500); }
-
-.composerActions {
-  display: flex;
-  gap: 0.5rem;
-  margin-left: auto;
-}
-
-.composerError {
-  font-size: 0.8125rem;
-  color: var(--danger-500);
-  margin: 0;
-}
-
 /* ── Ver más ── */
 .loadMoreRow {
   display: flex;
@@ -761,83 +956,17 @@
 }
 
 /* ================================================================
-   COLUMNA LATERAL — solo datos ya derivados en frontend (sin endpoint
-   nuevo): personas visibles en el feed cargado + contexto estático por rol.
-   ================================================================ */
-.sidebar {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  padding: 1.25rem 1.25rem 1.375rem;
-  background: var(--bg-surface);
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-lg);
-  animation: fadeSlideUp var(--dur-slow) var(--ease-out) both;
-  animation-delay: 80ms;
-}
-
-.sidebarTitle {
-  font-size: 0.9375rem;
-  font-weight: 700;
-  color: var(--text-display);
-  margin: 0;
-}
-
-.sidebarCount {
-  font-size: 0.8125rem;
-  color: var(--text-secondary);
-  margin: -0.375rem 0 0;
-}
-
-.avatarMosaic {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.375rem;
-}
-
-.mosaicAvatar {
-  box-shadow: 0 0 0 2px var(--bg-surface);
-}
-
-.sidebarContext {
-  font-size: 0.8125rem;
-  color: var(--community-meta-color);
-  margin: 0.25rem 0 0;
-  padding-top: 0.75rem;
-  border-top: 1px solid var(--border-default);
-}
-
-@media (max-width: 900px) {
-  .sidebar { animation-delay: 0ms; }
-}
-
-/* ================================================================
    RESPONSIVE
    ================================================================ */
 @media (max-width: 480px) {
   .pageGrid { padding: 1.5rem 1rem 2.5rem; gap: 1.25rem; }
-  .headerBand { padding: 1.25rem 1.25rem 1.125rem; }
-  .headerTitle { font-size: 1.5rem; }
-  .itemInner { padding: 1rem 1rem; gap: 0.625rem; }
-  .postInner { padding: 1.125rem; gap: 0.625rem; }
-  .composer { padding: 1rem; gap: 0.625rem; }
-
-  /* Avatar de post/compositor a 44px en móvil (48px en el resto) — se
-     ajusta desde fuera del componente Avatar (que no expone breakpoints
-     propios), apuntando a su elemento raíz sin depender de su clase
-     interna. Los eventos automáticos (.itemCompact) ya usan md (36px) y
-     no se tocan aquí — no tiene sentido agrandarlos en móvil. */
-  .itemPost .avatarSlot > span,
-  .composerAvatar > span {
-    width: 44px;
-    height: 44px;
-  }
-
-  .metaRow { flex-direction: column; align-items: flex-start; gap: 0.375rem; }
-  .date { margin-left: 0; }
-
-  .postAuthorRow { flex-direction: column; align-items: flex-start; gap: 0.125rem; }
-  .postDate { margin-left: 0; }
+  .heroContent { padding: 1.5rem 1.25rem 1.25rem; }
+  .headerTitle { font-size: 1.875rem; }
+  .headerTagline { font-size: 0.9375rem; }
+  .sidebar { padding: 1.25rem; }
+  .composer { padding: 0.875rem 1rem; min-height: 0; }
+  .itemInner { padding: 1rem; gap: 0.75rem; }
+  .postInner { padding: 1.125rem; gap: 0.75rem; }
 
   .composerFooter { flex-direction: column; align-items: stretch; gap: 0.625rem; }
   .composerActions { margin-left: 0; }

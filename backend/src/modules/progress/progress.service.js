@@ -144,6 +144,34 @@ const _calcStreak = (completedDocs) => {
   return streak;
 };
 
+// Una matrícula termina solo al completar todas las lecciones y aprobar todas
+// las evaluaciones. Se comprueba desde ambos flujos, sin modificar el % de lecciones.
+const completeCourseIfEligible = async (studentId, courseId) => {
+  const enrollment = await EnrollmentRepository.findOne({ studentId, courseId, status: ENROLLMENT_STATUS.ACTIVE });
+  if (!enrollment) return;
+
+  const [lessons, progress] = await Promise.all([
+    LessonRepository.findByCourseId(courseId),
+    LessonProgressRepository.findByStudentAndCourse(studentId, courseId),
+  ]);
+  const completedIds = new Set(
+    progress.filter((p) => p.status === PROGRESS_STATUS.COMPLETED).map((p) => p.lessonId.toString()),
+  );
+  if (!lessons.length || !lessons.every((lesson) => completedIds.has(lesson._id.toString()))) return;
+
+  // limit: 0 consulta todas las evaluaciones, sin el límite paginado por defecto.
+  const { docs: assessments } = await AssessmentRepository.findAll({ courseId }, { limit: 0 });
+  const results = await Promise.all(
+    assessments.map((assessment) => AssessmentAttemptRepository.findBestScore(studentId, assessment._id)),
+  );
+  if (!results.every((result) => result?.passed === true)) return;
+
+  const EnrollmentService = require('../enrollments/enrollment.service');
+  await EnrollmentService.markCompleted(enrollment._id);
+  await achievementService.unlockAchievement(studentId, 'first_course_completed');
+  await certificateService.issueCertificate(studentId, courseId, 100);
+};
+
 const completeLesson = async (studentId, lessonId) => {
   const progress = await LessonProgressRepository.findByStudentAndLesson(studentId, lessonId);
   if (!progress) throw new NotFoundError('PROGRESS_NOT_FOUND', 'Progreso de lección no encontrado');
@@ -163,11 +191,6 @@ const completeLesson = async (studentId, lessonId) => {
   const courseSnapshot = progressCalculator.calcCourseProgress(allProgress);
   const unitSnapshot   = progressCalculator.calcUnitProgress(allProgress, progress.unitId);
 
-  if (courseSnapshot.overallProgress === 100) {
-    const EnrollmentService = require('../enrollments/enrollment.service');
-    await EnrollmentService.markCompleted(enrollment._id);
-  }
-
   await achievementService.unlockAchievement(studentId, 'first_lesson_completed');
 
   const totalCompleted = await LessonProgressRepository.countCompletedByStudent(studentId);
@@ -179,8 +202,7 @@ const completeLesson = async (studentId, lessonId) => {
   }
 
   if (courseSnapshot.overallProgress === 100) {
-    await achievementService.unlockAchievement(studentId, 'first_course_completed');
-    await certificateService.issueCertificate(studentId, progress.courseId, courseSnapshot.overallProgress);
+    await completeCourseIfEligible(studentId, progress.courseId);
   }
 
   const completedDates = await LessonProgressRepository.findCompletedDatesByStudent(studentId);
@@ -205,7 +227,9 @@ const getCourseProgress = async (studentId, courseId) => {
     })
   );
 
-  const lessonOrderMap = new Map(allLessons.map((l) => [l._id.toString(), l.order]));
+  const lessonOrderMap = new Map(
+    allLessons.map((l) => [l._id.toString(), { order: l.order, unitId: l.unitId.toString() }])
+  );
   const progressMap    = new Map(allProgress.map((p) => [p.lessonId.toString(), p]));
 
   const unitProgress = units.map((unit) => {
@@ -272,6 +296,7 @@ const getStudentOverview = async (actorRole, actorId, studentId) => {
 module.exports = {
   initializeProgress,
   completeLesson,
+  completeCourseIfEligible,
   getCourseProgress,
   getProgressOverview,
   getStudentCourseProgress,

@@ -77,6 +77,7 @@ const issueCertificate = async (studentId, courseId, finalScore) => {
 const getMyCertificates = async (studentId) => {
   const docs = await CertificateRepository.findByStudentWithCourse(studentId);
   return docs.map((c) => ({
+    _id:               c._id,
     certificateNumber: c.certificateNumber,
     issueDate:         c.issueDate,
     finalScore:        c.finalScore,
